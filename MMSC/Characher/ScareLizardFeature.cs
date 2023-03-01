@@ -17,14 +17,11 @@ namespace MMSC.Characher
         static readonly PlayerFeature<bool> ScareLizard = PlayerBool("wanderer/scare_lizard");
         public ScareLizardFeature(ManualLogSource log) : base(log)
         {
-            On.RainWorld.OnModsInit += RainWorld_OnModsInit;
             _ScareLizardData = new Dictionary<Player, int>();
         }
 
-        private void RainWorld_OnModsInit(On.RainWorld.orig_OnModsInit orig, RainWorld self)
+        public override void OnModsInit()
         {
-            orig(self);
-
             On.Player.checkInput += Player_checkInput;
             On.Player.ctor += Player_ctor;
             On.PlayerGraphics.Update += PlayerGraphics_Update;

@@ -14,12 +14,10 @@ namespace MMSC.Characher
     {
         public LizardRelationFeature(ManualLogSource log) : base(log)
         {
-            On.RainWorld.OnModsInit += RainWorld_OnModsInit;
         }
 
-        private void RainWorld_OnModsInit(On.RainWorld.orig_OnModsInit orig, RainWorld self)
+        public override void OnModsInit()
         {
-            orig(self);
             On.CreatureCommunities.InfluenceLikeOfPlayer += CreatureCommunities_InfluenceLikeOfPlayer;
 
             On.LizardAI.ctor += LizardAI_ctor;

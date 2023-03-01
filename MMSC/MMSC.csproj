@@ -106,6 +106,7 @@
     <Compile Include="Cosmetic\WandererTailFin.cs" />
     <Compile Include="LizardMessage\LizardDialogBox.cs" />
     <Compile Include="LizardMessage\RandomMessagePicker.cs" />
+    <Compile Include="Options\WandererOptions.cs" />
     <Compile Include="WandererCharacterMod.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -113,8 +114,6 @@
     <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Options\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

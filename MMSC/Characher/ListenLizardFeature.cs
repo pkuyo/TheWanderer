@@ -15,19 +15,18 @@ namespace MMSC.Characher
 
         public ListenLizardFeature(ManualLogSource log) :base(log)
         {
-            On.RainWorld.OnModsInit += ListenLizardFeature_OnModsInit;
-            _log.LogDebug("ListenLizardFeature Init");
+            
         }
 
 
-        public void ListenLizardFeature_OnModsInit(On.RainWorld.orig_OnModsInit orig, RainWorld self)
+        public override void OnModsInit()
         {
-            orig(self);
             RandomMessagePicker.InitLizardMessage(_log);
             StatePriority.InitStatePriority(_log);
             LizardDialogBox.InitDialogBoxStaticData(_log);
 
             On.LizardAI.Update += LizardAI_Update;
+            _log.LogDebug("ListenLizardFeature Init");
         }
 
 

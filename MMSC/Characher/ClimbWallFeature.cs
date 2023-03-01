@@ -17,14 +17,12 @@ namespace MMSC.Characher
         static readonly PlayerFeature<float> ClimbWallSpeed = PlayerFloat("wanderer/wall_climb_speed");
         public ClimbWallFeature(ManualLogSource log) :base(log)
         {
-            On.RainWorld.OnModsInit += ClimbWallFeature_OnModsInit;
             _climbSlugHandGraphics = new ClimbSlugHandGraphics(log);
         }
 
 
-        public void ClimbWallFeature_OnModsInit(On.RainWorld.orig_OnModsInit orig, RainWorld self)
+        public override void OnModsInit()
         {
-            orig(self);
             RegisterAllEnumExtensions();
 
             On.Player.ctor += Player_ctor;
@@ -34,7 +32,9 @@ namespace MMSC.Characher
             On.Player.GrabVerticalPole += new On.Player.hook_GrabVerticalPole(Player_GrabVerticalPole);
             On.Player.UpdateMSC += new On.Player.hook_UpdateMSC(Player_UpdateMSC);
             On.Player.Destroy += Player_Destroy;
-      
+
+            _climbSlugHandGraphics.OnModsInit();
+
             _log.LogDebug("ClimbWallFeature Init");
         }
 

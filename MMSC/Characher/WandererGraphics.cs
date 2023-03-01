@@ -14,15 +14,13 @@ namespace MMSC.Characher
 	{
 		public WandererGraphics(ManualLogSource log) :base(log)
         {
-            On.RainWorld.OnModsInit += RainWorld_OnModsInit;
 			Cosmetics = new Dictionary<PlayerGraphics, List<CosmeticBase>>();
 			EndSprites = new Dictionary<PlayerGraphics, int>();
 			OriginSprites = new Dictionary<PlayerGraphics, int>();
 		}
 
-        private void RainWorld_OnModsInit(On.RainWorld.orig_OnModsInit orig, RainWorld self)
-        {
-			orig(self);
+		public override void OnModsInit()
+		{
 			On.PlayerGraphics.ctor += PlayerGraphics_ctor;
 			On.PlayerGraphics.InitiateSprites += PlayerGraphics_InitiateSprites;
             On.PlayerGraphics.DrawSprites += PlayerGraphics_DrawSprites;

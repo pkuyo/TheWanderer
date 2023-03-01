@@ -13,14 +13,11 @@ namespace MMSC.Characher
     {
         public HudHook(ManualLogSource log) : base(log)
         {
-            
-            On.RainWorld.OnModsInit += RainWorld_OnModsInit;
             _hud = new Dictionary<Player, MissionHud>();
         }
 
-        private void RainWorld_OnModsInit(On.RainWorld.orig_OnModsInit orig, RainWorld self)
+        public override void OnModsInit()
         {
-            orig(self);
             On.HUD.HUD.InitSinglePlayerHud += HUD_InitSinglePlayerHud;
             On.CreatureCommunities.InfluenceLikeOfPlayer += CreatureCommunities_InfluenceLikeOfPlayer;
             _log.LogDebug("HudHook Init");

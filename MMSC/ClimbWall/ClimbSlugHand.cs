@@ -15,11 +15,10 @@ namespace MMSC.Characher
         public ClimbSlugHandGraphics(ManualLogSource log)
         {
             _log = log;
-            On.RainWorld.OnModsInit += ClimbSlugHandGraphics_OnModsInit;
+           
         }
-        public void ClimbSlugHandGraphics_OnModsInit(On.RainWorld.orig_OnModsInit orig, RainWorld self)
+        public void OnModsInit()
         {
-            orig(self);
             On.PlayerGraphics.ctor += PlayerGraphics_ctor; ;
             On.SlugcatHand.EngageInMovement += SlugcatHand_EngageInMovement;
             On.Player.Destroy += Player_Destroy;

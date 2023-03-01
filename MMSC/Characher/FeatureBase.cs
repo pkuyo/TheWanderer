@@ -14,5 +14,10 @@ namespace MMSC.Characher
             _log = log;
         }
         protected ManualLogSource _log;
+
+        virtual public void OnModsInit()
+        {
+
+        }
     }
 }

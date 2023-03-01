@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using BepInEx;
 using MMSC.Characher;
+using MMSC.Options;
 
 namespace MMSC
 {
@@ -12,21 +13,30 @@ namespace MMSC
     {
         public WandererCharacterMod()
         {
-            _climbWallFeature = new ClimbWallFeature(Logger);
-            _listenLizardFeature = new ListenLizardFeature(Logger);
-            _wandererGraphics = new WandererGraphics(Logger);
-            _scareLizardFeature = new ScareLizardFeature(Logger);
-            _lizardRelationFeature = new LizardRelationFeature(Logger);
-            _hudHook = new HudHook(Logger);
+            _features = new List<FeatureBase>();
 
+            _features.Add(new ClimbWallFeature(Logger));
+            _features.Add(new ListenLizardFeature(Logger));
+            _features.Add(new WandererGraphics(Logger));
+            _features.Add(new ScareLizardFeature(Logger));
+            _features.Add(new LizardRelationFeature(Logger));
+            _features.Add(new HudHook(Logger));
 
+            _wandererOptions = new WandererOptions(Logger);
+
+            On.RainWorld.OnModsInit += RainWorld_OnModsInit;
         }
 
-        private ClimbWallFeature _climbWallFeature;
-        private ListenLizardFeature _listenLizardFeature;
-        private WandererGraphics _wandererGraphics;
-        private ScareLizardFeature _scareLizardFeature;
-        private LizardRelationFeature _lizardRelationFeature;
-        private HudHook _hudHook;
+        private void RainWorld_OnModsInit(On.RainWorld.orig_OnModsInit orig, RainWorld self)
+        {
+            orig(self);
+            foreach(var feature in _features)
+                feature.OnModsInit();
+            _wandererOptions.OnModsInit();
+        }
+
+        private List<FeatureBase> _features;
+
+        private WandererOptions _wandererOptions;
     }
 }
