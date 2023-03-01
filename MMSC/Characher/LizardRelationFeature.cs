@@ -38,38 +38,37 @@ namespace MMSC.Characher
             return re;
         }
 
-        ///TODO:炸弹惊吓免疫
-
-        ///战役相关///
 
         private CreatureTemplate.Relationship LizardAI_IUseARelationshipTracker_UpdateDynamicRelationship(On.LizardAI.orig_IUseARelationshipTracker_UpdateDynamicRelationship orig, LizardAI self, RelationshipTracker.DynamicRelationship dRelation)
         {
             var relationship = orig(self, dRelation);
-            //非角色战役不更改
-            if (self.creature.world.game.session.characterStats.name.value != "wanderer")
-                return relationship;
 
             ///////////////////////////////////////////////////
             //TODO: ui界面
             ///////////////////////////////////////////////////
-            ///
-            //如果角色为蛞蝓猫
-            if (ChangeLizardAIOption && dRelation.trackerRep.representedCreature.creatureTemplate.type == CreatureTemplate.Type.Slugcat)
+            //漫游者猫猫养的
+            if (self.friendTracker.friend != null && (self.friendTracker.friend is Player) && (self.friendTracker.friend as Player).slugcatStats.name.value == "wanderer")
             {
-                //忽略秃鹫面具惊吓
-                if (relationship.type == CreatureTemplate.Relationship.Type.Afraid && self.friendTracker.friend != null)
-                    relationship = new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Ignores, 0f);
-            }
+                //如果角色为蛞蝓猫
+                if (ChangeLizardAIOption && dRelation.trackerRep.representedCreature.creatureTemplate.type == CreatureTemplate.Type.Slugcat)
+                {
+                    //忽略秃鹫面具惊吓
+                    if (relationship.type == CreatureTemplate.Relationship.Type.Afraid)
+                        relationship = new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Ignores, 0f);
+                }
 
-            //忽略活的拾荒
-            if (ChangeLizardAIOption && self.friendTracker.friend !=null && relationship.type == CreatureTemplate.Relationship.Type.Eats && dRelation.trackerRep.representedCreature.creatureTemplate.type == CreatureTemplate.Type.Scavenger)
-            {
-                if(self.friendTracker.friend != null && !dRelation.trackerRep.representedCreature.state.dead)
-                    relationship = new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Ignores, 0f);
+                //忽略活的拾荒
+                if (ChangeLizardAIOption && relationship.type == CreatureTemplate.Relationship.Type.Eats && dRelation.trackerRep.representedCreature.creatureTemplate.type == CreatureTemplate.Type.Scavenger)
+                {
+                    if (self.friendTracker.friend != null && !dRelation.trackerRep.representedCreature.state.dead)
+                        relationship = new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Ignores, 0f);
+                }
             }
             return relationship;
         }
 
+        ///战役相关///
+        
         private void LizardAI_ctor(On.LizardAI.orig_ctor orig, LizardAI self, AbstractCreature creature, World world)
         {
             orig(self, creature, world);

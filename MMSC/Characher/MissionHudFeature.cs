@@ -110,7 +110,7 @@ namespace MMSC.Characher
             }
             else if (this.hud.owner.RevealMap && fade < 6.0f)
                 fade += deltaTime / 30f;
-            else if (!this.hud.owner.RevealMap && ReputationChanged <= 0 && fade > 0.0f && !isShelter)
+            else if (!this.hud.owner.RevealMap && ReputationChanged < 0 && fade > 0.0f && !isShelter)
                 fade -= deltaTime / 30f;
             
 
@@ -144,6 +144,9 @@ namespace MMSC.Characher
         }
         public void SetLikeOfPlayer(float New)
         {
+            if (New == toAcc)
+                return;
+
             lastAcc = acc[1];
             toAcc = New;
             ReputationChanged = 10f;
