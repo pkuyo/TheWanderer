@@ -15,7 +15,8 @@ namespace MMSC
             _climbWallFeature = new ClimbWallFeature(Logger);
             _listenLizardFeature = new ListenLizardFeature(Logger);
             _wandererGraphics = new WandererGraphics(Logger);
-            _ScareLizardFeature = new ScareLizardFeature(Logger);
+            _scareLizardFeature = new ScareLizardFeature(Logger);
+            _lizardRelationFeature = new LizardRelationFeature(Logger);
             _hudHook = new HudHook(Logger);
 
 
@@ -24,7 +25,8 @@ namespace MMSC
         private ClimbWallFeature _climbWallFeature;
         private ListenLizardFeature _listenLizardFeature;
         private WandererGraphics _wandererGraphics;
-        private ScareLizardFeature _ScareLizardFeature;
+        private ScareLizardFeature _scareLizardFeature;
+        private LizardRelationFeature _lizardRelationFeature;
         private HudHook _hudHook;
     }
 }

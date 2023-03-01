@@ -28,11 +28,6 @@ namespace MMSC.Characher
 
         private void CreatureCommunities_InfluenceLikeOfPlayer(On.CreatureCommunities.orig_InfluenceLikeOfPlayer orig, CreatureCommunities self, CreatureCommunities.CommunityID commID, int region, int playerNumber, float influence, float interRegionBleed, float interCommunityBleed)
         {
-            if (self.session.characterStats.name.value == "wanderer")
-            {
-                if (commID == CreatureCommunities.CommunityID.Lizards)
-                    influence *= 2f;
-            }
             orig(self, commID, region, playerNumber, influence, interRegionBleed, interCommunityBleed);
 
             //更新HUD

@@ -35,6 +35,8 @@ namespace MMSC.Characher
         {
             orig(self);
             var lizard = self.creature.realizedCreature as Lizard;
+
+            //若房间内存在漫游者则可以聆听
             var canListen = false;
             foreach (var player in lizard.room.game.Players)
                 if ((player.realizedCreature as Player).slugcatStats.name.value == "wanderer")

@@ -90,11 +90,12 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Characher\LizardRelationFeature.cs" />
     <Compile Include="ClimbWall\ClimbSlugHand.cs" />
     <Compile Include="Characher\ClimbWallFeature.cs" />
     <Compile Include="Characher\FeatureBase.cs" />
     <Compile Include="Characher\ListenLizardFeature.cs" />
-    <Compile Include="Characher\MissionHud.cs" />
+    <Compile Include="Characher\MissionHudFeature.cs" />
     <Compile Include="Characher\ScareLizardFeature.cs" />
     <Compile Include="Characher\WandererGraphics.cs" />
     <Compile Include="Cosmetic\CosmeticBase.cs" />
@@ -112,6 +113,8 @@
     <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Options\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
