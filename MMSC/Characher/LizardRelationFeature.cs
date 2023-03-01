@@ -9,7 +9,6 @@ using UnityEngine;
 
 namespace MMSC.Characher
 {
-    //全部更改均为战役专属
     class LizardRelationFeature : FeatureBase
     {
         public LizardRelationFeature(ManualLogSource log) : base(log)
@@ -23,40 +22,25 @@ namespace MMSC.Characher
             On.LizardAI.ctor += LizardAI_ctor;
             On.LizardAI.IUseARelationshipTracker_UpdateDynamicRelationship += LizardAI_IUseARelationshipTracker_UpdateDynamicRelationship;
 
-            On.Lizard.SpearStick += Lizard_SpearStick;
-            On.Lizard.Violence += Lizard_Violence;
-            On.SocialEventRecognizer.WeaponAttack += SocialEventRecognizer_WeaponAttack;
-            _log.LogDebug("LizardRelationFeature(session only) Init");
+            On.SharedPhysics.TraceProjectileAgainstBodyChunks += SharedPhysics_TraceProjectileAgainstBodyChunks;
+
+            _log.LogDebug("LizardRelationFeature Init");
         }
 
-        private void SocialEventRecognizer_WeaponAttack(On.SocialEventRecognizer.orig_WeaponAttack orig, SocialEventRecognizer self, PhysicalObject weapon, Creature thrower, Creature victim, bool hit)
+        private SharedPhysics.CollisionResult SharedPhysics_TraceProjectileAgainstBodyChunks(On.SharedPhysics.orig_TraceProjectileAgainstBodyChunks orig, SharedPhysics.IProjectileTracer projTracer, Room room, Vector2 lastPos, ref Vector2 pos, float rad, int collisionLayer, PhysicalObject exemptObject, bool hitAppendages)
         {
-            if (ChangeLizardFriendFire && victim.abstractCreature.world.game.session.characterStats.name.value == "wanderer")
-                if (victim is Lizard && (victim as Lizard).AI.friendTracker.friend == thrower)
-                    return;
-            
-            orig(self, weapon, thrower, victim, hit);
+            //友伤免疫
+            var re = orig(projTracer, room, lastPos,ref pos, rad, collisionLayer, exemptObject, hitAppendages);
+            if (ChangeLizardFriendFire)
+                if (re.obj is Lizard && exemptObject is Player && (re.obj as Lizard).AI.friendTracker.friend != null
+                      && (exemptObject as Player).slugcatStats.name.value == "wanderer")
+                    re.obj = null;
+            return re;
         }
 
-        private void Lizard_Violence(On.Lizard.orig_Violence orig, Lizard self, BodyChunk source, Vector2? directionAndMomentum, BodyChunk hitChunk, PhysicalObject.Appendage.Pos onAppendagePos, Creature.DamageType type, float damage, float stunBonus)
-        {
-            //去除石头和矛的友伤
-            if (ChangeLizardFriendFire && self.abstractCreature.world.game.session.characterStats.name.value == "wanderer") 
-                if(self.AI.friendTracker.friend != null)
-                    return;
+        ///TODO:炸弹惊吓免疫
 
-            orig(self,source,directionAndMomentum,hitChunk,onAppendagePos,type,damage,stunBonus);
-        }
-
-        private bool Lizard_SpearStick(On.Lizard.orig_SpearStick orig, Lizard self, Weapon source, float dmg, BodyChunk chunk, PhysicalObject.Appendage.Pos onAppendagePos, Vector2 direction)
-        {
-            //去除石头和矛的友伤
-            if (ChangeLizardFriendFire && self.abstractCreature.world.game.session.characterStats.name.value == "wanderer") 
-                if(self.AI.friendTracker.friend != null)
-                    return false;
-
-            return orig(self, source, dmg, chunk, onAppendagePos, direction);
-        }
+        ///战役相关///
 
         private CreatureTemplate.Relationship LizardAI_IUseARelationshipTracker_UpdateDynamicRelationship(On.LizardAI.orig_IUseARelationshipTracker_UpdateDynamicRelationship orig, LizardAI self, RelationshipTracker.DynamicRelationship dRelation)
         {

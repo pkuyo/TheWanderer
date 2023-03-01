@@ -63,8 +63,7 @@ namespace MMSC.Characher
                 self.Stun(5);
 
                 //惊吓物体
-                var scareObject = new FirecrackerPlant.ScareObject(self.mainBodyChunk.pos);
-                scareObject.lifeTime = 300;
+                var scareObject = new WandererScareObject(self.mainBodyChunk.pos);
                 self.room.AddObject(new ShockWave(self.mainBodyChunk.pos, 175f, 0.035f, 15, false));
                 self.room.AddObject(scareObject);
                 
@@ -95,6 +94,86 @@ namespace MMSC.Characher
                 _ScareLizardData.Add(self, 0);
         }
 
+        class WandererScareObject : UpdatableAndDeletable
+        {
+            public WandererScareObject(Vector2 pos) 
+            {
+                this.pos = pos;
+                this.threatPoints = new List<ThreatTracker.ThreatPoint>();
+                this.fearRange = 1500f;
+                this.fearScavs = true;
+            }
+            public override void Update(bool eu)
+            {
+                base.Update(eu);
+                this.lifeTime++;
+                WorldCoordinate worldCoordinate = this.room.GetWorldCoordinate(this.pos);
+                if (!this.init)
+                {
+                    this.init = true;
+                    for (int i = 0; i < this.room.abstractRoom.creatures.Count; i++)
+                    {
+                        if (this.room.abstractRoom.creatures[i].realizedCreature != null && !this.room.abstractRoom.creatures[i].realizedCreature.dead && (this.fearScavs || this.room.abstractRoom.creatures[i].creatureTemplate.type != CreatureTemplate.Type.Scavenger) && Custom.DistLess(this.room.abstractRoom.creatures[i].realizedCreature.mainBodyChunk.pos, this.pos, this.fearRange))
+                        {
+                            if (this.room.abstractRoom.creatures[i].abstractAI != null && this.room.abstractRoom.creatures[i].abstractAI.RealAI != null && this.room.abstractRoom.creatures[i].abstractAI.RealAI.threatTracker != null)
+                            {
+                                if ((room.abstractRoom.creatures[i].abstractAI.RealAI is LizardAI) && (room.abstractRoom.creatures[i].abstractAI.RealAI as LizardAI).friendTracker.friend != null)
+                                    continue;
+                                this.threatPoints.Add(this.room.abstractRoom.creatures[i].abstractAI.RealAI.threatTracker.AddThreatPoint(null, worldCoordinate, 1f));
+                                this.MakeCreatureLeaveRoom(this.room.abstractRoom.creatures[i].abstractAI.RealAI);
+                            }
+                        }
+                    }
+                }
+                for (int j = 0; j < this.threatPoints.Count; j++)
+                {
+                    this.threatPoints[j].severity = Mathf.InverseLerp(700f, 500f, (float)this.lifeTime);
+                    this.threatPoints[j].pos = worldCoordinate;
+                }
+                if (this.lifeTime > 400)
+                {
+                    this.Destroy();
+                }
+            }
+
+            private void MakeCreatureLeaveRoom(ArtificialIntelligence AI)
+            {
+                if (AI.creature.abstractAI.destination.room != this.room.abstractRoom.index)
+                {
+                    return;
+                }
+                int num = AI.threatTracker.FindMostAttractiveExit();
+                if (num > -1 && num < this.room.abstractRoom.nodes.Length && this.room.abstractRoom.nodes[num].type == AbstractRoomNode.Type.Exit)
+                {
+                    int num2 = this.room.world.GetAbstractRoom(this.room.abstractRoom.connections[num]).ExitIndex(this.room.abstractRoom.index);
+                    if (num2 > -1)
+                    {
+                        Debug.Log("migrate");
+                        AI.creature.abstractAI.MigrateTo(new WorldCoordinate(this.room.abstractRoom.connections[num], -1, -1, num2));
+                    }
+                }
+            }
+            public override void Destroy()
+            {
+                for (int i = 0; i < this.room.abstractRoom.creatures.Count; i++)
+                {
+                    if (this.room.abstractRoom.creatures[i].realizedCreature != null && !this.room.abstractRoom.creatures[i].realizedCreature.dead && this.room.abstractRoom.creatures[i].abstractAI != null && this.room.abstractRoom.creatures[i].abstractAI.RealAI != null && this.room.abstractRoom.creatures[i].abstractAI.RealAI.threatTracker != null)
+                    {
+                        for (int j = 0; j < this.threatPoints.Count; j++)
+                        {
+                            this.room.abstractRoom.creatures[i].abstractAI.RealAI.threatTracker.RemoveThreatPoint(this.threatPoints[j]);
+                        }
+                    }
+                }
+                base.Destroy();
+            }
+            public int lifeTime;
+            public Vector2 pos;
+            public List<ThreatTracker.ThreatPoint> threatPoints;
+            private bool init;
+            public bool fearScavs;
+            public float fearRange;
+        }
 
         Dictionary<Player, int> _ScareLizardData;
 
