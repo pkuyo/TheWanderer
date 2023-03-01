@@ -62,32 +62,17 @@ namespace MMSC.Characher
                 re[k] = 0;
 
                 IntVector2 add = new IntVector2(0, 0);
-                add += self.room.GetTilePosition(pos + addpos.normalized * 10 +Vector2.Perpendicular(bodyVec).normalized*bodyVec * ((k==0)?1:-1));
-                if (ex)
-                {
-                    for (int i = -1; i <= 1; i++)
-                        for (int j = -1; j <= 1; j++)
-                        {
-                            //判断预计点周边9个点 宽判
-                            IntVector2 tmpadd = add + new IntVector2(i, j);
-                            var titleacc = self.room.aimap.getAItile(tmpadd).acc;
-                            if (titleacc == AItile.Accessibility.Wall || self.room.aimap.getAItile(add).terrainProximity < 2)
-                                re[k] |= 1;
-                            if (titleacc == AItile.Accessibility.Solid
-                            || titleacc == AItile.Accessibility.Corridor)
-                                re[k] |= 2;
-                        }
-                }
-                else
-                {
-                    //单点 严判
-                    var titleacc = self.room.aimap.getAItile(add).acc;
-                    if (titleacc == AItile.Accessibility.Wall || self.room.aimap.getAItile(add).terrainProximity < 2)
-                        re[k] |= 1;
-                    if (titleacc == AItile.Accessibility.Solid
-                    || titleacc == AItile.Accessibility.Corridor)
-                        re[k] |= 2;
-                }
+                add += self.room.GetTilePosition(pos + addpos.normalized * 10 + Vector2.Perpendicular(bodyVec).normalized * bodyVec * ((k == 0) ? 1 : -1));
+                float dis = ex ? 2 : 1;
+
+                var titleacc = self.room.aimap.getAItile(add).acc;
+                if (titleacc == AItile.Accessibility.Wall)
+                    re[k] |= 1;
+                if (titleacc == AItile.Accessibility.Solid
+                || titleacc == AItile.Accessibility.Corridor || self.room.aimap.getAItile(add).terrainProximity < dis)
+                    re[k] |= 2;
+
+
             }
             var rre = re[0] & re[1];
             return rre;
