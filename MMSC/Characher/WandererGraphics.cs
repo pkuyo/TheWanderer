@@ -1,0 +1,145 @@
+﻿using BepInEx.Logging;
+using MMSC.Cosmetic;
+using RWCustom;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using UnityEngine;
+
+namespace MMSC.Characher
+{
+    class WandererGraphics : FeatureBase
+	{
+		public WandererGraphics(ManualLogSource log) :base(log)
+        {
+            On.RainWorld.OnModsInit += RainWorld_OnModsInit;
+			Cosmetics = new Dictionary<PlayerGraphics, List<CosmeticBase>>();
+			EndSprites = new Dictionary<PlayerGraphics, int>();
+			OriginSprites = new Dictionary<PlayerGraphics, int>();
+		}
+
+        private void RainWorld_OnModsInit(On.RainWorld.orig_OnModsInit orig, RainWorld self)
+        {
+			orig(self);
+			On.PlayerGraphics.ctor += PlayerGraphics_ctor;
+			On.PlayerGraphics.InitiateSprites += PlayerGraphics_InitiateSprites;
+            On.PlayerGraphics.DrawSprites += PlayerGraphics_DrawSprites;
+            On.PlayerGraphics.ApplyPalette += PlayerGraphics_ApplyPalette;
+            On.PlayerGraphics.Update += PlayerGraphics_Update;
+            On.Player.Destroy += Player_Destroy;
+			_log.LogDebug("WandererGraphics Init");
+
+		}
+
+        private void Player_Destroy(On.Player.orig_Destroy orig, Player self)
+        {
+			orig(self);
+		}
+
+        public void AddCosmetic(PlayerGraphics graphics,CosmeticBase cosmetic)
+        {
+			if(!Cosmetics.ContainsKey(graphics))
+				Cosmetics.Add(graphics, new List<CosmeticBase>());
+			Cosmetics[graphics].Add(cosmetic);
+		}
+
+        private void PlayerGraphics_ctor(On.PlayerGraphics.orig_ctor orig, PlayerGraphics self, PhysicalObject ow)
+        {
+			orig(self, ow);
+
+			foreach (var a in Cosmetics)
+				if (a.Key == null)
+					Cosmetics.Remove(a.Key);
+				
+
+			if ((self.owner as Player).slugcatStats.name.value != "wanderer")
+				return;
+			TailEffect = new WandererTailEffect(self, _log);//必须放在第一个初始化！
+			AddCosmetic(self,new WandererLongHair(self, _log));
+			AddCosmetic(self, new WandererTailFin(self,_log));
+			AddCosmetic(self, new WandererSpineSpikes(self, _log));
+			AddCosmetic(self, new WandererBumpHawk(self, _log));
+		}
+
+        private void PlayerGraphics_DrawSprites(On.PlayerGraphics.orig_DrawSprites orig, PlayerGraphics self, RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
+        {
+			orig(self, sLeaser, rCam, timeStacker, camPos);
+			if ((self.owner as Player).slugcatStats.name.value != "wanderer")
+				return;
+
+			foreach (var cosmetic in Cosmetics[self])
+				cosmetic.DrawSprites(sLeaser, rCam, timeStacker, camPos);
+				
+		
+        }
+
+        private void PlayerGraphics_InitiateSprites(On.PlayerGraphics.orig_InitiateSprites orig, PlayerGraphics self, RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam)
+        {
+	
+			orig(self, sLeaser, rCam);
+			if ((self.owner as Player).slugcatStats.name.value != "wanderer")
+				return;
+
+			TailEffect.InitiateSprites(sLeaser, rCam);
+
+			if (!OriginSprites.ContainsKey(self))
+			{
+				OriginSprites.Add(self, sLeaser.sprites.Length);
+				var startLength = sLeaser.sprites.Length;
+				
+				foreach (var cosmetic in Cosmetics[self])
+				{
+					cosmetic.startSprite = startLength;
+					startLength += cosmetic.numberOfSprites;
+				}
+				Array.Resize(ref sLeaser.sprites, startLength);
+				EndSprites.Add(self, startLength);
+			}
+			else
+				Array.Resize(ref sLeaser.sprites, EndSprites[self]);
+
+			foreach (var cosmetic in Cosmetics[self])
+				cosmetic.InitiateSprites(sLeaser, rCam);
+
+			FContainer newContatiner=rCam.ReturnFContainer("Midground");
+			for (int i = OriginSprites[self]; i < EndSprites[self]; i++)
+				newContatiner.AddChild(sLeaser.sprites[i]);
+			
+
+		}
+
+		private void PlayerGraphics_ApplyPalette(On.PlayerGraphics.orig_ApplyPalette orig, PlayerGraphics self, RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, RoomPalette palette)
+		{
+			orig(self, sLeaser, rCam, palette);
+			if ((self.owner as Player).slugcatStats.name.value != "wanderer")
+				return;
+
+			TailEffect.ApplyPalette(sLeaser, rCam,palette);
+			foreach (var cosmetic in Cosmetics[self])
+				cosmetic.ApplyPalette(sLeaser, rCam, palette);
+		}
+
+		private void PlayerGraphics_Update(On.PlayerGraphics.orig_Update orig, PlayerGraphics self)
+		{
+			orig(self);
+			if ((self.owner as Player).slugcatStats.name.value != "wanderer")
+				return;
+
+			foreach (var cosmetic in Cosmetics[self])
+				cosmetic.Update();
+		}
+
+
+
+		WandererTailEffect TailEffect;
+
+		Dictionary<PlayerGraphics, int> OriginSprites;
+
+		Dictionary<PlayerGraphics, List<CosmeticBase>> Cosmetics;
+
+		Dictionary<PlayerGraphics, int> EndSprites;
+
+	}
+}
