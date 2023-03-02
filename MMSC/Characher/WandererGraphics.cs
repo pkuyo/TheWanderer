@@ -50,6 +50,8 @@ namespace MMSC.Characher
 			foreach (var a in Cosmetics)
 				if (a.Key == null)
 					Cosmetics.Remove(a.Key);
+
+			
 				
 
 			if ((self.owner as Player).slugcatStats.name.value != "wanderer")

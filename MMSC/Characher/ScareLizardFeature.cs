@@ -46,14 +46,10 @@ namespace MMSC.Characher
             orig(self);
             bool isEnable;
             ScareLizard.TryGet(self, out isEnable);
-            if (isEnable && self.input[0].pckp && self.input[0].thrw && !self.lungsExhausted && _ScareLizardData[self] >= 20)
+            if (isEnable && self.input[0].pckp && self.input[0].thrw && !self.lungsExhausted && _ScareLizardData[self] >= 20 && self.dangerGrasp == null)
             {
                 self.input[0].thrw = false;
                 self.input[0].pckp = false;
-                if (self.dangerGrasp == null)
-                {
-                    self.LoseAllGrasps();
-                }
 
                 _ScareLizardData[self] = 0;
 

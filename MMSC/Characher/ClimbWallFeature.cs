@@ -51,9 +51,9 @@ namespace MMSC.Characher
         }
 
 
-        private int CheckCanClimb(Player self, Vector2 pos,Vector2 bodyVec,float bodyWidth=0.0f ,Vector2 addpos =new Vector2(),bool ex=true)
+        private int CheckCanClimb(Player self, Vector2 pos, Vector2 bodyVec, float bodyWidth = 0.0f, Vector2 addpos = new Vector2(), bool ex = true)
         {
-       
+
 
             int[] re = new int[2];
             re[1] = 3;
@@ -66,7 +66,7 @@ namespace MMSC.Characher
                 float dis = ex ? 2 : 1;
 
                 var titleacc = self.room.aimap.getAItile(add).acc;
-                if (titleacc == AItile.Accessibility.Wall)
+                if (titleacc == AItile.Accessibility.Wall || titleacc == AItile.Accessibility.Climb)
                     re[k] |= 1;
                 if (titleacc == AItile.Accessibility.Solid
                 || titleacc == AItile.Accessibility.Corridor || self.room.aimap.getAItile(add).terrainProximity < dis)
@@ -86,18 +86,17 @@ namespace MMSC.Characher
 
         private void CancelWallClimb(Player self)
         {
-            ClimbArgs[self].isClimb = false;
             ClimbArgs[self].pressedUsed = true;
+            ClimbArgs[self].isClimb = false;
             self.bodyMode = Player.BodyModeIndex.Default;
             _log.LogError("Cancel climb");
         }
 
         private void StartWallClimb(Player self)
         {
-            ClimbArgs[self].isClimb = true;
-            ClimbArgs[self].Reset(self.mainBodyChunk.vel);
-
             ClimbArgs[self].pressedUsed = true;
+            ClimbArgs[self].isClimb = true;
+            ClimbArgs[self].Reset(self.mainBodyChunk.vel); 
             _log.LogError("Start climb");
         }
 
@@ -152,8 +151,8 @@ namespace MMSC.Characher
                 //速度计算
                 vel.y = self.input[0].y*4f;
                 vel.x = self.input[0].x*6f;
-                vel = (vel.magnitude > Mathf.Lerp(0, MaxSpeed,
-                    (10 - slowDownCount) / 10.0f)) ? vel.normalized * Mathf.Lerp(0, MaxSpeed, (10 - slowDownCount) / 10.0f) : vel;
+                vel = (vel.magnitude > Mathf.Lerp(0, MaxSpeed * DefaultSpeed,
+                    (10 - slowDownCount) / 10.0f)) ? vel.normalized * Mathf.Lerp(0, MaxSpeed * DefaultSpeed, (10 - slowDownCount) / 10.0f) : vel;
 
                 //速度衰减
                 vel *= self.airFriction;
@@ -245,9 +244,9 @@ namespace MMSC.Characher
 
             //长按忽略
             //TODO : 多人支持
-            if ((self.input[0].pckp && self.input[0].jmp) && !ClimbArgs[self].pressed)
+            if ((self.input[0].pckp && self.wantToJump > 0) && !ClimbArgs[self].pressed)
                 ClimbArgs[self].pressed = true;
-            if (!(self.input[0].pckp && self.input[0].jmp))
+            if (!(self.input[0].pckp && self.wantToJump > 0))
             {
                 ClimbArgs[self].pressed = false;
                 ClimbArgs[self].pressedUsed = false;
@@ -277,6 +276,7 @@ namespace MMSC.Characher
         public static Player.BodyModeIndex ClimbBackWall;
 
         public float MaxSpeed = 7;
+        public float DefaultSpeed = 7;
         public readonly float BodyWidth = 6;
         
 

@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
-using static UnityEngine.Random;
+using Random = UnityEngine.Random;
 
 namespace MMSC.LizardMessage
 {
@@ -59,7 +59,22 @@ namespace MMSC.LizardMessage
         //对外接口
         public static string GetRandomMessage(Lizard target,StatePriority priority)
         {
-            if (priority._anim != null)
+            if(target.lizardParams.template == CreatureTemplate.Type.YellowLizard)
+            {
+                string message = string.Empty;
+                int lastIndex = -1;
+
+                //构建乱码
+                for(int i=0;i<Random.Range(4,7);i++)
+                {
+                    int index;
+                    while ((index = Random.Range(0, 9)) == lastIndex) ;
+                    message += YellowLizardText[index];
+                    lastIndex = index;
+                }
+                return message;
+            }
+            else if (priority._anim != null)
                 return GetRandomMessage(target, priority._anim);
             else
                 return GetRandomMessage(target, priority._behavior);
@@ -68,40 +83,41 @@ namespace MMSC.LizardMessage
         private static string GetRandomMessage(Lizard target, Lizard.Animation anim)
         {
             if (!animMessage[target.abstractCreature.creatureTemplate.type].ContainsKey(anim))
-                return anim.ToString() + " " + Range(0, 4);
+                return anim.ToString() + " " + Random.Range(0, 4);
 
             var messageList = animMessage[target.abstractCreature.creatureTemplate.type][anim];
 
             ////////////////////DEBUG///////////////////
             if (messageList.Count == 0)
-                return anim.ToString() + " " + Range(0, 4);
+                return anim.ToString() + " " + Random.Range(0, 4);
             ////////////////////////////////////////////
 
             if (messageList.Count == 0)
                 return null;
             else
-                return messageList[Range(0, messageList.Count - 1)];
+                return messageList[Random.Range(0, messageList.Count - 1)];
         }
         private static string GetRandomMessage(Lizard target, LizardAI.Behavior behavior)
         {
             if (!behaviorMessage[target.abstractCreature.creatureTemplate.type].ContainsKey(behavior))
-                return behavior.ToString() + " " + Range(0, 4);
+                return behavior.ToString() + " " + Random.Range(0, 4);
 
             var messageList = behaviorMessage[target.abstractCreature.creatureTemplate.type][behavior];
 
             ////////////////////DEBUG///////////////////
             if (messageList.Count == 0)
-                return behavior.ToString() + " " + Range(0, 4);
+                return behavior.ToString() + " " + Random.Range(0, 4);
             ////////////////////////////////////////////
 
             if (messageList.Count == 0)
                 return null;
             else
-                return messageList[Range(0, messageList.Count - 1)];
+                return messageList[Random.Range(0, messageList.Count - 1)];
         }
 
         static private Dictionary<CreatureTemplate.Type, Dictionary<LizardAI.Behavior, List<string>>> behaviorMessage;
         static private Dictionary<CreatureTemplate.Type, Dictionary<Lizard.Animation, List<string>>> animMessage;
         static private ManualLogSource _log;
+        static private string YellowLizardText = "!@#$%^&*+-";
     }
 }

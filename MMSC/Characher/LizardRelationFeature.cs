@@ -29,10 +29,10 @@ namespace MMSC.Characher
 
         private SharedPhysics.CollisionResult SharedPhysics_TraceProjectileAgainstBodyChunks(On.SharedPhysics.orig_TraceProjectileAgainstBodyChunks orig, SharedPhysics.IProjectileTracer projTracer, Room room, Vector2 lastPos, ref Vector2 pos, float rad, int collisionLayer, PhysicalObject exemptObject, bool hitAppendages)
         {
-            //友伤免疫
+            //友伤免疫 朋友蜥蜴和好感度为1的地区全部蜥蜴
             var re = orig(projTracer, room, lastPos,ref pos, rad, collisionLayer, exemptObject, hitAppendages);
             if (ChangeLizardFriendFire)
-                if (re.obj is Lizard && exemptObject is Player && (re.obj as Lizard).AI.friendTracker.friend != null
+                if (re.obj is Lizard && exemptObject is Player && ((re.obj as Lizard).AI.friendTracker.friend != null || (re.obj as Lizard).abstractCreature.world.game.session.creatureCommunities.LikeOfPlayer(CreatureCommunities.CommunityID.Lizards, (re.obj as Lizard).abstractCreature.world.RegionNumber, (exemptObject as Player).playerState.playerNumber)==1)
                       && (exemptObject as Player).slugcatStats.name.value == "wanderer")
                     re.obj = null;
             return re;
@@ -87,10 +87,10 @@ namespace MMSC.Characher
                     interRegionBleed *= 2f;
 
                     //在好感度为正时负影响倍率为乘2
-                    if (self.playerOpinions[CreatureCommunities.CommunityID.Lizards.Index - 1, 0, playerNumber] > 0)
+                    if (influence <0 && self.playerOpinions[CreatureCommunities.CommunityID.Lizards.Index - 1, 0, playerNumber] > 0)
                         influence *= 2f;
                 }
-            orig(self,commID,region,playerNumber,influence,interCommunityBleed,interCommunityBleed);
+            orig(self,commID,region,playerNumber,influence, interRegionBleed, interCommunityBleed);
         }
 
         ///////////////////////////////////////////////////

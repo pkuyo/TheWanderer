@@ -68,10 +68,11 @@ namespace MMSC.Cosmetic
         }
 
         public override void InitiateSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam)
-        {
-            
+        {   
+
             for (int i = 0; i < 2; i++)
             {
+       
                 TriangleMesh.Triangle[] tris = new TriangleMesh.Triangle[]
                 {
                 //new TriangleMesh.Triangle(0, 1, 2),
@@ -143,6 +144,7 @@ namespace MMSC.Cosmetic
                 }
             }
         }
+
         TailSegment[] hairs;
         float HairSpacing = 6f;
     }

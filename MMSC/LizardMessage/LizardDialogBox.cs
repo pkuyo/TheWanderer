@@ -71,6 +71,7 @@ namespace MMSC.LizardMessage
 
         private static LizardDialogBox CreateLizardDialog(Lizard target, StatePriority priority)
         {
+
             var message = RandomMessagePicker.GetRandomMessage(target, priority);
             //无文本则不响应
             if (message == null) return null;
@@ -90,16 +91,24 @@ namespace MMSC.LizardMessage
 
         public static void LizardDialogUpdate(Lizard self)
         {
-            //黄蜥蜴无线电通信
-            if (self.lizardParams.template == CreatureTemplate.Type.YellowLizard)
-                return;
-
             //无蜥蜴个体信息则创建
             if (!_data.ContainsKey(self))
                 _data.Add(self, new LizardDialogData());
 
-            //尝试获取前一次对话框信息
             LizardDialogBox dialog = null;
+
+            //黄蜥蜴无线电通信
+            if (self.lizardParams.template == CreatureTemplate.Type.YellowLizard)
+            {
+                if (_data[self].ConstantCounter == 0)
+                {
+                    dialog = CreateLizardDialog(self, new StatePriority());
+                    _data[self].ConstantCounter = 350 + Random.Range(50, 350);
+                }
+                return;
+            }
+
+            //尝试获取前一次对话框信息
             StatePriority lastPriority = new StatePriority();
             if (_data[self].dialogBox != null)
                 lastPriority = _data[self].dialogBox.Priority;
@@ -115,7 +124,7 @@ namespace MMSC.LizardMessage
             if ((_data[self].InstantCounter == 0 || instantState > lastPriority) && instantState.priority != -1)
             {
                 dialog = CreateLizardDialog(self, instantState);
-                _data[self].InstantCounter = 300;
+                _data[self].InstantCounter = 200 +Random.Range(50,200);
             }
             else
             {
@@ -124,7 +133,7 @@ namespace MMSC.LizardMessage
                 if (_data[self].ConstantCounter == 0)
                 {
                     dialog = CreateLizardDialog(self, constantState);
-                    _data[self].ConstantCounter = 400;
+                    _data[self].ConstantCounter = 300+Random.Range(50, 250);
                 }
             }
 
@@ -136,8 +145,6 @@ namespace MMSC.LizardMessage
                     _data[self].dialogBox.DeleteDialogBox();
                 }
                 _data[self].dialogBox = dialog;
-
-                _log.LogDebug("[" + self.abstractCreature.ID.ToString() + "] " + dialog.messages[0].text);
             }
 
         }
