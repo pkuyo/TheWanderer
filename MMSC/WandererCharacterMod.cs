@@ -31,8 +31,8 @@ namespace MMSC
         {
             orig(self);
             foreach(var feature in _features)
-                feature.OnModsInit();
-            _wandererOptions.OnModsInit();
+                feature.OnModsInit(self);
+            _wandererOptions.OnModsInit(self);
         }
 
         private List<FeatureBase> _features;

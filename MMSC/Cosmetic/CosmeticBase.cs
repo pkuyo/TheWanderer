@@ -41,7 +41,6 @@ namespace MMSC.Cosmetic
         {
             Color color = PlayerGraphics.SlugcatColor(self.CharacterForColor);
 
-            
             if (BodyColor.GetColor(self)!=null)
                 color = (Color)BodyColor.GetColor(self);
             return color;
@@ -50,11 +49,8 @@ namespace MMSC.Cosmetic
         protected Color GetFaceColor(PlayerGraphics self, RoomCamera rCam)
         {
             Color color = new Color(186 / 255.0f, 252 / 255.0f, 240 / 255.0f);
-            Player player = self.owner as Player;
-
             if (self.useJollyColor)
-                color = PlayerGraphics.JollyColor(player.playerState.playerNumber, 1);
-            
+                color = PlayerGraphics.JollyColor((self.owner as Player).playerState.playerNumber, 1);
             if (PlayerGraphics.CustomColorsEnabled())
                 color = PlayerGraphics.CustomColorSafety(1);
 

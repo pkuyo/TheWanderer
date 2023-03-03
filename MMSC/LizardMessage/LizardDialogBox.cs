@@ -149,7 +149,6 @@ namespace MMSC.LizardMessage
 
         }
 
-
         private class LizardDialogData
         {
             public int InstantCounter = 0;
@@ -233,7 +232,6 @@ namespace MMSC.LizardMessage
                 byte[] a = new byte[fileStream.Length];
                 fileStream.Read(a, 0, (int)fileStream.Length);
                 var all = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, int>>(Encoding.UTF8.GetString(a));
-                _log.LogDebug("ShortList Decoded");
                 bool flag = false; //是否到达anim区段
                 foreach (var pri in all)
                 {
@@ -266,7 +264,6 @@ namespace MMSC.LizardMessage
                 byte[] a = new byte[fileStream.Length];
                 fileStream.Read(a, 0, (int)fileStream.Length);
                 var all = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, int>>(Encoding.UTF8.GetString(a));
-                _log.LogDebug("LongList Decoded");
                 foreach (var pri in all)
                 {
                     LizardAI.Behavior behavior = (LizardAI.Behavior)ExtEnumBase.Parse(typeof(LizardAI.Behavior), pri.Key, false);

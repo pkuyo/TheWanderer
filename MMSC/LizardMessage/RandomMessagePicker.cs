@@ -10,18 +10,25 @@ using Random = UnityEngine.Random;
 
 namespace MMSC.LizardMessage
 {
-    class RandomMessagePicker
+    static class RandomMessagePicker
     {
 
-
-        public static void InitLizardMessage(ManualLogSource log)
+        public static void InitLizardMessage(ManualLogSource log, RainWorld rainWorld)
         {
             _log = log;
 
             //消息记录
             behaviorMessage = new Dictionary<CreatureTemplate.Type, Dictionary<LizardAI.Behavior, List<string>>>();
             animMessage = new Dictionary<CreatureTemplate.Type, Dictionary<Lizard.Animation, List<string>>>();
-            var path = AssetManager.ResolveFilePath("text/mmsc/lizard.dat");
+
+            //选择语言
+            //TODO: 动态语言调整
+            string path;
+            if(rainWorld.inGameTranslator.currentLanguage==InGameTranslator.LanguageID.Chinese)
+                path = AssetManager.ResolveFilePath("text/mmsc/lizard_cn.json");
+            else
+                path = AssetManager.ResolveFilePath("text/mmsc/lizard_en.json");
+
             FileStream fileStream = new FileStream(path, FileMode.Open);
 
             //反序列化Json

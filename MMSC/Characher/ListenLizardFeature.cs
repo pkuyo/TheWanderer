@@ -19,9 +19,9 @@ namespace MMSC.Characher
         }
 
 
-        public override void OnModsInit()
+        public override void OnModsInit(RainWorld rainWorld)
         {
-            RandomMessagePicker.InitLizardMessage(_log);
+            RandomMessagePicker.InitLizardMessage(_log,rainWorld);
             StatePriority.InitStatePriority(_log);
             LizardDialogBox.InitDialogBoxStaticData(_log);
 

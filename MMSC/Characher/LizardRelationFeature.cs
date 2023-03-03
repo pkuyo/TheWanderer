@@ -15,7 +15,7 @@ namespace MMSC.Characher
         {
         }
 
-        public override void OnModsInit()
+        public override void OnModsInit(RainWorld rainWorld)
         {
             On.CreatureCommunities.InfluenceLikeOfPlayer += CreatureCommunities_InfluenceLikeOfPlayer;
 
@@ -43,9 +43,6 @@ namespace MMSC.Characher
         {
             var relationship = orig(self, dRelation);
 
-            ///////////////////////////////////////////////////
-            //TODO: ui界面
-            ///////////////////////////////////////////////////
             //漫游者猫猫养的
             if (self.friendTracker.friend != null && (self.friendTracker.friend is Player) && (self.friendTracker.friend as Player).slugcatStats.name.value == "wanderer")
             {
@@ -74,7 +71,7 @@ namespace MMSC.Characher
             orig(self, creature, world);
             if (self.creature.world.game.session.characterStats.name.value == "wanderer")
                 //降低驯服难度
-                self.friendTracker.tamingDifficlty *= 0.3f;
+                self.friendTracker.tamingDifficlty = Mathf.Clamp(self.friendTracker.tamingDifficlty * 0.3f, 0.5f, 2f);
         }
 
         private void CreatureCommunities_InfluenceLikeOfPlayer(On.CreatureCommunities.orig_InfluenceLikeOfPlayer orig, CreatureCommunities self, CreatureCommunities.CommunityID commID, int region, int playerNumber, float influence, float interRegionBleed, float interCommunityBleed)

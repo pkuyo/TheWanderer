@@ -95,6 +95,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Characher\LizardRelationFeature.cs" />
+    <Compile Include="Characher\WandererTurtorial.cs" />
     <Compile Include="ClimbWall\ClimbSlugHand.cs" />
     <Compile Include="Characher\ClimbWallFeature.cs" />
     <Compile Include="Characher\FeatureBase.cs" />

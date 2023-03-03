@@ -21,8 +21,8 @@ namespace MMSC.Characher
 			TailEffect = new Dictionary<PlayerGraphics, WandererTailEffect>();
 		}
 
-		public override void OnModsInit()
-		{
+		public override void OnModsInit(RainWorld rainWorld)
+        {
 			On.PlayerGraphics.ctor += PlayerGraphics_ctor;
 			On.PlayerGraphics.InitiateSprites += PlayerGraphics_InitiateSprites;
             On.PlayerGraphics.DrawSprites += PlayerGraphics_DrawSprites;

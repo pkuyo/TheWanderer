@@ -14,7 +14,7 @@ namespace MMSC.Options
         {
 
         }
-        public void OnModsInit()
+        public void OnModsInit(RainWorld self)
         {
 
         }

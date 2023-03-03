@@ -16,7 +16,7 @@ namespace MMSC.Characher
            
         }
 
-        public override void OnModsInit()
+        public override void OnModsInit(RainWorld rainWorld)
         {
             On.HUD.HUD.InitSinglePlayerHud += HUD_InitSinglePlayerHud;
             On.CreatureCommunities.InfluenceLikeOfPlayer += CreatureCommunities_InfluenceLikeOfPlayer;
@@ -66,10 +66,6 @@ namespace MMSC.Characher
         {
             //设置起始位置
             var tmppos = pos + this.hud.rainWorld.options.SafeScreenOffset;
-            //if (this.hud.textPrompt != null && this.hud.textPrompt.foodVisibleMode == 0f)
-            //{
-            //    tmppos.y = tmppos.y + this.hud.textPrompt.LowerBorderHeight(1f);
-            //}
 
             sprites = new FSprite[4];
             for (int i = 0; i < 4; i++)
@@ -107,10 +103,6 @@ namespace MMSC.Characher
             base.Draw(timeStacker);
             //设置起始位置
             var tmppos = pos + this.hud.rainWorld.options.SafeScreenOffset;
-            //if (this.hud.textPrompt != null && this.hud.textPrompt.foodVisibleMode == 0f)
-            //{
-            //    tmppos.y = tmppos.y + this.hud.textPrompt.LowerBorderHeight(1f);
-            //}
 
             //是否是避难所内，是则强制显示
             bool isShelter = false;

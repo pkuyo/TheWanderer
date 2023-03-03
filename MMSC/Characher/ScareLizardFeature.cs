@@ -20,7 +20,7 @@ namespace MMSC.Characher
             _ScareLizardData = new Dictionary<Player, int>();
         }
 
-        public override void OnModsInit()
+        public override void OnModsInit(RainWorld rainWorld)
         {
             On.Player.checkInput += Player_checkInput;
             On.Player.ctor += Player_ctor;

@@ -21,7 +21,7 @@ namespace MMSC.Characher
         }
 
 
-        public override void OnModsInit()
+        public override void OnModsInit(RainWorld rainWorld)
         {
             RegisterAllEnumExtensions();
 

@@ -15,7 +15,7 @@ namespace MMSC.Characher
         }
         protected ManualLogSource _log;
 
-        virtual public void OnModsInit()
+        virtual public void OnModsInit(RainWorld rainWorld)
         {
 
         }
