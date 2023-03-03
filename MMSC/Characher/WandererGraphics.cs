@@ -179,4 +179,5 @@ namespace MMSC.Characher
 		Dictionary<PlayerGraphics, int> EndSprites;
 
 	}
+
 }

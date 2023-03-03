@@ -15,7 +15,7 @@ namespace MMSC.Characher
 
         public ListenLizardFeature(ManualLogSource log) :base(log)
         {
-            WandererLizards = new Dictionary<Lizard, WandererLizardData>();
+            WandererLizards = new Dictionary<Lizard, WandererLizard>();
         }
 
 
@@ -48,9 +48,9 @@ namespace MMSC.Characher
                     wandererLizard.Value.Destroy();
                     WandererLizards.Remove(wandererLizard.Key);
                 }
-
-            WandererLizards.Add(self, new WandererLizardData(self));
+            if(!WandererLizards.ContainsKey(self))
+                WandererLizards.Add(self, new WandererLizard(self));
         }
-        Dictionary<Lizard,WandererLizardData> WandererLizards;
+        Dictionary<Lizard,WandererLizard> WandererLizards;
     }
 }

@@ -9,9 +9,9 @@ using UnityEngine;
 
 namespace MMSC.LizardMessage
 {
-    public class WandererLizardData 
+    public class WandererLizard 
     {
-        public WandererLizardData(Lizard self)
+        public WandererLizard(Lizard self)
         {
             lizard = self;         
         }
