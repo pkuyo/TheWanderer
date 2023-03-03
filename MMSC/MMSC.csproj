@@ -51,6 +51,10 @@
     <Reference Include="HOOKS-Assembly-CSharp">
       <HintPath>..\..\..\SteamLibrary\steamapps\common\Rain World\BepInEx\plugins\HOOKS-Assembly-CSharp.dll</HintPath>
     </Reference>
+    <Reference Include="Mono.Cecil, Version=0.10.4.0, Culture=neutral, PublicKeyToken=50cebf1cceb9d05e, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\SteamLibrary\steamapps\common\Rain World\RainWorld_Data\Managed\Mono.Cecil.dll</HintPath>
+    </Reference>
     <Reference Include="MonoMod">
       <HintPath>..\..\..\SteamLibrary\steamapps\common\Rain World\BepInEx\core\MonoMod.dll</HintPath>
     </Reference>

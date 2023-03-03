@@ -144,7 +144,6 @@ namespace MMSC.Characher
                     int num2 = this.room.world.GetAbstractRoom(this.room.abstractRoom.connections[num]).ExitIndex(this.room.abstractRoom.index);
                     if (num2 > -1)
                     {
-                        Debug.Log("migrate");
                         AI.creature.abstractAI.MigrateTo(new WorldCoordinate(this.room.abstractRoom.connections[num], -1, -1, num2));
                     }
                 }

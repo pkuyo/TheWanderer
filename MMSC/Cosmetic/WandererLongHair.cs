@@ -15,6 +15,11 @@ namespace MMSC.Cosmetic
         {
             numberOfSprites = 2;
             hairs = new TailSegment[8];
+            if(graphics.RenderAsPup)
+            {
+                HairSpacing = 4.5f;
+                MaxLength = 5f;
+            }
             for (int i = 0; i < 2; i++)
             {
                 var player = graphics.owner as Player;  
@@ -28,6 +33,7 @@ namespace MMSC.Cosmetic
 
         public override void DrawSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
         {
+            
             for (int k=0;k<2;k++)
             {
                 var dir = Custom.DirVec(iGraphics.owner.bodyChunks[0].pos, iGraphics.owner.bodyChunks[1].pos).normalized;
@@ -133,9 +139,9 @@ namespace MMSC.Cosmetic
                     TailSegment tailSegment7 = hairs[k + i * 4];
                     tailSegment7.vel.y = tailSegment7.vel.y - Mathf.Lerp(0.1f, 0.5f, num3) * (1f - iGraphics.owner.bodyChunks[1].submersion) * iGraphics.owner.EffectiveRoomGravity;
                     num3 = (num3 * 10f + 1f) / 11f;
-                    if (!Custom.DistLess(hairs[k + i * 4].pos, RootPos, 9f * (float)(k + 1)))
+                    if (!Custom.DistLess(hairs[k + i * 4].pos, RootPos, MaxLength * (float)(k + 1)))
                     {
-                        hairs[k + i * 4].pos = RootPos + Custom.DirVec(RootPos, hairs[k + i * 4].pos) * 9f * (float)(k + 1);
+                        hairs[k + i * 4].pos = RootPos + Custom.DirVec(RootPos, hairs[k + i * 4].pos) * MaxLength * (float)(k + 1);
                     }
                     hairs[k + i * 4].vel += Custom.DirVec(vector2, hairs[k + i * 4].pos) * num9 / Vector2.Distance(vector2, hairs[k + i * 4].pos);
                     num9 *= 0.5f;
@@ -147,6 +153,8 @@ namespace MMSC.Cosmetic
 
         TailSegment[] hairs;
         float HairSpacing = 6f;
+
+        float MaxLength = 9f;
     }
     
 }

@@ -1,5 +1,6 @@
 ﻿using BepInEx.Logging;
 using MMSC.Cosmetic;
+using MonoMod.Cil;
 using RWCustom;
 using System;
 using System.Collections.Generic;
@@ -17,6 +18,7 @@ namespace MMSC.Characher
 			Cosmetics = new Dictionary<PlayerGraphics, List<CosmeticBase>>();
 			EndSprites = new Dictionary<PlayerGraphics, int>();
 			OriginSprites = new Dictionary<PlayerGraphics, int>();
+			TailEffect = new Dictionary<PlayerGraphics, WandererTailEffect>();
 		}
 
 		public override void OnModsInit()
@@ -26,15 +28,45 @@ namespace MMSC.Characher
             On.PlayerGraphics.DrawSprites += PlayerGraphics_DrawSprites;
             On.PlayerGraphics.ApplyPalette += PlayerGraphics_ApplyPalette;
             On.PlayerGraphics.Update += PlayerGraphics_Update;
-            On.Player.Destroy += Player_Destroy;
+            
+			IL.PlayerGraphics.InitiateSprites += PlayerGraphics_InitiateSpritesIL;
+            IL.PlayerGraphics.DrawSprites += PlayerGraphics_DrawSpritesIL;
 			_log.LogDebug("WandererGraphics Init");
 
 		}
 
-        private void Player_Destroy(On.Player.orig_Destroy orig, Player self)
+
+
+        private void PlayerGraphics_InitiateSpritesIL(ILContext il)
         {
-			orig(self);
+			//毛绒绒毛茸茸
+			var c = new ILCursor(il);
+			if(c.TryGotoNext(i => i.MatchLdstr("HeadA0")))
+            {
+				c.Remove();
+				c.Emit(Mono.Cecil.Cil.OpCodes.Ldarg_0);
+				c.EmitDelegate<Func<PlayerGraphics, string>>((self) =>
+				 {
+					 return (self.owner as Player).slugcatStats.name.value == "wanderer" ? "HeadB0" : "HeadA0";
+				 });
+			}
+        }
+
+		private void PlayerGraphics_DrawSpritesIL(ILContext il)
+		{
+			//毛绒绒毛茸茸
+			var c = new ILCursor(il);
+			if (c.TryGotoNext(i => i.MatchLdstr("HeadA")))
+			{
+				c.Remove();
+				c.Emit(Mono.Cecil.Cil.OpCodes.Ldarg_0);
+				c.EmitDelegate<Func<PlayerGraphics, string>>((self) =>
+				{
+					return (self.owner as Player).slugcatStats.name.value == "wanderer" ? "HeadB" : "HeadA";
+				});
+			}
 		}
+
 
         public void AddCosmetic(PlayerGraphics graphics,CosmeticBase cosmetic)
         {
@@ -49,14 +81,19 @@ namespace MMSC.Characher
 
 			foreach (var a in Cosmetics)
 				if (a.Key == null)
+				{
 					Cosmetics.Remove(a.Key);
+					TailEffect.Remove(a.Key);
+				}
 
-			
-				
 
 			if ((self.owner as Player).slugcatStats.name.value != "wanderer")
 				return;
-			TailEffect = new WandererTailEffect(self, _log);//必须放在第一个初始化！
+			if (!TailEffect.ContainsKey(self))
+				TailEffect.Add(self, new WandererTailEffect(self, _log));//必须放在第一个初始化！
+			else
+				TailEffect[self] = new WandererTailEffect(self, _log);
+
 			AddCosmetic(self,new WandererLongHair(self, _log));
 			AddCosmetic(self, new WandererTailFin(self,_log));
 			AddCosmetic(self, new WandererSpineSpikes(self, _log));
@@ -82,7 +119,7 @@ namespace MMSC.Characher
 			if ((self.owner as Player).slugcatStats.name.value != "wanderer")
 				return;
 
-			TailEffect.InitiateSprites(sLeaser, rCam);
+			TailEffect[self].InitiateSprites(sLeaser, rCam);
 
 			if (!OriginSprites.ContainsKey(self))
 			{
@@ -116,7 +153,7 @@ namespace MMSC.Characher
 			if ((self.owner as Player).slugcatStats.name.value != "wanderer")
 				return;
 
-			TailEffect.ApplyPalette(sLeaser, rCam,palette);
+			TailEffect[self].ApplyPalette(sLeaser, rCam,palette);
 			foreach (var cosmetic in Cosmetics[self])
 				cosmetic.ApplyPalette(sLeaser, rCam, palette);
 		}
@@ -133,7 +170,7 @@ namespace MMSC.Characher
 
 
 
-		WandererTailEffect TailEffect;
+		Dictionary<PlayerGraphics, WandererTailEffect> TailEffect;
 
 		Dictionary<PlayerGraphics, int> OriginSprites;
 

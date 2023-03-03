@@ -12,7 +12,12 @@ namespace MMSC.Cosmetic
     {
         public WandererBumpHawk(PlayerGraphics graphics, ManualLogSource log) : base(graphics, log)
         {
+            if(graphics.RenderAsPup)
+            {
+                bumps = 3;
+            }
             numberOfSprites = bumps;
+           
         }
 
 

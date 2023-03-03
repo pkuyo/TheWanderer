@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using SlugBase.DataTypes;
 using UnityEngine;
 
 namespace MMSC.Cosmetic
@@ -39,6 +40,10 @@ namespace MMSC.Cosmetic
         protected Color GetBodyColor(PlayerGraphics self)
         {
             Color color = PlayerGraphics.SlugcatColor(self.CharacterForColor);
+
+            
+            if (BodyColor.GetColor(self)!=null)
+                color = (Color)BodyColor.GetColor(self);
             return color;
         }
 
@@ -46,14 +51,17 @@ namespace MMSC.Cosmetic
         {
             Color color = new Color(186 / 255.0f, 252 / 255.0f, 240 / 255.0f);
             Player player = self.owner as Player;
+
             if (self.useJollyColor)
-            {
                 color = PlayerGraphics.JollyColor(player.playerState.playerNumber, 1);
-            }
+            
             if (PlayerGraphics.CustomColorsEnabled())
-            {
                 color = PlayerGraphics.CustomColorSafety(1);
-            }
+
+           
+            if (EyeColor.GetColor(self) != null)
+                color = (Color)EyeColor.GetColor(self);
+
             return color;
         }
 
@@ -62,5 +70,8 @@ namespace MMSC.Cosmetic
         public int startSprite;
         public int numberOfSprites;
         public PlayerGraphics iGraphics;
+
+        PlayerColor EyeColor = new PlayerColor("Eyes");
+        PlayerColor BodyColor = new PlayerColor("Body");
     }
 }

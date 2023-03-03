@@ -28,32 +28,55 @@ namespace MMSC.Characher
             On.Player.ctor += Player_ctor;
             On.Player.Update += new On.Player.hook_Update(Player_Update);
             On.Player.MovementUpdate += new On.Player.hook_MovementUpdate(Player_MovementUpdate);
+            On.Player.UpdateMSC += new On.Player.hook_UpdateMSC(Player_UpdateMSC);
+            On.Player.UpdateBodyMode += Player_UpdateBodyMode;
+
             On.Player.Jump += new On.Player.hook_Jump(Player_Jump);
             On.Player.GrabVerticalPole += new On.Player.hook_GrabVerticalPole(Player_GrabVerticalPole);
-            On.Player.UpdateMSC += new On.Player.hook_UpdateMSC(Player_UpdateMSC);
-            On.Player.Destroy += Player_Destroy;
 
             _climbSlugHandGraphics.OnModsInit();
 
             _log.LogDebug("ClimbWallFeature Init");
         }
 
-        private void Player_Destroy(On.Player.orig_Destroy orig, Player self)
+        private void Player_UpdateBodyMode(On.Player.orig_UpdateBodyMode orig, Player self)
         {
-            ClimbArgs.Remove(self);
             orig(self);
+            if (ClimbArgs[self].isClimb)
+            {
+                //设置状态
+                if ((self.bodyMode == Player.BodyModeIndex.Default
+                    || self.bodyMode == Player.BodyModeIndex.WallClimb
+                    || self.bodyMode == Player.BodyModeIndex.ClimbingOnBeam))
+                {
+                    self.bodyMode = ClimbBackWall;
+                    //防止卡杆子
+                    self.forceFeetToHorizontalBeamTile = 0;
+                    if (self.animation == Player.AnimationIndex.HangFromBeam)
+                        self.animation = Player.AnimationIndex.None;
+                }
+                else
+                {
+                    //爬杆钻管道等优先级高的操作 直接取消爬墙
+                    CancelWallClimb(self);
+                    _log.LogDebug("Cancel climb cause by " + self.bodyMode.ToString());
+                    return;
+                }
+            }
+            
+            
         }
 
+
         //注册enum
+        //TODO : ExtEnum
         public static void RegisterAllEnumExtensions()
         {
             ClimbWallFeature.ClimbBackWall = new Player.BodyModeIndex("ClimbBackWall", true);
         }
 
-
         private int CheckCanClimb(Player self, Vector2 pos, Vector2 bodyVec, float bodyWidth = 0.0f, Vector2 addpos = new Vector2(), bool ex = true)
         {
-
 
             int[] re = new int[2];
             re[1] = 3;
@@ -71,8 +94,6 @@ namespace MMSC.Characher
                 if (titleacc == AItile.Accessibility.Solid
                 || titleacc == AItile.Accessibility.Corridor || self.room.aimap.getAItile(add).terrainProximity < dis)
                     re[k] |= 2;
-
-
             }
             var rre = re[0] & re[1];
             return rre;
@@ -89,7 +110,7 @@ namespace MMSC.Characher
             ClimbArgs[self].pressedUsed = true;
             ClimbArgs[self].isClimb = false;
             self.bodyMode = Player.BodyModeIndex.Default;
-            _log.LogError("Cancel climb");
+            _log.LogDebug("Cancel climb");
         }
 
         private void StartWallClimb(Player self)
@@ -97,7 +118,7 @@ namespace MMSC.Characher
             ClimbArgs[self].pressedUsed = true;
             ClimbArgs[self].isClimb = true;
             ClimbArgs[self].Reset(self.mainBodyChunk.vel); 
-            _log.LogError("Start climb");
+            _log.LogDebug("Start climb");
         }
 
         private void Player_ctor(On.Player.orig_ctor orig, Player self, AbstractCreature abstractCreature, World world)
@@ -133,20 +154,6 @@ namespace MMSC.Characher
             if (_isClimb)
             {
                 ClimbWallSpeed.TryGet(self,out MaxSpeed);
-                //设置状态
-                if ((self.bodyMode == Player.BodyModeIndex.Default
-                    || self.bodyMode == Player.BodyModeIndex.WallClimb
-                    || self.bodyMode == Player.BodyModeIndex.ClimbingOnBeam) && !self.room.GetTile(self.mainBodyChunk.pos).horizontalBeam)
-                {
-                    self.bodyMode = ClimbBackWall;
-                }
-                else
-                {
-                    //爬杆钻管道等优先级高的操作 直接取消爬墙
-                    CancelWallClimb(self);
-                    _log.LogDebug("Cancel climb cause by " + self.bodyMode.ToString());
-                    return;
-                }
 
                 //速度计算
                 vel.y = self.input[0].y*4f;
@@ -211,7 +218,7 @@ namespace MMSC.Characher
 
         private void Player_GrabVerticalPole(On.Player.orig_GrabVerticalPole orig, Player self)
         {
-            if (!ClimbArgs[self].isClimb) //防止中途身体状态更改
+            if (!ClimbArgs[self].isClimb) 
                 orig(self);
         }
 
@@ -243,7 +250,6 @@ namespace MMSC.Characher
 
 
             //长按忽略
-            //TODO : 多人支持
             if ((self.input[0].pckp && self.wantToJump > 0) && !ClimbArgs[self].pressed)
                 ClimbArgs[self].pressed = true;
             if (!(self.input[0].pckp && self.wantToJump > 0))

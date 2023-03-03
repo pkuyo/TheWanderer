@@ -31,6 +31,11 @@ namespace MMSC.Cosmetic
 			
 			this.sizeExponent = 0.6f;
 			this.bumps = 7;
+			if (graphics.RenderAsPup)
+			{
+				bumps = 3;
+			}
+
 			this.scaleX = 0.7f*2;
 			this.graphic = 0;
 			this.numberOfSprites = ((this.colored) ? (this.bumps * 2) : this.bumps);
