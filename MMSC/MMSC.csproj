@@ -100,7 +100,7 @@
     <Compile Include="Characher\ClimbWallFeature.cs" />
     <Compile Include="Characher\FeatureBase.cs" />
     <Compile Include="Characher\ListenLizardFeature.cs" />
-    <Compile Include="Characher\MissionHudFeature.cs" />
+    <Compile Include="Characher\MessionHudFeature.cs" />
     <Compile Include="Characher\ScareLizardFeature.cs" />
     <Compile Include="Characher\WandererGraphics.cs" />
     <Compile Include="Cosmetic\CosmeticBase.cs" />

@@ -9,9 +9,9 @@ using UnityEngine;
 
 namespace MMSC.Characher
 {
-    class HudHook : FeatureBase
+    class MessionHudFeature : FeatureBase
     {
-        public HudHook(ManualLogSource log) : base(log)
+        public MessionHudFeature(ManualLogSource log) : base(log)
         {
            
         }
@@ -19,8 +19,32 @@ namespace MMSC.Characher
         public override void OnModsInit(RainWorld rainWorld)
         {
             On.HUD.HUD.InitSinglePlayerHud += HUD_InitSinglePlayerHud;
+            On.HUD.HUD.Update += HUD_Update;
             On.CreatureCommunities.InfluenceLikeOfPlayer += CreatureCommunities_InfluenceLikeOfPlayer;
-            _log.LogDebug("HudHook Init");
+            _log.LogDebug("WanderMessionFeature Init");
+        }
+
+        private void HUD_Update(On.HUD.HUD.orig_Update orig, HUD.HUD self)
+        {
+            orig(self);
+            if (wandererHud != null)
+                wandererHud.Update();
+        }
+
+       
+
+        private void HUD_InitSinglePlayerHud(On.HUD.HUD.orig_InitSinglePlayerHud orig, HUD.HUD self, RoomCamera cam)
+        {
+            orig(self,cam);
+            
+            //判断是否为the wanderer战役
+            if (self.owner is Player && (self.owner as Player).abstractCreature.world.game.session.characterStats.name.value == "wanderer")
+            {
+                if (wandererHud != null)
+                    wandererHud.Destroy();
+
+                wandererHud = new WandererMessionHud(self);
+            }
         }
 
         private void CreatureCommunities_InfluenceLikeOfPlayer(On.CreatureCommunities.orig_InfluenceLikeOfPlayer orig, CreatureCommunities self, CreatureCommunities.CommunityID commID, int region, int playerNumber, float influence, float interRegionBleed, float interCommunityBleed)
@@ -28,32 +52,87 @@ namespace MMSC.Characher
             orig(self, commID, region, playerNumber, influence, interRegionBleed, interCommunityBleed);
 
             //更新HUD
-            if (self.session.characterStats.name.value == "wanderer" && commID == CreatureCommunities.CommunityID.Lizards && _hud != null)
+            if (wandererHud != null && commID == CreatureCommunities.CommunityID.Lizards)
             {
-                _hud.SetLikeOfPlayer(self.playerOpinions[CreatureCommunities.CommunityID.Lizards.Index - 1, 0, playerNumber]);
+                wandererHud.SetLikeOfPlayer(self.playerOpinions[CreatureCommunities.CommunityID.Lizards.Index - 1, 0, playerNumber]);
             }
         }
 
 
-        private void HUD_InitSinglePlayerHud(On.HUD.HUD.orig_InitSinglePlayerHud orig, HUD.HUD self, RoomCamera cam)
-        {
-            orig(self,cam);
-            
-          
-            if (self.owner is Player && (self.owner as Player).abstractCreature.world.game.session.characterStats.name.value == "wanderer")
-            {
-                if (_hud != null)
-                    _hud.slatedForDeletion = true;
-
-                var creature = (self.owner as Player).abstractCreature;
-                var hudpart = new MissionHud(self, creature.world.game.session.creatureCommunities.playerOpinions[CreatureCommunities.CommunityID.Lizards.Index - 1, 0, (self.owner as Player).playerState.playerNumber], _log);
-                _hud = hudpart;
-                self.AddPart(hudpart);
-            }
-        }
-
-        MissionHud _hud;
+        WandererMessionHud wandererHud;
     }
+
+    class WandererMessionHud
+    {
+        public WandererMessionHud(HUD.HUD owner)
+        {
+            this.owner = owner;
+
+            var creature = (owner.owner as Player).abstractCreature;
+            var hudpart = new MissionHud(owner, creature.world.game.session.creatureCommunities.playerOpinions[CreatureCommunities.CommunityID.Lizards.Index - 1, 0, (owner.owner as Player).playerState.playerNumber],null);
+            _hud = hudpart;
+            owner.AddPart(hudpart);
+        }
+
+        public void Update()
+        {
+            if (owner == null)
+                return;
+            if (!(owner.owner is Player))
+            {
+                Destroy();
+                return;
+            }
+           
+            var room = (owner.owner as Player).room;
+            if (room == null)
+                return;
+
+            //爬墙教程
+            if (!ClimbWallTurtorial && room.roomSettings.name == "SB_GOR01")
+            {
+                ClimbWallTurtorial = true;
+                room.AddObject(new WandererClimbTurtorial(room));
+            }
+            //惊吓蜥蜴教程
+            else if (!ScareTurtorial &&  room.roomSettings.name == "SB_H03")
+            {
+                bool hasLizard = false;
+                foreach (var creature in room.abstractRoom.creatures)
+                {
+                    if (creature.realizedCreature is Lizard)
+                    {
+                        hasLizard = true;
+                        break;
+                    }
+                }
+                if(hasLizard)
+                {
+                    room.AddObject(new WandererScareTurtorial(room));
+                    ScareTurtorial = true;
+                }
+            }
+        }
+
+        public void SetLikeOfPlayer(float like)
+        {
+            _hud.SetLikeOfPlayer(like);
+        }
+
+        public void Destroy()
+        {
+            if (_hud != null)
+                _hud.slatedForDeletion = true;
+            owner = null;
+            _hud = null;
+        }
+
+        bool ClimbWallTurtorial = false;
+        bool ScareTurtorial = false;
+        MissionHud _hud;
+        HUD.HUD owner;
+    }
+
     class MissionHud : HudPart
     {
         public MissionHud(HUD.HUD hud,float aacc, ManualLogSource log) : base(hud)

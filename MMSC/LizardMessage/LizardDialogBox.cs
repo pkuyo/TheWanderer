@@ -9,6 +9,88 @@ using UnityEngine;
 
 namespace MMSC.LizardMessage
 {
+    public class WandererLizardData 
+    {
+        public WandererLizardData(Lizard self)
+        {
+            lizard = self;         
+        }
+        public void Update()
+        {
+            //若房间内存在漫游者则可以聆听
+            var canListen = false;
+            foreach (var player in lizard.room.game.Players)
+                if ((player.realizedCreature as Player).slugcatStats.name.value == "wanderer")
+                    canListen = true;
+            if (!canListen)
+                return;
+
+            //计数器触发
+            if (InstantCounter != 0) InstantCounter--;
+            if (ConstantCounter != 0) ConstantCounter--;
+
+            LizardDialogBox dialog = null;
+
+            //黄蜥蜴无线电通信
+            if (lizard.lizardParams.template == CreatureTemplate.Type.YellowLizard)
+            {
+                if (ConstantCounter == 0)
+                {
+                    dialog = LizardDialogBox.CreateLizardDialog(lizard, new StatePriority());
+                    ConstantCounter = 350 + Random.Range(50, 200);
+                }
+                return;
+            }
+
+            //尝试获取前一次对话框信息
+            StatePriority lastPriority = new StatePriority();
+            if (dialogBox != null)
+                lastPriority = dialogBox.Priority;
+
+
+            //判断需要即时触发的
+            var astate = new StatePriority(lizard.animation);
+            var bstate = new StatePriority(lizard.AI.behavior, true);
+            var instantState = astate > bstate ? astate : bstate;
+            if ((InstantCounter == 0 || instantState > lastPriority) && instantState.priority != -1)
+            {
+                dialog = LizardDialogBox.CreateLizardDialog(lizard, instantState);
+                InstantCounter = 200 + Random.Range(50, 200);
+            }
+            else
+            {
+                //判断通常触发的
+                var constantState = new StatePriority(lizard.AI.behavior, false);
+                if (ConstantCounter == 0)
+                {
+                    dialog = LizardDialogBox.CreateLizardDialog(lizard, constantState);
+                    ConstantCounter = 300 + Random.Range(50, 250);
+                }
+            }
+
+            //更新对话框
+            if (dialog != null)
+            {
+                if (dialogBox != null)
+                {
+                    dialogBox.DeleteDialogBox();
+                }
+                dialogBox = dialog;
+            }
+        }
+
+        public void Destroy()
+        {
+            if (dialogBox != null)
+                dialogBox.DeleteDialogBox();
+        }
+
+        public int InstantCounter = 0;
+        public int ConstantCounter = 0;
+        private LizardDialogBox dialogBox = null;
+        public Lizard lizard;
+    }
+
     class LizardDialogBox : DialogBox
     {
         LizardDialogBox(HUD.HUD hud, RoomCamera camera , Lizard target, string message, StatePriority pri) : base(hud)
@@ -65,11 +147,10 @@ namespace MMSC.LizardMessage
 
         static public void InitDialogBoxStaticData(ManualLogSource log)
         {
-            _data = new Dictionary<Lizard, LizardDialogData>();
             _log = log;
         }
 
-        private static LizardDialogBox CreateLizardDialog(Lizard target, StatePriority priority)
+        public static LizardDialogBox CreateLizardDialog(Lizard target, StatePriority priority)
         {
 
             var message = RandomMessagePicker.GetRandomMessage(target, priority);
@@ -89,74 +170,6 @@ namespace MMSC.LizardMessage
             return null;
         }
 
-        public static void LizardDialogUpdate(Lizard self)
-        {
-            //无蜥蜴个体信息则创建
-            if (!_data.ContainsKey(self))
-                _data.Add(self, new LizardDialogData());
-
-            LizardDialogBox dialog = null;
-
-            //黄蜥蜴无线电通信
-            if (self.lizardParams.template == CreatureTemplate.Type.YellowLizard)
-            {
-                if (_data[self].ConstantCounter == 0)
-                {
-                    dialog = CreateLizardDialog(self, new StatePriority());
-                    _data[self].ConstantCounter = 350 + Random.Range(50, 350);
-                }
-                return;
-            }
-
-            //尝试获取前一次对话框信息
-            StatePriority lastPriority = new StatePriority();
-            if (_data[self].dialogBox != null)
-                lastPriority = _data[self].dialogBox.Priority;
-
-            //计数器触发
-            if (_data[self].InstantCounter != 0) _data[self].InstantCounter--;
-            if (_data[self].ConstantCounter != 0) _data[self].ConstantCounter--;
-
-            //判断需要即时触发的
-            var astate = new StatePriority(self.animation);
-            var bstate = new StatePriority(self.AI.behavior, true);
-            var instantState = astate > bstate ? astate : bstate;
-            if ((_data[self].InstantCounter == 0 || instantState > lastPriority) && instantState.priority != -1)
-            {
-                dialog = CreateLizardDialog(self, instantState);
-                _data[self].InstantCounter = 200 +Random.Range(50,200);
-            }
-            else
-            {
-                //判断通常触发的
-                var constantState = new StatePriority(self.AI.behavior, false);
-                if (_data[self].ConstantCounter == 0)
-                {
-                    dialog = CreateLizardDialog(self, constantState);
-                    _data[self].ConstantCounter = 300+Random.Range(50, 250);
-                }
-            }
-
-            //更新对话框
-            if (dialog != null)
-            {
-                if (_data[self].dialogBox != null)
-                {
-                    _data[self].dialogBox.DeleteDialogBox();
-                }
-                _data[self].dialogBox = dialog;
-            }
-
-        }
-
-        private class LizardDialogData
-        {
-            public int InstantCounter = 0;
-            public int ConstantCounter = 0;
-            public LizardDialogBox dialogBox = null;
-
-        }
-        private static Dictionary<Lizard, LizardDialogData> _data;
         private static ManualLogSource _log;
 
     }

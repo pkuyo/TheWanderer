@@ -15,7 +15,7 @@ namespace MMSC.Characher
 
         public ListenLizardFeature(ManualLogSource log) :base(log)
         {
-            
+            WandererLizards = new Dictionary<Lizard, WandererLizardData>();
         }
 
 
@@ -25,28 +25,32 @@ namespace MMSC.Characher
             StatePriority.InitStatePriority(_log);
             LizardDialogBox.InitDialogBoxStaticData(_log);
 
-            On.LizardAI.Update += LizardAI_Update;
+            On.Lizard.ctor += Lizard_ctor;
+            On.Lizard.Update += Lizard_Update;
+
             _log.LogDebug("ListenLizardFeature Init");
         }
 
-
-        private void LizardAI_Update(On.LizardAI.orig_Update orig, LizardAI self)
+        private void Lizard_Update(On.Lizard.orig_Update orig, Lizard self, bool eu)
         {
-            orig(self);
-            var lizard = self.creature.realizedCreature as Lizard;
+            orig(self,eu);
+            WandererLizards[self].Update();
 
-            //若房间内存在漫游者则可以聆听
-            var canListen = false;
-            foreach (var player in lizard.room.game.Players)
-                if ((player.realizedCreature as Player).slugcatStats.name.value == "wanderer")
-                    canListen = true;
-
-            if(canListen)
-                LizardDialogBox.LizardDialogUpdate(lizard);
         }
 
+        private void Lizard_ctor(On.Lizard.orig_ctor orig, Lizard self, AbstractCreature abstractCreature, World world)
+        {
+            orig(self,abstractCreature,world);
 
+            foreach(var wandererLizard in WandererLizards)
+                if(wandererLizard.Key==null)
+                {
+                    wandererLizard.Value.Destroy();
+                    WandererLizards.Remove(wandererLizard.Key);
+                }
 
-
+            WandererLizards.Add(self, new WandererLizardData(self));
+        }
+        Dictionary<Lizard,WandererLizardData> WandererLizards;
     }
 }

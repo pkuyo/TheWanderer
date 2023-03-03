@@ -20,7 +20,7 @@ namespace MMSC
             _features.Add(new WandererGraphics(Logger));
             _features.Add(new ScareLizardFeature(Logger));
             _features.Add(new LizardRelationFeature(Logger));
-            _features.Add(new HudHook(Logger));
+            _features.Add(new MessionHudFeature(Logger));
 
             _wandererOptions = new WandererOptions(Logger);
 
