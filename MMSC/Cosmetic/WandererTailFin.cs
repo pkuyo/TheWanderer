@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 
-namespace MMSC.Cosmetic
+namespace Pkuyo.Wanderer.Cosmetic
 {
 	public class WandererTailFin : CosmeticBase
 	{

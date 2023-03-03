@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-namespace MMSC.LizardMessage
+namespace Pkuyo.Wanderer.LizardMessage
 {
     static class RandomMessagePicker
     {
@@ -25,9 +25,9 @@ namespace MMSC.LizardMessage
             //TODO: 动态语言调整
             string path;
             if(rainWorld.inGameTranslator.currentLanguage==InGameTranslator.LanguageID.Chinese)
-                path = AssetManager.ResolveFilePath("text/mmsc/lizard_cn.json");
+                path = AssetManager.ResolveFilePath("text/Pkuyo.Wanderer/lizard_cn.json");
             else
-                path = AssetManager.ResolveFilePath("text/mmsc/lizard_en.json");
+                path = AssetManager.ResolveFilePath("text/Pkuyo.Wanderer/lizard_en.json");
 
             FileStream fileStream = new FileStream(path, FileMode.Open);
 

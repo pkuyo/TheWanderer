@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using BepInEx;
-using MMSC.Characher;
-using MMSC.Options;
+using Pkuyo.Wanderer.Characher;
+using Pkuyo.Wanderer.Options;
 
-namespace MMSC
+namespace Pkuyo.Wanderer
 {
     [BepInPlugin("pkuyo.thewanderer", "The Wanderer", "1.0.0")]
     public class WandererCharacterMod : BaseUnityPlugin
@@ -21,7 +21,7 @@ namespace MMSC
             _features.Add(new ScareLizardFeature(Logger));
             _features.Add(new LizardRelationFeature(Logger));
             _features.Add(new MessionHudFeature(Logger));
-
+            _features.Add(new WandererRoomFeature(Logger));
             _wandererOptions = new WandererOptions(Logger);
 
             On.RainWorld.OnModsInit += RainWorld_OnModsInit;

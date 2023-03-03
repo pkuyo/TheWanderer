@@ -7,7 +7,7 @@
     <ProjectGuid>{3F4FEB46-3F73-40C9-A1A5-47D599A84E2B}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>MMSC</RootNamespace>
+    <RootNamespace>Pkuyo.Wanderer</RootNamespace>
     <AssemblyName>TheWanderer</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -96,6 +96,7 @@
   <ItemGroup>
     <Compile Include="Characher\LizardRelationFeature.cs" />
     <Compile Include="Characher\WandererTurtorial.cs" />
+    <Compile Include="Characher\WandererRoomFeature.cs" />
     <Compile Include="ClimbWall\ClimbSlugHand.cs" />
     <Compile Include="Characher\ClimbWallFeature.cs" />
     <Compile Include="Characher\FeatureBase.cs" />

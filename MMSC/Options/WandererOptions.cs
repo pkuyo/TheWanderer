@@ -1,12 +1,12 @@
 ﻿using BepInEx.Logging;
-using MMSC.Characher;
+using Pkuyo.Wanderer.Characher;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MMSC.Options
+namespace Pkuyo.Wanderer.Options
 {
     class WandererOptions : OptionInterface 
     {

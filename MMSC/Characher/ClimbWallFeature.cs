@@ -9,7 +9,7 @@ using RWCustom;
 using BepInEx.Logging;
 using HarmonyLib;
 
-namespace MMSC.Characher
+namespace Pkuyo.Wanderer.Characher
 {
     class ClimbWallFeature : FeatureBase
     {

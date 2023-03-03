@@ -6,9 +6,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using BepInEx.Logging;
-using MMSC.LizardMessage;
+using Pkuyo.Wanderer.LizardMessage;
 
-namespace MMSC.Characher
+namespace Pkuyo.Wanderer.Characher
 {
     class ListenLizardFeature : FeatureBase
     {

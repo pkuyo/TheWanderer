@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using SlugBase.DataTypes;
 using UnityEngine;
 
-namespace MMSC.Cosmetic
+namespace Pkuyo.Wanderer.Cosmetic
 {
     public class CosmeticBase
     {

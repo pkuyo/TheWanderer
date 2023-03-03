@@ -1,5 +1,5 @@
 ﻿using BepInEx.Logging;
-using MMSC.Cosmetic;
+using Pkuyo.Wanderer.Cosmetic;
 using MonoMod.Cil;
 using RWCustom;
 using System;
@@ -9,7 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 
-namespace MMSC.Characher
+namespace Pkuyo.Wanderer.Characher
 {
     class WandererGraphics : FeatureBase
 	{

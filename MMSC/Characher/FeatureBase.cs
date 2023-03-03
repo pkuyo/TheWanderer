@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MMSC.Characher
+namespace Pkuyo.Wanderer.Characher
 {
     class FeatureBase
     {

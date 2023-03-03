@@ -7,7 +7,7 @@ using UnityEngine;
 
 
 
-namespace MMSC.LizardMessage
+namespace Pkuyo.Wanderer.LizardMessage
 {
     public class WandererLizard 
     {
@@ -239,7 +239,7 @@ namespace MMSC.LizardMessage
 
             {
                 //打开文件-即时触发行为
-                var path = AssetManager.ResolveFilePath("text/mmsc/shortlist.json");
+                var path = AssetManager.ResolveFilePath("text/Pkuyo.Wanderer/shortlist.json");
                 FileStream fileStream = new FileStream(path, FileMode.Open);
                 //反序列化Json
                 byte[] a = new byte[fileStream.Length];
@@ -271,7 +271,7 @@ namespace MMSC.LizardMessage
 
             {
                 //打开文件-长期触发行为
-                var path = AssetManager.ResolveFilePath("text/mmsc/longlist.json");
+                var path = AssetManager.ResolveFilePath("text/Pkuyo.Wanderer/longlist.json");
                 FileStream fileStream = new FileStream(path, FileMode.Open);
                 //反序列化Json
                 byte[] a = new byte[fileStream.Length];
