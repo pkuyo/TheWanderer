@@ -269,14 +269,6 @@ namespace Pkuyo.Wanderer.Characher
                 CancelWallClimb(self);
             }
         }
-
-        private bool WallCheck(Player self,Vector2 pos)
-        {
-            if (true)
-                return self.room.aimap.getAItile(pos).acc == AItile.Accessibility.Wall;
-            else
-                return self.room.GetTile(pos).wallbehind;
-        }
  
         private ClimbSlugHandGraphics _climbSlugHandGraphics;
         public static Player.BodyModeIndex ClimbBackWall;
