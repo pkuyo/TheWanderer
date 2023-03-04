@@ -34,7 +34,7 @@ namespace Pkuyo.Wanderer.LizardMessage
             //反序列化Json
             byte[] a = new byte[fileStream.Length];
             fileStream.Read(a, 0, (int)fileStream.Length);
-            var all = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, List<string>>>>(Encoding.Unicode.GetString(a));
+            var all = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, List<string>>>>(Encoding.UTF8.GetString(a));
             foreach (var creature in all)
             {
                 CreatureTemplate.Type type = (CreatureTemplate.Type)ExtEnumBase.Parse(typeof(CreatureTemplate.Type), creature.Key,false);
@@ -90,31 +90,27 @@ namespace Pkuyo.Wanderer.LizardMessage
         private static string GetRandomMessage(Lizard target, Lizard.Animation anim)
         {
             if (!animMessage[target.abstractCreature.creatureTemplate.type].ContainsKey(anim))
-                return anim.ToString() + " " + Random.Range(0, 4);
+                return null;
 
-            var messageList = animMessage[target.abstractCreature.creatureTemplate.type][anim];
-
-            ////////////////////DEBUG///////////////////
+            List<string> messageList = animMessage[target.abstractCreature.creatureTemplate.type][anim];
             if (messageList.Count == 0)
-                return anim.ToString() + " " + Random.Range(0, 4);
-            ////////////////////////////////////////////
+                messageList = animMessage[CreatureTemplate.Type.PinkLizard][anim];
 
             if (messageList.Count == 0)
                 return null;
             else
                 return messageList[Random.Range(0, messageList.Count - 1)];
         }
+
         private static string GetRandomMessage(Lizard target, LizardAI.Behavior behavior)
         {
             if (!behaviorMessage[target.abstractCreature.creatureTemplate.type].ContainsKey(behavior))
-                return behavior.ToString() + " " + Random.Range(0, 4);
+                return null;
 
             var messageList = behaviorMessage[target.abstractCreature.creatureTemplate.type][behavior];
 
-            ////////////////////DEBUG///////////////////
             if (messageList.Count == 0)
-                return behavior.ToString() + " " + Random.Range(0, 4);
-            ////////////////////////////////////////////
+                messageList = behaviorMessage[CreatureTemplate.Type.PinkLizard][behavior];
 
             if (messageList.Count == 0)
                 return null;

@@ -1,0 +1,13 @@
+{
+    "Idle": 1,
+    "Hunt": 2,
+    "Flee": 1,
+    "EscapeRain": 3,
+    "ReturnPrey": 3,
+    "-":0,
+    "Injured": 3,
+    "Fighting ": 2,
+    "Frustrated": 2,
+    "ActingOutMission ": 1,
+    "Lurk": 2
+}

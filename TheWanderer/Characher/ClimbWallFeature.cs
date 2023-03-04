@@ -47,7 +47,7 @@ namespace Pkuyo.Wanderer.Characher
                 //设置状态
                 if ((self.bodyMode == Player.BodyModeIndex.Default
                     || self.bodyMode == Player.BodyModeIndex.WallClimb
-                    || self.bodyMode == Player.BodyModeIndex.ClimbingOnBeam))
+                    || self.bodyMode == Player.BodyModeIndex.ClimbingOnBeam) || self.bodyMode == ClimbBackWall)
                 {
                     self.bodyMode = ClimbBackWall;
                     //防止卡杆子
@@ -58,8 +58,8 @@ namespace Pkuyo.Wanderer.Characher
                 else
                 {
                     //爬杆钻管道等优先级高的操作 直接取消爬墙
-                    CancelWallClimb(self);
                     _log.LogDebug("Cancel climb cause by " + self.bodyMode.ToString());
+                    CancelWallClimb(self);
                     return;
                 }
             }

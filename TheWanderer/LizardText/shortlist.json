@@ -1,0 +1,18 @@
+{
+    "EscapeRain": 7,
+    "ReturnPrey": 5,
+    "Injured": 7,
+    "Frustrated": 1,
+    "":-1,
+    "HearSound ": 2,
+    "InvestigateSound":2,
+    "PreyReSpotted": 3,
+    "PreySpotted": 3,
+    "FightingStance": 1,
+    "ThreatSpotted": 6,
+    "ThreatReSpotted": 6,
+    "ShootTongue": 8,
+    "Spit": 8,
+    "Lounge": 8,
+    "ShakePrey ": 4
+}

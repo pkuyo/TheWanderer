@@ -118,6 +118,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+    <None Include="LizardText\lizard_cn.json" />
+    <None Include="LizardText\lizard_en.json" />
+    <None Include="LizardText\longlist.json" />
+    <None Include="LizardText\shortlist.json" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
