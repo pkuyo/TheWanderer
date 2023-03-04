@@ -25,9 +25,9 @@ namespace Pkuyo.Wanderer.LizardMessage
             //TODO: 动态语言调整
             string path;
             if(rainWorld.inGameTranslator.currentLanguage==InGameTranslator.LanguageID.Chinese)
-                path = AssetManager.ResolveFilePath("text/Pkuyo.Wanderer/lizard_cn.json");
+                path = AssetManager.ResolveFilePath("text/wanderer/lizard_cn.json");
             else
-                path = AssetManager.ResolveFilePath("text/Pkuyo.Wanderer/lizard_en.json");
+                path = AssetManager.ResolveFilePath("text/wanderer/lizard_en.json");
 
             FileStream fileStream = new FileStream(path, FileMode.Open);
 

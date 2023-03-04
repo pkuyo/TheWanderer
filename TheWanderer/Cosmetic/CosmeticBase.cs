@@ -67,7 +67,7 @@ namespace Pkuyo.Wanderer.Cosmetic
         public int numberOfSprites;
         public PlayerGraphics iGraphics;
 
-        PlayerColor EyeColor = new PlayerColor("Eyes");
-        PlayerColor BodyColor = new PlayerColor("Body");
+        static PlayerColor EyeColor = new PlayerColor("Eyes");
+        static PlayerColor BodyColor = new PlayerColor("Body");
     }
 }
