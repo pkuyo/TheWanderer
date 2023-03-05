@@ -81,7 +81,7 @@ namespace Pkuyo.Wanderer.LizardMessage
                 return null;
             }
             //如果是朋友则尝试查找朋友对话
-            if (target.AI.friendTracker.friend != null || target.AI.friendTracker.followClosestFriend == true || Message[target.abstractCreature.creatureTemplate.type].ContainsKey(value + "Friend"))
+            if (target.AI.friendTracker.friend != null && (target.AI.friendTracker.friend is Player) && target.AI.friendTracker.followClosestFriend == true && Message[target.abstractCreature.creatureTemplate.type].ContainsKey(value + "Friend"))
                 value += "Friend";
 
             var messageList = Message[target.abstractCreature.creatureTemplate.type][value];

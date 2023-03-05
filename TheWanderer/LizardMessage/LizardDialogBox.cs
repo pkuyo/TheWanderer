@@ -55,7 +55,7 @@ namespace Pkuyo.Wanderer.LizardMessage
             if ((InstantCounter == 0 || instantState > lastPriority) && instantState.priority != -1)
             {
                 dialog = LizardDialogBox.CreateLizardDialog(lizard, instantState);
-                InstantCounter = 150 + Random.Range(25, 100);
+                InstantCounter = 150 + Random.Range(25, 200);
             }
             else
             {
@@ -64,7 +64,7 @@ namespace Pkuyo.Wanderer.LizardMessage
                 if (ConstantCounter == 0)
                 {
                     dialog = LizardDialogBox.CreateLizardDialog(lizard, constantState);
-                    ConstantCounter = 150 + Random.Range(50, 100);
+                    ConstantCounter = 250 + Random.Range(50, 250);
                 }
             }
 
