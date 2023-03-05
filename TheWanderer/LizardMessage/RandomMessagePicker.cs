@@ -75,16 +75,22 @@ namespace Pkuyo.Wanderer.LizardMessage
         private static string GetRandomMessage(Lizard target, string value)
         {
             //无状态
-            if (!Message[target.abstractCreature.creatureTemplate.type].ContainsKey(value))
+            CreatureTemplate.Type type = target.abstractCreature.creatureTemplate.type;
+
+            //其他种类蜥蜴
+            if (!Message.ContainsKey(type))
+                type = CreatureTemplate.Type.PinkLizard;
+
+            if (!Message[type].ContainsKey(value))
             {
                 _log.LogError("Can't get message use " + value);
                 return null;
             }
             //如果是朋友则尝试查找朋友对话
-            if (target.AI.friendTracker.friend != null && (target.AI.friendTracker.friend is Player) && target.AI.friendTracker.followClosestFriend == true && Message[target.abstractCreature.creatureTemplate.type].ContainsKey(value + "Friend"))
+            if (target.AI.friendTracker.friend != null && (target.AI.friendTracker.friend is Player) && target.AI.friendTracker.followClosestFriend == true && Message[type].ContainsKey(value + "Friend"))
                 value += "Friend";
 
-            var messageList = Message[target.abstractCreature.creatureTemplate.type][value];
+            var messageList = Message[type][value];
             if (messageList.Count == 0)
                 messageList = Message[CreatureTemplate.Type.PinkLizard][value];
 

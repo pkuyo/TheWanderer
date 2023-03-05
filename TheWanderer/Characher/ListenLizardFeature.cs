@@ -36,6 +36,7 @@ namespace Pkuyo.Wanderer.Characher
             orig(self,eu);
             WandererLizards[self].Update();
 
+
         }
 
         private void Lizard_ctor(On.Lizard.orig_ctor orig, Lizard self, AbstractCreature abstractCreature, World world)

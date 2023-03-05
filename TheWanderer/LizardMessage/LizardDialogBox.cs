@@ -15,15 +15,18 @@ namespace Pkuyo.Wanderer.LizardMessage
         {
             lizard = self;         
         }
-        public void Update()
+        public bool Update()
         {
             //若房间内存在漫游者则可以聆听
             var canListen = false;
+            if(lizard.room==null)
+               return false;
+            
             foreach (var player in lizard.room.game.Players)
                 if ((player.realizedCreature as Player).slugcatStats.name.value == "wanderer")
                     canListen = true;
             if (!canListen)
-                return;
+                return true;
 
             //计数器触发
             if (InstantCounter != 0) InstantCounter--;
@@ -39,7 +42,7 @@ namespace Pkuyo.Wanderer.LizardMessage
                     dialog = LizardDialogBox.CreateLizardDialog(lizard, new StatePriority());
                     ConstantCounter = 350 + Random.Range(50, 200);
                 }
-                return;
+                return true;
             }
 
             //尝试获取前一次对话框信息
@@ -77,6 +80,7 @@ namespace Pkuyo.Wanderer.LizardMessage
                 }
                 dialogBox = dialog;
             }
+            return true;
         }
 
         public void Destroy()
@@ -89,6 +93,8 @@ namespace Pkuyo.Wanderer.LizardMessage
         public int ConstantCounter = 0;
         private LizardDialogBox dialogBox = null;
         public Lizard lizard;
+
+        public bool needDelete=false;
     }
 
     class LizardDialogBox : DialogBox
