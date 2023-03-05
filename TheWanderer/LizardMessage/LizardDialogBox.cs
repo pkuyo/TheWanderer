@@ -64,7 +64,7 @@ namespace Pkuyo.Wanderer.LizardMessage
                 if (ConstantCounter == 0)
                 {
                     dialog = LizardDialogBox.CreateLizardDialog(lizard, constantState);
-                    ConstantCounter = 200 + Random.Range(50, 150);
+                    ConstantCounter = 150 + Random.Range(50, 100);
                 }
             }
 

@@ -18,8 +18,7 @@ namespace Pkuyo.Wanderer.LizardMessage
             _log = log;
 
             //消息记录
-            behaviorMessage = new Dictionary<CreatureTemplate.Type, Dictionary<LizardAI.Behavior, List<string>>>();
-            animMessage = new Dictionary<CreatureTemplate.Type, Dictionary<Lizard.Animation, List<string>>>();
+            Message = new Dictionary<CreatureTemplate.Type, Dictionary<string, List<string>>>();
 
             //选择语言
             //TODO: 动态语言调整
@@ -38,26 +37,11 @@ namespace Pkuyo.Wanderer.LizardMessage
             foreach (var creature in all)
             {
                 CreatureTemplate.Type type = (CreatureTemplate.Type)ExtEnumBase.Parse(typeof(CreatureTemplate.Type), creature.Key,false);
+                Message.Add(type, new Dictionary<string, List<string>>());
 
-                behaviorMessage.Add(type, new Dictionary<LizardAI.Behavior, List<string>>());
-                animMessage.Add(type, new Dictionary<Lizard.Animation, List<string>>());
-
-                //前十个是行为，之后则为动画
-                int index = 0;
                 foreach (var messages in creature.Value)
-                {
-                    if(index<10)
-                    {
-                        LizardAI.Behavior behavior = (LizardAI.Behavior)ExtEnumBase.Parse(typeof(LizardAI.Behavior), messages.Key,false);
-                        behaviorMessage[type].Add(behavior, messages.Value);
-                    }
-                    else
-                    {
-                        Lizard.Animation anim = (Lizard.Animation)ExtEnumBase.Parse(typeof(Lizard.Animation), messages.Key,false);
-                        animMessage[type].Add(anim, messages.Value);
-                    }
-                    index++;
-                }
+                    Message[type].Add(messages.Key, messages.Value);
+                
             }
             _log.LogDebug("Loaded Lizard Messages");
             fileStream.Close();
@@ -82,19 +66,27 @@ namespace Pkuyo.Wanderer.LizardMessage
                 return message;
             }
             else if (priority._anim != null)
-                return GetRandomMessage(target, priority._anim);
+                return GetRandomMessage(target, priority._anim.value);
             else
-                return GetRandomMessage(target, priority._behavior);
+                return GetRandomMessage(target, priority._behavior.value);
         }
 
-        private static string GetRandomMessage(Lizard target, Lizard.Animation anim)
-        {
-            if (!animMessage[target.abstractCreature.creatureTemplate.type].ContainsKey(anim))
-                return null;
 
-            List<string> messageList = animMessage[target.abstractCreature.creatureTemplate.type][anim];
+        private static string GetRandomMessage(Lizard target, string value)
+        {
+            //无状态
+            if (!Message[target.abstractCreature.creatureTemplate.type].ContainsKey(value))
+            {
+                _log.LogError("Can't get message use " + value);
+                return null;
+            }
+            //如果是朋友则尝试查找朋友对话
+            if (target.AI.friendTracker.friend != null || target.AI.friendTracker.followClosestFriend == true || Message[target.abstractCreature.creatureTemplate.type].ContainsKey(value + "Friend"))
+                value += "Friend";
+
+            var messageList = Message[target.abstractCreature.creatureTemplate.type][value];
             if (messageList.Count == 0)
-                messageList = animMessage[CreatureTemplate.Type.PinkLizard][anim];
+                messageList = Message[CreatureTemplate.Type.PinkLizard][value];
 
             if (messageList.Count == 0)
                 return null;
@@ -102,24 +94,7 @@ namespace Pkuyo.Wanderer.LizardMessage
                 return messageList[Random.Range(0, messageList.Count - 1)];
         }
 
-        private static string GetRandomMessage(Lizard target, LizardAI.Behavior behavior)
-        {
-            if (!behaviorMessage[target.abstractCreature.creatureTemplate.type].ContainsKey(behavior))
-                return null;
-
-            var messageList = behaviorMessage[target.abstractCreature.creatureTemplate.type][behavior];
-
-            if (messageList.Count == 0)
-                messageList = behaviorMessage[CreatureTemplate.Type.PinkLizard][behavior];
-
-            if (messageList.Count == 0)
-                return null;
-            else
-                return messageList[Random.Range(0, messageList.Count - 1)];
-        }
-
-        static private Dictionary<CreatureTemplate.Type, Dictionary<LizardAI.Behavior, List<string>>> behaviorMessage;
-        static private Dictionary<CreatureTemplate.Type, Dictionary<Lizard.Animation, List<string>>> animMessage;
+        static private Dictionary<CreatureTemplate.Type, Dictionary<string, List<string>>> Message;
         static private ManualLogSource _log;
         static private string YellowLizardText = "!@#$%^&*+-";
     }
