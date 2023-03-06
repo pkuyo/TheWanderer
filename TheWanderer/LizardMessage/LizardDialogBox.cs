@@ -1,11 +1,11 @@
 ﻿using BepInEx.Logging;
 using HUD;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using UnityEngine;
-
-
+using Random = UnityEngine.Random;
 
 namespace Pkuyo.Wanderer.LizardMessage
 {
@@ -13,12 +13,16 @@ namespace Pkuyo.Wanderer.LizardMessage
     {
         public WandererLizard(Lizard self)
         {
-            lizard = self;         
+            lizardRef = new WeakReference<Lizard>(self);         
         }
         public bool Update()
         {
             //若房间内存在漫游者则可以聆听
             var canListen = false;
+            Lizard lizard = null;
+            if (!lizardRef.TryGetTarget(out lizard))
+                return false;
+
             if(lizard.room==null)
                return false;
             
@@ -92,7 +96,7 @@ namespace Pkuyo.Wanderer.LizardMessage
         public int InstantCounter = 0;
         public int ConstantCounter = 0;
         private LizardDialogBox dialogBox = null;
-        public Lizard lizard;
+        public WeakReference<Lizard> lizardRef;
 
         public bool needDelete=false;
     }
@@ -140,6 +144,7 @@ namespace Pkuyo.Wanderer.LizardMessage
         public void DeleteDialogBox()
         {
             this.messages.Clear();
+            this.slatedForDeletion = true;
         }
 
 

@@ -4,6 +4,7 @@ using RWCustom;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -21,33 +22,26 @@ namespace Pkuyo.Wanderer.Characher
         {
             On.PlayerGraphics.ctor += PlayerGraphics_ctor; ;
             On.SlugcatHand.EngageInMovement += SlugcatHand_EngageInMovement;
-            On.Player.Destroy += Player_Destroy;
         }
 
-        private void Player_Destroy(On.Player.orig_Destroy orig, Player self)
-        {
-            for (int i = 0; i < 2; i++)
-            {
-                _HandOwner.Remove((self.graphicsModule as PlayerGraphics).hands[i]);
-                _HandData.Remove((self.graphicsModule as PlayerGraphics).hands[i]);
-            }
-           orig(self);
-        }
+
+
 
         private void PlayerGraphics_ctor(On.PlayerGraphics.orig_ctor orig, PlayerGraphics self, PhysicalObject ow)
         {
             orig(self, ow);
+            var player = self.owner as Player;
+            PlayerBackClimb climb;
+            if ( !ClimbWallFeature.ClimbArg.TryGetValue(player, out climb))
+                return;
+
             for (int i = 0; i < 2; i++)
             {
-                if (!_HandOwner.ContainsKey(((PlayerGraphics)self).hands[i]))
+                if (self.hands[i]!=null && !_HandOwner.TryGetValue(self.hands[i], out player))
                 {
-                    _HandOwner.Add(((PlayerGraphics)self).hands[i], self.owner as Player);
-                    _HandData.Add(((PlayerGraphics)self).hands[i], new ClimbSlugHand((i % 2 == 0) ? new Vector2(1, 1) : new Vector2(-1, -1)));
-                }
-                else 
-                {
-                    _HandOwner[((PlayerGraphics)self).hands[i]] = self.owner as Player;
-                    _HandData[((PlayerGraphics)self).hands[i]]= new ClimbSlugHand((i % 2 == 0) ? new Vector2(1, 1) : new Vector2(-1, -1));
+                    player = self.owner as Player;
+                    _HandOwner.Add(self.hands[i], player);
+                    _HandData.Add(self.hands[i], new ClimbSlugHand((i % 2 == 0) ? new Vector2(1, 1) : new Vector2(-1, -1), ClimbWallFeature.ClimbArg[player]));
                 }
             }
         }
@@ -70,37 +64,46 @@ namespace Pkuyo.Wanderer.Characher
         private bool SlugcatHand_EngageInMovement(On.SlugcatHand.orig_EngageInMovement orig, SlugcatHand self)
         {
             var re = orig(self);
-            var player = _HandOwner[self];
-            if (player.bodyMode == ClimbWallFeature.ClimbBackWall)
+            Player player;
+            if (_HandOwner.TryGetValue(self, out player) && player != null)
             {
-                var data = _HandData[self];
-                var posDir = Custom.DirVec(player.bodyChunks[1].pos, player.bodyChunks[0].pos);
-                var velDir = player.bodyChunks[1].vel.normalized;
-
-                //超出手部范围
-                if (!Custom.DistLess(self.pos,data.LastGrapPos,StepLength))
+                if (player.bodyMode == ClimbWallFeature.ClimbBackWall)
                 {
-                    
-                    data.LastGrapPos = self.pos;
+                    ClimbSlugHand data;
+                    if(!_HandData.TryGetValue(self,out data))
+                        return re;
+                    var posDir = Custom.DirVec(player.bodyChunks[1].pos, player.bodyChunks[0].pos);
+                    var velDir = player.bodyChunks[1].vel.normalized;
 
-                    //有地面的话手接触地面
-                    var soildPos = CheckHasSoild(_HandOwner[self], self.connection.pos + velDir * (StepLength - 2));
-                    if (soildPos != -2)
+                    //超出手部范围
+                    if (!Custom.DistLess(self.pos, data.LastGrapPos, StepLength))
                     {
-                        self.absoluteHuntPos = self.connection.pos + velDir * (StepLength - 2) + Vector2.Perpendicular(posDir).normalized * HandWidth * -soildPos;
-                        self.FindGrip(player.room, self.absoluteHuntPos, self.absoluteHuntPos, 24f, self.absoluteHuntPos, 2, 2, false);
-                    }
-                    else
-                    {
-                        self.absoluteHuntPos = self.connection.pos + velDir * (StepLength - 2) + Vector2.Perpendicular(posDir).normalized * HandWidth * data.VerDir;
-                        self.FindGrip(player.room, self.absoluteHuntPos, self.absoluteHuntPos, 24f, self.absoluteHuntPos, 2, 2, true);
-                    }
 
-                    //换点 减速
-                    ClimbWallFeature.ClimbArgs[player].slowDownCount += 5;
-                    ClimbWallFeature.ClimbArgs[player].slowDownCount = Mathf.Min(ClimbWallFeature.ClimbArgs[player].slowDownCount, 9);
+                        data.LastGrapPos = self.pos;
+
+                        //有地面的话手接触地面
+                        var soildPos = CheckHasSoild(player, self.connection.pos + velDir * (StepLength - 2));
+                        if (soildPos != -2)
+                        {
+                            self.absoluteHuntPos = self.connection.pos + velDir * (StepLength - 2) + Vector2.Perpendicular(posDir).normalized * HandWidth * -soildPos;
+                            self.FindGrip(player.room, self.absoluteHuntPos, self.absoluteHuntPos, 24f, self.absoluteHuntPos, 2, 2, false);
+                        }
+                        else
+                        {
+                            self.absoluteHuntPos = self.connection.pos + velDir * (StepLength - 2) + Vector2.Perpendicular(posDir).normalized * HandWidth * data.VerDir;
+                            self.FindGrip(player.room, self.absoluteHuntPos, self.absoluteHuntPos, 24f, self.absoluteHuntPos, 2, 2, true);
+                        }
+
+                        //换点 减速
+                        PlayerBackClimb backwall = null;
+                        if (data.playerBackClimbRef.TryGetTarget(out backwall))
+                        {
+                            backwall.SlowDownCount += 5;
+                            backwall.SlowDownCount = Mathf.Min(backwall.SlowDownCount, 9);
+                        }
+                    }
+                    return false;
                 }
-                return false;
             }
             return re;
             //更换手部落点 
@@ -112,17 +115,23 @@ namespace Pkuyo.Wanderer.Characher
         private readonly float StepLength = 30.0f;
         private readonly float HandWidth = 10.0f;
 
-        private static Dictionary<SlugcatHand, Player> _HandOwner = new Dictionary<SlugcatHand, Player>();
-        private static Dictionary<SlugcatHand, ClimbSlugHand> _HandData = new Dictionary<SlugcatHand, ClimbSlugHand>();
+        
+
+        private static ConditionalWeakTable<SlugcatHand, Player> _HandOwner = new ConditionalWeakTable<SlugcatHand, Player>();
+        private static ConditionalWeakTable<SlugcatHand, ClimbSlugHand> _HandData = new ConditionalWeakTable<SlugcatHand, ClimbSlugHand>();
     }
     public class ClimbSlugHand
     {
         public Vector2 VerDir;
         public Vector2 LastGrapPos;
-        public ClimbSlugHand(Vector2 vector)
+
+        public WeakReference<PlayerBackClimb> playerBackClimbRef;
+
+        public ClimbSlugHand(Vector2 vector, PlayerBackClimb player)
         {
             VerDir = vector;
             LastGrapPos = Vector2.zero;
+            playerBackClimbRef = new WeakReference<PlayerBackClimb>(player);
         }
     }
 }

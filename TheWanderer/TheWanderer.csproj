@@ -103,7 +103,7 @@
     <Compile Include="Characher\ListenLizardFeature.cs" />
     <Compile Include="Characher\MessionHudFeature.cs" />
     <Compile Include="Characher\ScareLizardFeature.cs" />
-    <Compile Include="Characher\WandererGraphics.cs" />
+    <Compile Include="Characher\WandererGraphicsFeature.cs" />
     <Compile Include="Cosmetic\CosmeticBase.cs" />
     <Compile Include="Cosmetic\WandererBumpHawk.cs" />
     <Compile Include="Cosmetic\WandererLongHair.cs" />

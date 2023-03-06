@@ -10,6 +10,11 @@
             "\u6CA1\u6709\u730E\u7269\u2026\u2026",
             "\u4F11\u606F\u2026\u2026"
         ],
+        "IdleFriend":[
+            "\u670b\u53cb\u002e\u002e\u002e",
+            "\u8ddf\u7740\u002e\u002e\u002e",
+            "\u4e3b\u4eba\u002e\u002e\u002e"
+        ],
         "Hunt": [
             "\u98DF\u7269\uFF01",
             "\u8FFD\uFF01",
@@ -103,6 +108,7 @@
     "GreenLizard": {
         "Travelling":[],
         "Idle": [],
+        "IdleFriend":[],
         "Hunt": [],
         "Flee": [],
         "EscapeRain": [],
@@ -128,6 +134,7 @@
     "BlueLizard": {
         "Travelling":[],
         "Idle": [],
+        "IdleFriend":[],
         "Hunt": [],
         "Flee": [],
         "EscapeRain": [],
@@ -153,6 +160,7 @@
     "YellowLizard": {
         "Travelling":[],
         "Idle": [],
+        "IdleFriend":[],
         "Hunt": [],
         "Flee": [],
         "EscapeRain": [],
@@ -178,6 +186,7 @@
     "WhiteLizard": {
         "Travelling":[],
         "Idle": [],
+        "IdleFriend":[],
         "Hunt": [],
         "Flee": [],
         "EscapeRain": [],
@@ -203,6 +212,7 @@
     "RedLizard": {
         "Travelling":[],
         "Idle": [],
+        "IdleFriend":[],
         "Hunt": [],
         "Flee": [],
         "EscapeRain": [],
@@ -228,6 +238,7 @@
     "BlackLizard": {
         "Travelling":[],
         "Idle": [],
+        "IdleFriend":[],
         "Hunt": [],
         "Flee": [],
         "EscapeRain": [],
@@ -253,6 +264,7 @@
     "Salamander": {
         "Travelling":[],
         "Idle": [],
+        "IdleFriend":[],
         "Hunt": [],
         "Flee": [],
         "EscapeRain": [],
@@ -278,6 +290,7 @@
     "CyanLizard": {
         "Travelling":[],
         "Idle": [],
+        "IdleFriend":[],
         "Hunt": [],
         "Flee": [],
         "EscapeRain": [],
@@ -303,6 +316,7 @@
     "SpitLizard": {
         "Travelling":[],
         "Idle": [],
+        "IdleFriend":[],
         "Hunt": [],
         "Flee": [],
         "EscapeRain": [],
@@ -328,6 +342,7 @@
     "EelLizard": {
         "Travelling":[],
         "Idle": [],
+        "IdleFriend":[],
         "Hunt": [],
         "Flee": [],
         "EscapeRain": [],
@@ -353,6 +368,7 @@
     "ZoopLizard": {
         "Travelling":[],
         "Idle": [],
+        "IdleFriend":[],
         "Hunt": [],
         "Flee": [],
         "EscapeRain": [],

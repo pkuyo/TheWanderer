@@ -40,7 +40,11 @@ namespace Pkuyo.Wanderer.LizardMessage
                 Message.Add(type, new Dictionary<string, List<string>>());
 
                 foreach (var messages in creature.Value)
+                {
                     Message[type].Add(messages.Key, messages.Value);
+                }
+
+               
                 
             }
             _log.LogDebug("Loaded Lizard Messages");

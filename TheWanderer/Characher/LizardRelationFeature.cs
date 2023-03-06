@@ -60,6 +60,13 @@ namespace Pkuyo.Wanderer.Characher
                     if (self.friendTracker.friend != null && !dRelation.trackerRep.representedCreature.state.dead)
                         relationship = new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Ignores, 0f);
                 }
+
+                //忽略同为一家的蜥蜴
+                if (ChangeLizardAIOption && relationship.type == CreatureTemplate.Relationship.Type.Attacks && (dRelation.trackerRep.representedCreature.realizedCreature is Lizard) && (dRelation.trackerRep.representedCreature.realizedCreature as Lizard).AI.friendTracker.friend !=null)
+                {
+                    if (self.friendTracker.friend != null)
+                        relationship = new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Ignores, 0f);
+                }
             }
             return relationship;
         }

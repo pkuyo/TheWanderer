@@ -17,7 +17,7 @@ namespace Pkuyo.Wanderer
 
             _features.Add(new ClimbWallFeature(Logger));
             _features.Add(new ListenLizardFeature(Logger));
-            _features.Add(new WandererGraphics(Logger));
+            _features.Add(new WandererGraphicsFeature(Logger));
             _features.Add(new ScareLizardFeature(Logger));
             _features.Add(new LizardRelationFeature(Logger));
             _features.Add(new MessionHudFeature(Logger));

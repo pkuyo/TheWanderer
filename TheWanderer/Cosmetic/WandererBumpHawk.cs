@@ -23,12 +23,16 @@ namespace Pkuyo.Wanderer.Cosmetic
 
         public override void DrawSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
         {
-            for (int i = base.startSprite + this.numberOfSprites - 1; i >= base.startSprite; i--)
+            PlayerGraphics iGraphics = null;
+            if (!iGraphicsRef.TryGetTarget(out iGraphics))
+                return;
+
+            for (int i = startSprite + numberOfSprites - 1; i >= startSprite; i--)
             {
-                float num = Mathf.InverseLerp((float)base.startSprite, (float)(base.startSprite + this.numberOfSprites - 1), (float)i);
-                sLeaser.sprites[i].scale = Mathf.Lerp(this.sizeRangeMin, this.sizeRangeMax, Mathf.Lerp(Mathf.Sin(Mathf.Pow(num, this.sizeSkewExponent) * 3.1415927f), 1f, (num >= 0.5f) ? 0f : 0.5f));
+                float num = Mathf.InverseLerp(startSprite, (startSprite + numberOfSprites - 1), (float)i);
+                sLeaser.sprites[i].scale = Mathf.Lerp(sizeRangeMin, sizeRangeMax, Mathf.Lerp(Mathf.Sin(Mathf.Pow(num, this.sizeSkewExponent) * 3.1415927f), 1f, (num >= 0.5f) ? 0f : 0.5f));
                 float spineFactor = Mathf.Lerp(0.05f, 1, num);
-                PlayerGraphics.PlayerSpineData spineData = this.iGraphics.SpinePosition(spineFactor, timeStacker);
+                PlayerGraphics.PlayerSpineData spineData = iGraphics.SpinePosition(spineFactor, timeStacker);
                 sLeaser.sprites[i].x = spineData.outerPos.x - camPos.x;
                 sLeaser.sprites[i].y = spineData.outerPos.y - camPos.y;
             }
@@ -36,16 +40,20 @@ namespace Pkuyo.Wanderer.Cosmetic
 
         public override void InitiateSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam)
         {
-            for (int i = base.startSprite + this.numberOfSprites - 1; i >= base.startSprite; i--)
+            for (int i = startSprite + numberOfSprites - 1; i >= startSprite; i--)
             {
-                Mathf.InverseLerp((float)base.startSprite, (float)(base.startSprite + this.numberOfSprites - 1), (float)i);
+                Mathf.InverseLerp(startSprite, (startSprite + numberOfSprites - 1), i);
                 sLeaser.sprites[i] = new FSprite("tinyStar", true);
             }
         }
 
         public override void ApplyPalette(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, RoomPalette palette)
         {
- 
+
+            PlayerGraphics iGraphics = null;
+            if (!iGraphicsRef.TryGetTarget(out iGraphics))
+                return;
+
             for (int i = base.startSprite + this.numberOfSprites - 1; i >= base.startSprite; i--)
             {
                 float t = Mathf.InverseLerp((float)base.startSprite, (float)(base.startSprite + this.numberOfSprites - 1), (float)i);

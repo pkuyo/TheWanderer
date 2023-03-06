@@ -13,7 +13,7 @@ namespace Pkuyo.Wanderer.Cosmetic
     {
         protected CosmeticBase(PlayerGraphics graphics, ManualLogSource log)
         {
-            iGraphics = graphics;
+            iGraphicsRef = new WeakReference<PlayerGraphics>(graphics);
             _log = log;
         }
         public virtual void DrawSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
@@ -65,7 +65,7 @@ namespace Pkuyo.Wanderer.Cosmetic
 
         public int startSprite;
         public int numberOfSprites;
-        public PlayerGraphics iGraphics;
+        public WeakReference<PlayerGraphics> iGraphicsRef;
 
         static PlayerColor EyeColor = new PlayerColor("Eyes");
         static PlayerColor BodyColor = new PlayerColor("Body");

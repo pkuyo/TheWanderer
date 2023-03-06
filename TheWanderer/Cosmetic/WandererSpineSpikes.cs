@@ -43,10 +43,14 @@ namespace Pkuyo.Wanderer.Cosmetic
 
 		public override void DrawSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
 		{
+			PlayerGraphics iGraphics = null;
+			if (!iGraphicsRef.TryGetTarget(out iGraphics))
+				return;
+
 			for (int i = this.startSprite + this.bumps - 1; i >= this.startSprite; i--)
 			{
-				float num = Mathf.InverseLerp(this.startSprite, (this.startSprite + this.bumps - 1), (float)i);
-				PlayerGraphics.PlayerSpineData SpineData = this.iGraphics.SpinePosition(Mathf.Lerp(0, 1 , num), timeStacker);
+				float num = Mathf.InverseLerp(startSprite, (startSprite + bumps - 1), (float)i);
+				PlayerGraphics.PlayerSpineData SpineData = iGraphics.SpinePosition(Mathf.Lerp(0, 1 , num), timeStacker);
 
 
 				sLeaser.sprites[i].x = SpineData.outerPos.x - camPos.x;
@@ -82,6 +86,10 @@ namespace Pkuyo.Wanderer.Cosmetic
 
 		public override void ApplyPalette(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, RoomPalette palette)
 		{
+			PlayerGraphics iGraphics = null;
+			if (!iGraphicsRef.TryGetTarget(out iGraphics))
+				return;
+
 			for (int i = this.startSprite; i < this.startSprite + this.bumps; i++)
 			{
 				if (this.colored)

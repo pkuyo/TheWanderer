@@ -5,6 +5,11 @@
             "\u770b\u770b\u2026\u2026\uff1f",
             "\u53bb\u2026\u2026\u90a3\u91cc\u2026\u2026"
         ],
+        "Idle2":[
+            "\u670b\u53cb\u002e\u002e\u002e",
+            "\u8ddf\u7740\u002e\u002e\u002e",
+            "\u4e3b\u4eba\u002e\u002e\u002e"
+        ],
         "Idle": [
             "\u5B89\u9759\u2026\u2026",
             "\u6CA1\u6709\u730E\u7269\u2026\u2026",
@@ -52,6 +57,7 @@
             "\u8EB2\u8FDC\u70B9\uFF01"
         ],
         "Lurk": [],
+        "-":[],
         "Standard": [],
         "HearSound ": [
             "\u4EC0\u4E48\u58F0\u97F3\uFF1F",
@@ -103,6 +109,7 @@
     "GreenLizard": {
         "Travelling":[],
         "Idle": [],
+        "Idle2": [],
         "Hunt": [],
         "Flee": [],
         "EscapeRain": [],
@@ -112,6 +119,7 @@
         "Frustrated": [],
         "ActingOutMission ": [],
         "Lurk": [],
+        "-":[],
         "Standard": [],
         "HearSound ": [],
         "InvestigateSound": [],
@@ -128,6 +136,7 @@
     "BlueLizard": {
         "Travelling":[],
         "Idle": [],
+        "Idle2": [],
         "Hunt": [],
         "Flee": [],
         "EscapeRain": [],
@@ -137,6 +146,7 @@
         "Frustrated": [],
         "ActingOutMission ": [],
         "Lurk": [],
+        "-":[],
         "Standard": [],
         "HearSound ": [],
         "InvestigateSound": [],
@@ -153,6 +163,7 @@
     "YellowLizard": {
         "Travelling":[],
         "Idle": [],
+        "Idle2": [],
         "Hunt": [],
         "Flee": [],
         "EscapeRain": [],
@@ -162,6 +173,7 @@
         "Frustrated": [],
         "ActingOutMission ": [],
         "Lurk": [],
+        "-":[],
         "Standard": [],
         "HearSound ": [],
         "InvestigateSound": [],
@@ -178,6 +190,7 @@
     "WhiteLizard": {
         "Travelling":[],
         "Idle": [],
+        "Idle2": [],
         "Hunt": [],
         "Flee": [],
         "EscapeRain": [],
@@ -187,6 +200,7 @@
         "Frustrated": [],
         "ActingOutMission ": [],
         "Lurk": [],
+        "-":[],
         "Standard": [],
         "HearSound ": [],
         "InvestigateSound": [],
@@ -203,6 +217,7 @@
     "RedLizard": {
         "Travelling":[],
         "Idle": [],
+        "Idle2": [],
         "Hunt": [],
         "Flee": [],
         "EscapeRain": [],
@@ -212,6 +227,7 @@
         "Frustrated": [],
         "ActingOutMission ": [],
         "Lurk": [],
+        "-":[],
         "Standard": [],
         "HearSound ": [],
         "InvestigateSound": [],
@@ -228,6 +244,7 @@
     "BlackLizard": {
         "Travelling":[],
         "Idle": [],
+        "Idle2": [],
         "Hunt": [],
         "Flee": [],
         "EscapeRain": [],
@@ -237,6 +254,7 @@
         "Frustrated": [],
         "ActingOutMission ": [],
         "Lurk": [],
+        "-":[],
         "Standard": [],
         "HearSound ": [],
         "InvestigateSound": [],
@@ -253,6 +271,7 @@
     "Salamander": {
         "Travelling":[],
         "Idle": [],
+        "Idle2": [],
         "Hunt": [],
         "Flee": [],
         "EscapeRain": [],
@@ -262,6 +281,7 @@
         "Frustrated": [],
         "ActingOutMission ": [],
         "Lurk": [],
+        "-":[],
         "Standard": [],
         "HearSound ": [],
         "InvestigateSound": [],
@@ -278,6 +298,7 @@
     "CyanLizard": {
         "Travelling":[],
         "Idle": [],
+        "Idle2": [],
         "Hunt": [],
         "Flee": [],
         "EscapeRain": [],
@@ -287,6 +308,7 @@
         "Frustrated": [],
         "ActingOutMission ": [],
         "Lurk": [],
+        "-":[],
         "Standard": [],
         "HearSound ": [],
         "InvestigateSound": [],
@@ -303,6 +325,7 @@
     "SpitLizard": {
         "Travelling":[],
         "Idle": [],
+        "Idle2": [],
         "Hunt": [],
         "Flee": [],
         "EscapeRain": [],
@@ -312,6 +335,7 @@
         "Frustrated": [],
         "ActingOutMission ": [],
         "Lurk": [],
+        "-":[],
         "Standard": [],
         "HearSound ": [],
         "InvestigateSound": [],
@@ -328,6 +352,7 @@
     "EelLizard": {
         "Travelling":[],
         "Idle": [],
+        "Idle2": [],
         "Hunt": [],
         "Flee": [],
         "EscapeRain": [],
@@ -337,6 +362,7 @@
         "Frustrated": [],
         "ActingOutMission ": [],
         "Lurk": [],
+        "-":[],
         "Standard": [],
         "HearSound ": [],
         "InvestigateSound": [],
@@ -353,6 +379,7 @@
     "ZoopLizard": {
         "Travelling":[],
         "Idle": [],
+        "Idle2": [],
         "Hunt": [],
         "Flee": [],
         "EscapeRain": [],
@@ -362,6 +389,7 @@
         "Frustrated": [],
         "ActingOutMission ": [],
         "Lurk": [],
+        "-":[],
         "Standard": [],
         "HearSound ": [],
         "InvestigateSound": [],

@@ -10,12 +10,18 @@ namespace Pkuyo.Wanderer.Cosmetic
 {
     class WandererTailEffect : CosmeticBase
     {
+
+
         public WandererTailEffect(PlayerGraphics graphics, ManualLogSource log) : base(graphics, log)
         {
             this.numberOfSprites = 0;
         }
         public override void InitiateSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam)
         {
+            PlayerGraphics iGraphics = null;
+            if (!iGraphicsRef.TryGetTarget(out iGraphics))
+                return;
+
             TriangleMesh.Triangle[] tris = new TriangleMesh.Triangle[]
 {
             new TriangleMesh.Triangle(0, 1, 2),
@@ -40,6 +46,10 @@ namespace Pkuyo.Wanderer.Cosmetic
 
         public override void ApplyPalette(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, RoomPalette palette)
         {
+            PlayerGraphics iGraphics = null;
+            if (!iGraphicsRef.TryGetTarget(out iGraphics))
+                return;
+
             var mesh = (sLeaser.sprites[2] as TriangleMesh);
             for (int i = 0; i < mesh.verticeColors.Length; i++)
                 mesh.verticeColors[i] = Color.Lerp(GetBodyColor(iGraphics), GetFaceColor(iGraphics, rCam), Mathf.Pow(Mathf.InverseLerp(0, mesh.verticeColors.Length, i), 3f));

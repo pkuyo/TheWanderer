@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using BepInEx.Logging;
 using Pkuyo.Wanderer.LizardMessage;
+using System.Runtime.CompilerServices;
 
 namespace Pkuyo.Wanderer.Characher
 {
@@ -15,7 +16,7 @@ namespace Pkuyo.Wanderer.Characher
 
         public ListenLizardFeature(ManualLogSource log) :base(log)
         {
-            WandererLizards = new Dictionary<Lizard, WandererLizard>();
+            WandererLizards = new ConditionalWeakTable<Lizard, WandererLizard>();
         }
 
 
@@ -34,7 +35,9 @@ namespace Pkuyo.Wanderer.Characher
         private void Lizard_Update(On.Lizard.orig_Update orig, Lizard self, bool eu)
         {
             orig(self,eu);
-            WandererLizards[self].Update();
+            WandererLizard lizard;
+            if (WandererLizards.TryGetValue(self, out lizard))
+                lizard.Update();
 
 
         }
@@ -43,15 +46,11 @@ namespace Pkuyo.Wanderer.Characher
         {
             orig(self,abstractCreature,world);
 
-            foreach(var wandererLizard in WandererLizards)
-                if(wandererLizard.Key==null)
-                {
-                    wandererLizard.Value.Destroy();
-                    WandererLizards.Remove(wandererLizard.Key);
-                }
-            if(!WandererLizards.ContainsKey(self))
+
+            WandererLizard lizard;
+            if(!WandererLizards.TryGetValue(self,out lizard))
                 WandererLizards.Add(self, new WandererLizard(self));
         }
-        Dictionary<Lizard,WandererLizard> WandererLizards;
+        ConditionalWeakTable<Lizard,WandererLizard> WandererLizards;
     }
 }

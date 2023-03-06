@@ -14,7 +14,7 @@ namespace Pkuyo.Wanderer.Cosmetic
         public WandererLongHair(PlayerGraphics graphics, ManualLogSource log) : base(graphics, log)
         {
             numberOfSprites = 2;
-            hairs = new TailSegment[8];
+            Hairs = new TailSegment[8];
             if(graphics.RenderAsPup)
             {
                 HairSpacing = 4.5f;
@@ -23,17 +23,20 @@ namespace Pkuyo.Wanderer.Cosmetic
             for (int i = 0; i < 2; i++)
             {
                 var player = graphics.owner as Player;  
-                hairs[i*4+0] = new TailSegment(graphics, 6f, 4f, null, 0.85f, 1f, 1f, true);
-                hairs[i*4+1] = new TailSegment(graphics, 4f, 7f, hairs[i*4+0], 0.85f, 1f, 0.5f, true);
-                hairs[i*4+2] = new TailSegment(graphics, 2.5f, 7f, hairs[i*4+1], 0.85f, 1f, 0.5f, true);
-                hairs[i*4+3] = new TailSegment(graphics, 1f, 7f, hairs[i*4+2], 0.85f, 1f, 0.5f, true);
+                Hairs[i*4+0] = new TailSegment(graphics, 6f, 4f, null, 0.85f, 1f, 1f, true);
+                Hairs[i*4+1] = new TailSegment(graphics, 4f, 7f, Hairs[i*4+0], 0.85f, 1f, 0.5f, true);
+                Hairs[i*4+2] = new TailSegment(graphics, 2.5f, 7f, Hairs[i*4+1], 0.85f, 1f, 0.5f, true);
+                Hairs[i*4+3] = new TailSegment(graphics, 1f, 7f, Hairs[i*4+2], 0.85f, 1f, 0.5f, true);
             }
 
         }
 
         public override void DrawSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
         {
-            
+            PlayerGraphics iGraphics = null;
+            if (!iGraphicsRef.TryGetTarget(out iGraphics))
+                return;
+
             for (int k=0;k<2;k++)
             {
                 var dir = Custom.DirVec(iGraphics.owner.bodyChunks[0].pos, iGraphics.owner.bodyChunks[1].pos).normalized;
@@ -47,7 +50,7 @@ namespace Pkuyo.Wanderer.Cosmetic
                 float d2 = 6f;
                 for (int i = 0; i < 4; i++)
                 {
-                    Vector2 vector5 = Vector2.Lerp(hairs[k * 4 + i].lastPos, hairs[k * 4 + i].pos, timeStacker);
+                    Vector2 vector5 = Vector2.Lerp(Hairs[k * 4 + i].lastPos, Hairs[k * 4 + i].pos, timeStacker);
                     Vector2 normalized = (vector5 - vector4).normalized;
                     Vector2 a = Custom.PerpendicularVector(normalized);
                     float d3 = Vector2.Distance(vector5, vector4) / 5f;
@@ -60,14 +63,14 @@ namespace Pkuyo.Wanderer.Cosmetic
                     (sLeaser.sprites[startSprite+k] as TriangleMesh).MoveVertice(i * 4 + 1, vector4 + a * d2 * HairWidth + normalized * d3 - camPos);
                     if (i < 3)
                     {
-                        (sLeaser.sprites[startSprite+k] as TriangleMesh).MoveVertice(i * 4 + 2, vector5 - a * hairs[k * 4 + i].StretchedRad * HairWidth - normalized * d3 - camPos);
-                        (sLeaser.sprites[startSprite+k] as TriangleMesh).MoveVertice(i * 4 + 3, vector5 + a * hairs[k * 4 + i].StretchedRad * HairWidth - normalized * d3 - camPos);
+                        (sLeaser.sprites[startSprite+k] as TriangleMesh).MoveVertice(i * 4 + 2, vector5 - a * Hairs[k * 4 + i].StretchedRad * HairWidth - normalized * d3 - camPos);
+                        (sLeaser.sprites[startSprite+k] as TriangleMesh).MoveVertice(i * 4 + 3, vector5 + a * Hairs[k * 4 + i].StretchedRad * HairWidth - normalized * d3 - camPos);
                     }
                     else
                     {
                         (sLeaser.sprites[startSprite+k] as TriangleMesh).MoveVertice(i * 4 + 2, vector5 - camPos);
                     }
-                    d2 = hairs[k * 4 + i].StretchedRad;
+                    d2 = Hairs[k * 4 + i].StretchedRad;
                     vector4 = vector5;
                 }
             }
@@ -104,6 +107,10 @@ namespace Pkuyo.Wanderer.Cosmetic
 
         public override void ApplyPalette(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, RoomPalette palette)
         {
+            PlayerGraphics iGraphics = null;
+            if (!iGraphicsRef.TryGetTarget(out iGraphics))
+                return;
+
             var faceColor = GetFaceColor(iGraphics, rCam);
             var bodyColor = GetBodyColor(iGraphics);
             var fadeLength = 2;
@@ -119,6 +126,10 @@ namespace Pkuyo.Wanderer.Cosmetic
 
         public override void Update()
         {
+            PlayerGraphics iGraphics = null;
+            if (!iGraphicsRef.TryGetTarget(out iGraphics))
+                return;
+
             for (int i = 0; i < 2; i++)
             {
                 var dir = Custom.DirVec(iGraphics.owner.bodyChunks[0].pos, iGraphics.owner.bodyChunks[1].pos).normalized;
@@ -131,27 +142,28 @@ namespace Pkuyo.Wanderer.Cosmetic
                 Vector2 pos = RootPos;
                 float num9 = 28f;
 
-                hairs[i*4].connectedPoint = new Vector2?(RootPos);
+                Hairs[i*4].connectedPoint = new Vector2?(RootPos);
                 for (int k = 0; k < 4; k++)
                 {
-                    hairs[k + i * 4].Update();
-                    hairs[k + i * 4].vel *= Mathf.Lerp(0.75f, 0.95f, num3 * (1f - iGraphics.owner.bodyChunks[1].submersion));//水中减少速度
-                    TailSegment tailSegment7 = hairs[k + i * 4];
+                    Hairs[k + i * 4].Update();
+                    Hairs[k + i * 4].vel *= Mathf.Lerp(0.75f, 0.95f, num3 * (1f - iGraphics.owner.bodyChunks[1].submersion));//水中减少速度
+                    TailSegment tailSegment7 = Hairs[k + i * 4];
                     tailSegment7.vel.y = tailSegment7.vel.y - Mathf.Lerp(0.1f, 0.5f, num3) * (1f - iGraphics.owner.bodyChunks[1].submersion) * iGraphics.owner.EffectiveRoomGravity;
                     num3 = (num3 * 10f + 1f) / 11f;
-                    if (!Custom.DistLess(hairs[k + i * 4].pos, RootPos, MaxLength * (float)(k + 1)))
+                    if (!Custom.DistLess(Hairs[k + i * 4].pos, RootPos, MaxLength * (float)(k + 1)))
                     {
-                        hairs[k + i * 4].pos = RootPos + Custom.DirVec(RootPos, hairs[k + i * 4].pos) * MaxLength * (float)(k + 1);
+                        Hairs[k + i * 4].pos = RootPos + Custom.DirVec(RootPos, Hairs[k + i * 4].pos) * MaxLength * (float)(k + 1);
                     }
-                    hairs[k + i * 4].vel += Custom.DirVec(vector2, hairs[k + i * 4].pos) * num9 / Vector2.Distance(vector2, hairs[k + i * 4].pos);
+                    Hairs[k + i * 4].vel += Custom.DirVec(vector2, Hairs[k + i * 4].pos) * num9 / Vector2.Distance(vector2, Hairs[k + i * 4].pos);
                     num9 *= 0.5f;
                     vector2 = pos;
-                    pos = hairs[k + i * 4].pos;
+                    pos = Hairs[k + i * 4].pos;
                 }
             }
         }
 
-        TailSegment[] hairs;
+        TailSegment[] Hairs;
+
         float HairSpacing = 6f;
 
         float MaxLength = 9f;

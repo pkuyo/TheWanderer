@@ -7,7 +7,8 @@
     "-":0,
     "Injured": 3,
     "Fighting ": 2,
+    "InvestigateSound":2,
     "Frustrated": 2,
-    "ActingOutMission ": 1,
+    "ActingOutMission ": 2,
     "Lurk": 2
 }
