@@ -15,6 +15,8 @@ namespace Pkuyo.Wanderer.LizardMessage
         {
             lizardRef = new WeakReference<Lizard>(self);         
         }
+
+        //false代表程序错误
         public bool Update()
         {
             //若房间内存在漫游者则可以聆听
@@ -68,7 +70,7 @@ namespace Pkuyo.Wanderer.LizardMessage
             {
                 //判断通常触发的
                 var constantState = new StatePriority(lizard.AI.behavior, false);
-                if (ConstantCounter == 0)
+                if (ConstantCounter == 0 && constantState.priority !=-1)
                 {
                     dialog = LizardDialogBox.CreateLizardDialog(lizard, constantState);
                     ConstantCounter = 250 + Random.Range(50, 250);

@@ -21,6 +21,7 @@ namespace Pkuyo.Wanderer
             _features.Add(new ScareLizardFeature(Logger));
             _features.Add(new LizardRelationFeature(Logger));
             _features.Add(new MessionHudFeature(Logger));
+            _features.Add(new WandererRoomFeature(Logger));
             _wandererOptions = new WandererOptions(Logger);
 
             On.RainWorld.OnModsInit += RainWorld_OnModsInit;
