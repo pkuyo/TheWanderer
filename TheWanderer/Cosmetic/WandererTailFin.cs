@@ -13,15 +13,15 @@ namespace Pkuyo.Wanderer.Cosmetic
 	{
 		public WandererTailFin(PlayerGraphics graphics, ManualLogSource log) : base(graphics, log)
 		{
-			this.graphic = 1;
-			this.bumps = 2;//count
-			this.colored = true;
+			graphic = 1;
+			bumps = 2;//count
+			colored = true;
 
-			this.spineLength = 0;
-				this.spineLength += graphics.tail[graphics.tail.Length-1].connectionRad;
-			this.spineLength *= Custom.ClampedRandomVariation(0.3f, 0.17f, 0.5f);
+			spineLength = 0;
+				spineLength += graphics.tail[graphics.tail.Length-1].connectionRad;
+			spineLength *= Custom.ClampedRandomVariation(0.3f, 0.17f, 0.5f);
 
-			this.numberOfSprites = ((!this.colored) ? this.bumps : (this.bumps * 2)) * 2;
+			numberOfSprites = ((!colored) ? bumps : (bumps * 2)) * 2;
 		}
 
 		public override void DrawSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
@@ -32,10 +32,10 @@ namespace Pkuyo.Wanderer.Cosmetic
 
 			for (int i = 0; i < 2; i++)
 			{
-				int num = i * ((!this.colored) ? this.bumps : (this.bumps * 2));
-				for (int j = this.startSprite + this.bumps - 1; j >= this.startSprite; j--)
+				int num = i * ((!colored) ? bumps : (bumps * 2));
+				for (int j = startSprite + bumps - 1; j >= startSprite; j--)
 				{
-					float num2 = Mathf.InverseLerp((float)this.startSprite, (float)(this.startSprite + this.bumps - 1), (float)j);
+					float num2 = Mathf.InverseLerp((float)startSprite, (float)(startSprite + bumps - 1), (float)j);
 					PlayerGraphics.PlayerSpineData spineData = iGraphics.SpinePosition(Mathf.Lerp(0.8f, 1f, num2), timeStacker);
 
 
@@ -50,27 +50,27 @@ namespace Pkuyo.Wanderer.Cosmetic
 						sLeaser.sprites[j + num].y = spineData.pos.y + (spineData.pos.y - spineData.outerPos.y) * 0.85f - camPos.y;
 					}
 					sLeaser.sprites[j + num].rotation = Custom.VecToDeg(Vector2.Lerp(spineData.perp * spineData.depthRotation, spineData.dir * (float)((i != 1) ? 1 : -1), num2));
-					float num3 = this.scale * Mathf.Lerp(this.sizeMin, 1f, Mathf.Sin(Mathf.Pow(num2, this.sizeExponent) * 3.1415927f));
-					sLeaser.sprites[j + num].scaleX = Mathf.Sign(this.iGraphicsDepthRotation) * this.thickness * num3;
-					sLeaser.sprites[j + num].scaleY = num3 * Mathf.Max(0.2f, Mathf.InverseLerp(0f, 0.5f, Mathf.Abs(this.iGraphicsDepthRotation))) * ((i != 1) ? 1f : (-this.undersideSize)) * ScaleY;
-					if (this.colored)
+					float num3 = scale * Mathf.Lerp(sizeMin, 1f, Mathf.Sin(Mathf.Pow(num2, sizeExponent) * 3.1415927f));
+					sLeaser.sprites[j + num].scaleX = Mathf.Sign(iGraphicsDepthRotation) * thickness * num3;
+					sLeaser.sprites[j + num].scaleY = num3 * Mathf.Max(0.2f, Mathf.InverseLerp(0f, 0.5f, Mathf.Abs(iGraphicsDepthRotation))) * ((i != 1) ? 1f : (-undersideSize)) * ScaleY;
+					if (colored)
 					{
 						if (i == 0)
 						{
-							sLeaser.sprites[j + this.bumps + num].x = spineData.outerPos.x - camPos.x;
-							sLeaser.sprites[j + this.bumps + num].y = spineData.outerPos.y - camPos.y;
+							sLeaser.sprites[j + bumps + num].x = spineData.outerPos.x - camPos.x;
+							sLeaser.sprites[j + bumps + num].y = spineData.outerPos.y - camPos.y;
 						}
 						else if (i == 1)
 						{
-							sLeaser.sprites[j + this.bumps + num].x = spineData.pos.x + (spineData.pos.x - spineData.outerPos.x) * 0.85f - camPos.x;
-							sLeaser.sprites[j + this.bumps + num].y = spineData.pos.y + (spineData.pos.y - spineData.outerPos.y) * 0.85f - camPos.y;
+							sLeaser.sprites[j + bumps + num].x = spineData.pos.x + (spineData.pos.x - spineData.outerPos.x) * 0.85f - camPos.x;
+							sLeaser.sprites[j + bumps + num].y = spineData.pos.y + (spineData.pos.y - spineData.outerPos.y) * 0.85f - camPos.y;
 						}
-						sLeaser.sprites[j + this.bumps + num].rotation = Custom.VecToDeg(Vector2.Lerp(spineData.perp * spineData.depthRotation, spineData.dir * (float)((i != 1) ? 1 : -1), num2));
-						sLeaser.sprites[j + this.bumps + num].scaleX = Mathf.Sign(this.iGraphicsDepthRotation) * this.thickness * num3;
-						sLeaser.sprites[j + this.bumps + num].scaleY = num3 * Mathf.Max(0.2f, Mathf.InverseLerp(0f, 0.5f, Mathf.Abs(this.iGraphicsDepthRotation))) * ((i != 1) ? 1f : (-this.undersideSize)) * ScaleY;
+						sLeaser.sprites[j + bumps + num].rotation = Custom.VecToDeg(Vector2.Lerp(spineData.perp * spineData.depthRotation, spineData.dir * (float)((i != 1) ? 1 : -1), num2));
+						sLeaser.sprites[j + bumps + num].scaleX = Mathf.Sign(iGraphicsDepthRotation) * thickness * num3;
+						sLeaser.sprites[j + bumps + num].scaleY = num3 * Mathf.Max(0.2f, Mathf.InverseLerp(0f, 0.5f, Mathf.Abs(iGraphicsDepthRotation))) * ((i != 1) ? 1f : (-undersideSize)) * ScaleY;
 						if (i == 1)
 						{
-							sLeaser.sprites[j + this.bumps + num].alpha = Mathf.Pow(Mathf.InverseLerp(0.3f, 1f, Mathf.Abs(this.iGraphicsDepthRotation)), 0.2f);
+							sLeaser.sprites[j + bumps + num].alpha = Mathf.Pow(Mathf.InverseLerp(0.3f, 1f, Mathf.Abs(iGraphicsDepthRotation)), 0.2f);
 						}
 					}
 				}
@@ -81,16 +81,16 @@ namespace Pkuyo.Wanderer.Cosmetic
 		{
 			for (int i = 0; i < 2; i++)
 			{
-				int num = i * ((!this.colored) ? this.bumps : (this.bumps * 2));
-				for (int j = this.startSprite + this.bumps - 1; j >= this.startSprite; j--)
+				int num = i * ((!colored) ? bumps : (bumps * 2));
+				for (int j = startSprite + bumps - 1; j >= startSprite; j--)
 				{
-					Mathf.InverseLerp((float)this.startSprite, (float)(this.startSprite + this.bumps - 1), (float)j);
-					sLeaser.sprites[j + num] = new FSprite("LizardScaleA" + this.graphic.ToString(), true);
+					Mathf.InverseLerp((float)startSprite, (float)(startSprite + bumps - 1), (float)j);
+					sLeaser.sprites[j + num] = new FSprite("LizardScaleA" + graphic.ToString(), true);
 					sLeaser.sprites[j + num].anchorY = 0.15f;
-					if (this.colored)
+					if (colored)
 					{
-						sLeaser.sprites[j + this.bumps + num] = new FSprite("LizardScaleB" + this.graphic.ToString(), true);
-						sLeaser.sprites[j + this.bumps + num].anchorY = 0.15f;
+						sLeaser.sprites[j + bumps + num] = new FSprite("LizardScaleB" + graphic.ToString(), true);
+						sLeaser.sprites[j + bumps + num].anchorY = 0.15f;
 					}
 				}
 			}
@@ -104,14 +104,14 @@ namespace Pkuyo.Wanderer.Cosmetic
 
 			for (int i = 0; i < 2; i++)
 			{
-				int num = i * ((!this.colored) ? this.bumps : (this.bumps * 2));
-				for (int j = base.startSprite; j < base.startSprite + this.bumps; j++)
+				int num = i * ((!colored) ? bumps : (bumps * 2));
+				for (int j = startSprite; j < startSprite + bumps; j++)
 				{
 					//sLeaser.sprites[j + num].color = MainColor;
-					if (this.colored)
+					if (colored)
 					{
-						float f = Mathf.InverseLerp(startSprite, (startSprite + this.bumps - 1), j);
-						sLeaser.sprites[j + this.bumps + num].color = Color.Lerp(GetBodyColor(iGraphics), GetFaceColor(iGraphics,rCam), Mathf.Pow(f, 0.5f));
+						float f = Mathf.InverseLerp(startSprite, (startSprite + bumps - 1), j);
+						sLeaser.sprites[j + bumps + num].color = Color.Lerp(GetBodyColor(iGraphics), GetFaceColor(iGraphics,rCam), Mathf.Pow(f, 0.5f));
 					}
 				}
 

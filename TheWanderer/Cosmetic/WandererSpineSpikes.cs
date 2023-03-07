@@ -13,32 +13,32 @@ namespace Pkuyo.Wanderer.Cosmetic
 	{
 		public WandererSpineSpikes(PlayerGraphics graphics, ManualLogSource log) : base(graphics, log)
 		{
-			//this.spritesOverlap = Template.SpritesOverlap.BehindHead;
+			//spritesOverlap = Template.SpritesOverlap.BehindHead;
 			float num = Mathf.Lerp(5f, 8f, Mathf.Pow(Random.value, 0.7f));
 
-			this.spineLength = 0;
+			spineLength = 0;
 			foreach (var tail in graphics.tail)
-				this.spineLength += tail.connectionRad;
-			//this.spineLength += graphics.head.rad;
-			this.spineLength *= Custom.ClampedRandomVariation(0.3f, 0.17f, 0.5f);
+				spineLength += tail.connectionRad;
+			//spineLength += graphics.head.rad;
+			spineLength *= Custom.ClampedRandomVariation(0.3f, 0.17f, 0.5f);
 
-			this.sizeMin = 0.3f;
-			this.sizeMax = 1f;
+			sizeMin = 0.3f;
+			sizeMax = 1f;
 			
 	
-			this.sizeMin = Mathf.Min(this.sizeMin, 0.3f);
-			this.sizeMax = Mathf.Min(this.sizeMax, 0.6f);
+			sizeMin = Mathf.Min(sizeMin, 0.3f);
+			sizeMax = Mathf.Min(sizeMax, 0.6f);
 			
-			this.sizeExponent = 0.6f;
-			this.bumps = 7;
+			sizeExponent = 0.6f;
+			bumps = 7;
 			if (graphics.RenderAsPup)
 			{
 				bumps = 3;
 			}
 
-			this.scaleX = 0.7f*2;
-			this.graphic = 0;
-			this.numberOfSprites = ((this.colored) ? (this.bumps * 2) : this.bumps);
+			scaleX = 0.7f*2;
+			graphic = 0;
+			numberOfSprites = ((colored) ? (bumps * 2) : bumps);
 		}
 
 		public override void DrawSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
@@ -47,7 +47,7 @@ namespace Pkuyo.Wanderer.Cosmetic
 			if (!iGraphicsRef.TryGetTarget(out iGraphics))
 				return;
 
-			for (int i = this.startSprite + this.bumps - 1; i >= this.startSprite; i--)
+			for (int i = startSprite + bumps - 1; i >= startSprite; i--)
 			{
 				float num = Mathf.InverseLerp(startSprite, (startSprite + bumps - 1), (float)i);
 				PlayerGraphics.PlayerSpineData SpineData = iGraphics.SpinePosition(Mathf.Lerp(0, 1 , num), timeStacker);
@@ -56,30 +56,30 @@ namespace Pkuyo.Wanderer.Cosmetic
 				sLeaser.sprites[i].x = SpineData.outerPos.x - camPos.x;
 				sLeaser.sprites[i].y = SpineData.outerPos.y - camPos.y;
 				sLeaser.sprites[i].rotation = Custom.VecToDeg(SpineData.perp);
-				float num2 = Mathf.Lerp(this.sizeMin, sizeMax, Mathf.Sin(Mathf.Pow(num, this.sizeExponent) * 3.1415927f));
-				sLeaser.sprites[i].scaleX = Mathf.Sign(this.iGraphicsDepthRotation) * this.scaleX * num2;
-				sLeaser.sprites[i].scaleY = num2 * Mathf.Max(0.2f, Mathf.InverseLerp(0f, 0.5f, Mathf.Abs(this.iGraphicsDepthRotation)))*1;
+				float num2 = Mathf.Lerp(sizeMin, sizeMax, Mathf.Sin(Mathf.Pow(num, sizeExponent) * 3.1415927f));
+				sLeaser.sprites[i].scaleX = Mathf.Sign(iGraphicsDepthRotation) * scaleX * num2;
+				sLeaser.sprites[i].scaleY = num2 * Mathf.Max(0.2f, Mathf.InverseLerp(0f, 0.5f, Mathf.Abs(iGraphicsDepthRotation)))*1;
 				if (colored)
 				{
-					sLeaser.sprites[i + this.bumps].x = SpineData.outerPos.x - camPos.x;
-					sLeaser.sprites[i + this.bumps].y = SpineData.outerPos.y - camPos.y;
-					sLeaser.sprites[i + this.bumps].rotation = Custom.AimFromOneVectorToAnother(-SpineData.perp * SpineData.depthRotation, SpineData.perp * SpineData.depthRotation);
-					sLeaser.sprites[i + this.bumps].scaleX = Mathf.Sign(this.iGraphicsDepthRotation) * this.scaleX * num2 ;
-					sLeaser.sprites[i + this.bumps].scaleY = num2 * Mathf.Max(0.2f, Mathf.InverseLerp(0f, 0.5f, Mathf.Abs(this.iGraphicsDepthRotation))) * 1;
+					sLeaser.sprites[i + bumps].x = SpineData.outerPos.x - camPos.x;
+					sLeaser.sprites[i + bumps].y = SpineData.outerPos.y - camPos.y;
+					sLeaser.sprites[i + bumps].rotation = Custom.AimFromOneVectorToAnother(-SpineData.perp * SpineData.depthRotation, SpineData.perp * SpineData.depthRotation);
+					sLeaser.sprites[i + bumps].scaleX = Mathf.Sign(iGraphicsDepthRotation) * scaleX * num2 ;
+					sLeaser.sprites[i + bumps].scaleY = num2 * Mathf.Max(0.2f, Mathf.InverseLerp(0f, 0.5f, Mathf.Abs(iGraphicsDepthRotation))) * 1;
 				}
 			}
 		}
 
 		public override void InitiateSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam)
 		{
-			for (int i = this.startSprite + this.bumps - 1; i >= this.startSprite; i--)
+			for (int i = startSprite + bumps - 1; i >= startSprite; i--)
 			{
-				sLeaser.sprites[i] = new FSprite("LizardScaleA" + this.graphic.ToString(), true);
+				sLeaser.sprites[i] = new FSprite("LizardScaleA" + graphic.ToString(), true);
 				sLeaser.sprites[i].anchorY = 0.15f;
 				if (colored)
 				{
-					sLeaser.sprites[i + this.bumps] = new FSprite("LizardScaleB" + this.graphic.ToString(), true);
-					sLeaser.sprites[i + this.bumps].anchorY = 0.15f;
+					sLeaser.sprites[i + bumps] = new FSprite("LizardScaleB" + graphic.ToString(), true);
+					sLeaser.sprites[i + bumps].anchorY = 0.15f;
 				}
 			}
 		}
@@ -90,12 +90,12 @@ namespace Pkuyo.Wanderer.Cosmetic
 			if (!iGraphicsRef.TryGetTarget(out iGraphics))
 				return;
 
-			for (int i = this.startSprite; i < this.startSprite + this.bumps; i++)
+			for (int i = startSprite; i < startSprite + bumps; i++)
 			{
-				if (this.colored)
+				if (colored)
 				{
-					float f = Mathf.InverseLerp(startSprite, (startSprite + this.bumps - 1), i);
-					sLeaser.sprites[i + this.bumps].color = Color.Lerp(GetBodyColor(iGraphics), GetFaceColor(iGraphics, rCam), Mathf.Pow(f, 0.5f));
+					float f = Mathf.InverseLerp(startSprite, (startSprite + bumps - 1), i);
+					sLeaser.sprites[i + bumps].color = Color.Lerp(GetBodyColor(iGraphics), GetFaceColor(iGraphics, rCam), Mathf.Pow(f, 0.5f));
 				}
 			}
 		}

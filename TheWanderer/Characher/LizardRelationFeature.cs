@@ -62,10 +62,48 @@ namespace Pkuyo.Wanderer.Characher
                 }
 
                 //忽略同为一家的蜥蜴
-                if (ChangeLizardAIOption && relationship.type == CreatureTemplate.Relationship.Type.Attacks && (dRelation.trackerRep.representedCreature.realizedCreature is Lizard) && (dRelation.trackerRep.representedCreature.realizedCreature as Lizard).AI.friendTracker.friend !=null)
+                if (ChangeLizardAIOption && relationship.type == CreatureTemplate.Relationship.Type.Attacks && (dRelation.trackerRep.representedCreature.realizedCreature is Lizard) && (dRelation.trackerRep.representedCreature.realizedCreature as Lizard).AI.friendTracker.friend != null)
                 {
                     if (self.friendTracker.friend != null)
                         relationship = new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Ignores, 0f);
+                }
+            }
+            //没养猫猫
+            else if (self.friendTracker.friend == null || !(self.friendTracker.friend is Player))
+            {
+                if (self.creature.Room != null || self.friendTracker.friend != null)
+                    return relationship;
+
+                Player toPlayer = null;
+                float max = -10f;
+                var room = self.creature.Room.realizedRoom;
+
+                //总体好感度高自动保护
+                foreach (var player in room.PlayersInRoom)
+                {
+                    if (player.slugcatStats.name.value == "wanderer" && room.game.session.creatureCommunities.LikeOfPlayer(CreatureCommunities.CommunityID.Lizards, room.game.world.RegionNumber, player.playerState.playerNumber) == 1.0f &&
+                             dRelation.trackerRep.representedCreature.creatureTemplate.dangerousToPlayer > 0f && dRelation.trackerRep.representedCreature.state.alive && dRelation.trackerRep.representedCreature.realizedCreature != null && 
+                             !(dRelation.trackerRep.representedCreature.realizedCreature is Lizard) && dRelation.trackerRep.representedCreature.abstractAI != null && dRelation.trackerRep.representedCreature.abstractAI.RealAI != null)
+                    {
+                        float num2 = 0.5f * Mathf.Pow(dRelation.trackerRep.representedCreature.creatureTemplate.dangerousToPlayer * dRelation.trackerRep.representedCreature.abstractAI.RealAI.CurrentPlayerAggression(player.abstractCreature), 0.5f);
+                        num2 *= Mathf.InverseLerp(30f, 7f, Custom.WorldCoordFloatDist(room.GetWorldCoordinate(player.mainBodyChunk.pos), dRelation.trackerRep.BestGuessForPosition()));
+                        if (!Custom.DistLess(room.GetWorldCoordinate(player.mainBodyChunk.pos), dRelation.trackerRep.BestGuessForPosition(), Custom.WorldCoordFloatDist(self.creature.pos, room.GetWorldCoordinate(player.mainBodyChunk.pos))))
+                        {
+                            num2 *= 0.5f;
+                        }
+                        if (num2 > 0f && (self.StaticRelationship(dRelation.trackerRep.representedCreature).type != CreatureTemplate.Relationship.Type.Eats || self.StaticRelationship(dRelation.trackerRep.representedCreature).intensity < num2))
+                        {
+                            if (num2 > max)
+                            {
+                                toPlayer = player;
+                                max = num2;
+                            }
+                        }
+                    }
+                }
+                if (toPlayer != null)
+                {
+                    return new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Attacks, max);
                 }
             }
             return relationship;
@@ -76,7 +114,7 @@ namespace Pkuyo.Wanderer.Characher
         private void LizardAI_ctor(On.LizardAI.orig_ctor orig, LizardAI self, AbstractCreature creature, World world)
         {
             orig(self, creature, world);
-            if (self.creature.world.game.session.characterStats.name.value == "wanderer")
+            if (creature.world.game.session.characterStats.name.value == "wanderer")
                 //降低驯服难度
                 self.friendTracker.tamingDifficlty = Mathf.Clamp(self.friendTracker.tamingDifficlty * 0.3f, 0.5f, 2f);
         }

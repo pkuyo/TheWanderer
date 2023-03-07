@@ -1,109 +1,111 @@
 {
     "PinkLizard": {
-        "Travelling":[
-            "\u662f\u4ec0\u4e48\u2026\u2026\uff1f",
-            "\u770b\u770b\u2026\u2026\uff1f",
-            "\u53bb\u2026\u2026\u90a3\u91cc\u2026\u2026"
+        "travelling": [
+            "What?is that¡­¡­£¿",
+            "Let me have a look¡­¡­£¿",
+            "wanna¡­¡­get there¡­¡­"
         ],
-        "Idle2":[
-            "\u670b\u53cb\u002e\u002e\u002e",
-            "\u8ddf\u7740\u002e\u002e\u002e",
-            "\u4e3b\u4eba\u002e\u002e\u002e"
+        "idle": [
+            "So quiet¡­¡­",
+            "No prey¡­¡­",
+            "Break time¡­¡­"
         ],
-        "Idle": [
-            "\u5B89\u9759\u2026\u2026",
-            "\u6CA1\u6709\u730E\u7269\u2026\u2026",
-            "\u4F11\u606F\u2026\u2026"
+        "idlefriend": [
+            "Friend...",
+            "Follow them...",
+            "My lord..."
         ],
-        "Hunt": [
-            "\u98DF\u7269\uFF01",
-            "\u8FFD\uFF01",
-            "\u522B\u8DD1\uFF01"
+        "hunt": [
+            "Food£¡",
+            "Follow it£¡",
+            "Hold it£¡"
         ],
-        "Flee": [
-            "\u602A\u7269\uFF1F\uFF01",
-            "\u5FEB\u8DD1\uFF01",
-            "\u5371\u9669\uFF01"
+        "flee": [
+            "Monster£¿£¡",
+            "Run£¡",
+            "Watch out£¡"
         ],
-        "EscapeRain": [
-            "\u4E0B\u96E8\u4E86\uFF01",
-            "\u6D2A\u6C34\u2026\u2026\u8981\u6765\u4E86\u2026\u2026",
-            "\u56DE\u5DE2\uFF01",
-            "\u79BB\u5F00\uFF01"
+        "escaperain": [
+            "It's raining£¡",
+            "Flood¡­¡­is coming¡­¡­",
+            "Go Home£¡",
+            "I am leaving£¡"
         ],
-        "ReturnPrey": [
-            "\u98DF\u7269\u2026\u2026\u6293\u5230\u4E86\u2026\u2026",
-            "\u5FEB\u56DE\u53BB\u2026\u2026",
-            "\u5B58\u653E\u2026\u2026"
+        "returnprey": [
+            "Food¡­¡­gotcha¡­¡­",
+            "Go back¡­¡­",
+            "Store it¡­¡­"
         ],
-        "Injured": [
-            "\u75DB\uFF01",
-            "\u545C\uFF01",
-            "\u554A\uFF01"
+        "injured": [
+            "It hurts£¡",
+            "Ouch£¡",
+            "Ah£¡"
         ],
-        "Fighting ": [
-            "\u54AC\uFF01",
-            "\u6218\u6597\uFF01",
-            "\u522B\u8FC7\u6765\uFF01"
+        "fighting?": [
+            "Bite£¡",
+            "Fight£¡",
+            "Halt£¡"
         ],
-        "Frustrated": [
-            "\u9003\u8D70\u4E86\u2026\u2026",
-            "\u53EF\u60DC\u2026\u2026",
-            "\u5931\u8D25\u2026\u2026"
+        "frustrated": [
+            "It flees¡­¡­",
+            "What a pity¡­¡­",
+            "I failed¡­¡­"
         ],
-        "ActingOutMission ": [
-            "\u8D70\u5F00\uFF01",
-            "\u8FDC\u79BB\uFF01",
-            "\u8EB2\u8FDC\u70B9\uFF01"
+        "actingoutmission?": [
+            "Go away£¡",
+            "Stand back£¡",
+            "Back off£¡"
         ],
-        "Lurk": [],
-        "-":[],
-        "Standard": [],
-        "HearSound ": [
-            "\u4EC0\u4E48\u58F0\u97F3\uFF1F",
-            "\u53BB\u770B\u770B\u2026\u2026",
-            "\u730E\u7269\uFF1F"
+        "lurk": [],
+        "standard": [],
+        "hearsound?": [
+            "What's that noise£¿",
+            "Have a look¡­¡­",
+            "Prey£¿"
         ],
-        "InvestigateSound": [
-            "\u53BB\u770B\u770B\u2026\u2026",
-            "\u730E\u7269\uFF1F"
+        "investigatesound": [
+            "Take a look¡­¡­",
+            "Pray£¿"
         ],
-        "PreyReSpotted": [
-            "\u53C8\u770B\u89C1\u4E86\uFF01",
-            "\u522B\u60F3\u8DD1\u4E86\uFF01"
+        "preyrespotted": [
+            "You again£¡",
+            "Don't move£¡"
         ],
-        "PreySpotted": [
-            "\u98DF\u7269\uFF01",
-            "\u522B\u8DD1\uFF01",
-            "\u5403\u2026\u2026"
+        "preyspotted": [
+            "Food£¡",
+            "Freeze£¡",
+            "Want to eat¡­¡­"
         ],
-        "FightingStance": [
-            "\u8D70\u5F00\uFF01",
-            "\u6EDA\uFF01",
-            "\u627E\u6B7B\uFF01",
-            "\u6EDA\u8FDC\u70B9\uFF01"
+        "fightingstance": [
+            "Go away£¡",
+            "Back off£¡",
+            "Go to hell£¡",
+            "Get out of there£¡"
         ],
-        "ThreatSpotted": [
-            "\u602A\u7269\uFF01",
-            "\u5FEB\u8DD1\uFF01",
-            "\u8EB2\u8D77\u6765\uFF01"
+        "threatspotted": [
+            "Monster£¡",
+            "Run£¡",
+            "Hide£¡"
         ],
-        "ThreatReSpotted": [
-            "\u53C8\uFF1F\uFF01",
-            "\u5FEB\u79BB\u5F00\u5427\u2026\u2026",
-            "\u518D\u8EB2\u4E00\u6B21\u2026\u2026"
+        "threatrespotted": [
+            "Again£¿£¡",
+            "Please go¡­¡­",
+            "Hide again¡­¡­"
         ],
-        "ShootTongue": [],
-        "Spit": [],
-        "Lounge": [
-            "\u8FC7\u6765\uFF01",
-            "\u6740\uFF01",
-            "\u522B\u60F3\u8DD1\uFF01"
+        "shoottongue": [
+            "Give me this",
+            "I'll take it!"  
         ],
-        "ShakePrey ": [
-            "\u8DD1\u4E0D\u6389\u4E86\u5427",
-            "\u4E0D\u9519\u2026\u2026",
-            "\u6210\u529F\u2026\u2026"
+        "spit": [],
+        "lounge": [
+            "Come here£¡",
+            "I'll kill you£¡",
+            "Don't move£¡"
+        ],
+        "shakeprey?": [
+            "Now you can't run away!",
+            "nice¡­¡­",
+            "Success¡­¡­"
         ]
     },
     "GreenLizard": {

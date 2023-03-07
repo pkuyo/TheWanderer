@@ -182,7 +182,6 @@ namespace Pkuyo.Wanderer.Characher
                 IntVector2 add = new IntVector2(0, 0);
                 add += self.room.GetTilePosition(pos + addpos.normalized * 10 + Vector2.Perpendicular(bodyVec).normalized * bodyVec * ((k == 0) ? 1 : -1));
                 float dis = ex ? 2 : 1;
-
                 var titleacc = self.room.aimap.getAItile(add).acc;
                 if (titleacc == AItile.Accessibility.Wall || titleacc == AItile.Accessibility.Climb)
                     re[k] |= 1;
@@ -205,7 +204,7 @@ namespace Pkuyo.Wanderer.Characher
             pressedUsed = true;
             IsClimb = false;
             owner.bodyMode = Player.BodyModeIndex.Default;
-            _log.LogDebug("Cancel climb");
+            //_log.LogDebug("Cancel climb");
         }
 
         private void StartWallClimb()
@@ -213,7 +212,7 @@ namespace Pkuyo.Wanderer.Characher
             pressedUsed = true;
             IsClimb = true;
             Reset();
-            _log.LogDebug("Start climb");
+            //_log.LogDebug("Start climb");
         }
 
 
@@ -235,7 +234,7 @@ namespace Pkuyo.Wanderer.Characher
                 else
                 {
                     //爬杆钻管道等优先级高的操作 直接取消爬墙
-                    _log.LogDebug("Cancel climb cause by " + owner.bodyMode.ToString());
+                    _log.LogDebug("[Climb] Cancel climb cause by " + owner.bodyMode.ToString());
                     CancelWallClimb();
                     return;
                 }
@@ -284,7 +283,7 @@ namespace Pkuyo.Wanderer.Characher
                 {
                     CancelWallClimb();
                     isFall = true;
-                    _log.LogDebug("Fall from wall!");
+                    _log.LogDebug("[Climb] Fall from wall!");
                     return;
                 }
                 else if (climbState == 2)
@@ -322,7 +321,7 @@ namespace Pkuyo.Wanderer.Characher
             if (isFall)
                 if (!IsClimb && CheckCanClimb(owner, pos, Vector2.zero, 0.0f, Vector2.zero, false) != 0)
                 {
-                    _log.LogDebug("Auto climb after fell");
+                    _log.LogDebug("[Climb] Auto climb after fell");
                     StartWallClimb();
                     isFall = false;
                 }

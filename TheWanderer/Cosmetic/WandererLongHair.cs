@@ -23,7 +23,7 @@ namespace Pkuyo.Wanderer.Cosmetic
             for (int i = 0; i < 2; i++)
             {
                 var player = graphics.owner as Player;  
-                Hairs[i*4+0] = new TailSegment(graphics, 6f, 4f, null, 0.85f, 1f, 1f, true);
+                Hairs[i*4+0] = new TailSegment(graphics, 6f, 4f, null, 0.85f, 1f, 3f, true);
                 Hairs[i*4+1] = new TailSegment(graphics, 4f, 7f, Hairs[i*4+0], 0.85f, 1f, 0.5f, true);
                 Hairs[i*4+2] = new TailSegment(graphics, 2.5f, 7f, Hairs[i*4+1], 0.85f, 1f, 0.5f, true);
                 Hairs[i*4+3] = new TailSegment(graphics, 1f, 7f, Hairs[i*4+2], 0.85f, 1f, 0.5f, true);
