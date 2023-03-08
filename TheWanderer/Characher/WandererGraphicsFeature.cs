@@ -136,12 +136,13 @@ namespace Pkuyo.Wanderer.Characher
 		{
 			Cosmetics = new List<CosmeticBase>();
 			this.self = self;
+			_log = log;
 			OriginSprites = EndSprites = -1;
 
 			if ((self.owner as Player).slugcatStats.name.value != "wanderer")
 				return;
 
-			TailEffect = new WandererTailEffect(self, _log);//必须放在第一个初始化！
+			AddCosmetic(new WandererTailEffect(self, _log));
 			AddCosmetic(new WandererLongHair(self, _log));
 			AddCosmetic(new WandererTailFin(self, _log));
 			AddCosmetic(new WandererSpineSpikes(self, _log));
@@ -150,6 +151,11 @@ namespace Pkuyo.Wanderer.Characher
 
 		private void AddCosmetic(CosmeticBase cosmetic)
 		{
+			if (cosmetic is WandererTailEffect)
+			{
+				TailEffect = (cosmetic as WandererTailEffect);
+				return;
+			}
 			Cosmetics.Add(cosmetic);
 		}
 

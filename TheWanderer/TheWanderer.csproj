@@ -115,6 +115,7 @@
     <Compile Include="Options\WandererOptions.cs" />
     <Compile Include="WandererCharacterMod.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="WandererModEnum.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

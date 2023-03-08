@@ -67,7 +67,7 @@ namespace Pkuyo.Wanderer.Characher
             Player player;
             if (_HandOwner.TryGetValue(self, out player) && player != null)
             {
-                if (player.bodyMode == ClimbWallFeature.ClimbBackWall)
+                if (player.bodyMode == WandererModEnum.PlayerBodyModeIndex.ClimbBackWall)
                 {
                     ClimbSlugHand data;
                     if(!_HandData.TryGetValue(self,out data))

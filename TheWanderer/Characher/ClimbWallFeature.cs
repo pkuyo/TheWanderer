@@ -26,7 +26,6 @@ namespace Pkuyo.Wanderer.Characher
 
         public override void OnModsInit(RainWorld rainWorld)
         {
-            RegisterAllEnumExtensions();
 
             On.Player.ctor += Player_ctor;
             On.Player.Update += new On.Player.hook_Update(Player_Update);
@@ -50,13 +49,6 @@ namespace Pkuyo.Wanderer.Characher
             orig(self, grasp, eu);
         }
 
-
-        //注册enum
-        //TODO : ExtEnum
-        public static void RegisterAllEnumExtensions()
-        {
-            ClimbWallFeature.ClimbBackWall = new Player.BodyModeIndex("ClimbBackWall", true);
-        }
 
 
         private void Player_ctor(On.Player.orig_ctor orig, Player self, AbstractCreature abstractCreature, World world)
@@ -127,7 +119,6 @@ namespace Pkuyo.Wanderer.Characher
         }
  
         private ClimbSlugHandGraphics _climbSlugHandGraphics;
-        public static Player.BodyModeIndex ClimbBackWall;
 
         public static Dictionary<Player, PlayerBackClimb> ClimbArg;
     }
@@ -223,9 +214,9 @@ namespace Pkuyo.Wanderer.Characher
                 //设置状态
                 if ((owner.bodyMode == Player.BodyModeIndex.Default
                     || owner.bodyMode == Player.BodyModeIndex.WallClimb
-                    || owner.bodyMode == Player.BodyModeIndex.ClimbingOnBeam) || owner.bodyMode == ClimbWallFeature.ClimbBackWall)
+                    || owner.bodyMode == Player.BodyModeIndex.ClimbingOnBeam) || owner.bodyMode == WandererModEnum.PlayerBodyModeIndex.ClimbBackWall)
                 {
-                    owner.bodyMode =  ClimbWallFeature.ClimbBackWall;
+                    owner.bodyMode = WandererModEnum.PlayerBodyModeIndex.ClimbBackWall;
                     //防止卡杆子
                     owner.forceFeetToHorizontalBeamTile = 0;
                     if (owner.animation == Player.AnimationIndex.HangFromBeam)
@@ -243,7 +234,7 @@ namespace Pkuyo.Wanderer.Characher
         public void UpdateGravity()
         {
             //先于updateMSC调用
-            if (owner.bodyMode == ClimbWallFeature.ClimbBackWall)
+            if (owner.bodyMode == WandererModEnum.PlayerBodyModeIndex.ClimbBackWall)
                 owner.customPlayerGravity = 0;
             else
                 owner.customPlayerGravity = 0.9f;

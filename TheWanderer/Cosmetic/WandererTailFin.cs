@@ -17,8 +17,7 @@ namespace Pkuyo.Wanderer.Cosmetic
 			bumps = 2;//count
 			colored = true;
 
-			spineLength = 0;
-				spineLength += graphics.tail[graphics.tail.Length-1].connectionRad;
+			spineLength = graphics.tail[graphics.tail.Length-1].connectionRad;
 			spineLength *= Custom.ClampedRandomVariation(0.3f, 0.17f, 0.5f);
 
 			numberOfSprites = ((!colored) ? bumps : (bumps * 2)) * 2;
@@ -51,7 +50,7 @@ namespace Pkuyo.Wanderer.Cosmetic
 					}
 					sLeaser.sprites[j + num].rotation = Custom.VecToDeg(Vector2.Lerp(spineData.perp * spineData.depthRotation, spineData.dir * (float)((i != 1) ? 1 : -1), num2));
 					float num3 = scale * Mathf.Lerp(sizeMin, 1f, Mathf.Sin(Mathf.Pow(num2, sizeExponent) * 3.1415927f));
-					sLeaser.sprites[j + num].scaleX = Mathf.Sign(iGraphicsDepthRotation) * thickness * num3;
+					sLeaser.sprites[j + num].scaleX = Mathf.Sign(iGraphicsDepthRotation) * thickness * num3 * ScaleX;
 					sLeaser.sprites[j + num].scaleY = num3 * Mathf.Max(0.2f, Mathf.InverseLerp(0f, 0.5f, Mathf.Abs(iGraphicsDepthRotation))) * ((i != 1) ? 1f : (-undersideSize)) * ScaleY;
 					if (colored)
 					{
@@ -66,7 +65,7 @@ namespace Pkuyo.Wanderer.Cosmetic
 							sLeaser.sprites[j + bumps + num].y = spineData.pos.y + (spineData.pos.y - spineData.outerPos.y) * 0.85f - camPos.y;
 						}
 						sLeaser.sprites[j + bumps + num].rotation = Custom.VecToDeg(Vector2.Lerp(spineData.perp * spineData.depthRotation, spineData.dir * (float)((i != 1) ? 1 : -1), num2));
-						sLeaser.sprites[j + bumps + num].scaleX = Mathf.Sign(iGraphicsDepthRotation) * thickness * num3;
+						sLeaser.sprites[j + bumps + num].scaleX = Mathf.Sign(iGraphicsDepthRotation) * thickness * num3 * ScaleX;
 						sLeaser.sprites[j + bumps + num].scaleY = num3 * Mathf.Max(0.2f, Mathf.InverseLerp(0f, 0.5f, Mathf.Abs(iGraphicsDepthRotation))) * ((i != 1) ? 1f : (-undersideSize)) * ScaleY;
 						if (i == 1)
 						{
@@ -129,6 +128,7 @@ namespace Pkuyo.Wanderer.Cosmetic
 		float spineLength = 0.6f;
 		float undersideSize = 0.6f;
 		float ScaleY = 3f;
+		float ScaleX = 1f;
 		float iGraphicsDepthRotation = 1f;
 
 	}
