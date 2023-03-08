@@ -1,129 +1,128 @@
 {
     "PinkLizard": {
-        "travelling": [
-            "What?is that¡­¡­£¿",
-            "Let me have a look¡­¡­£¿",
-            "wanna¡­¡­get there¡­¡­"
+        "Travelling": [
+            "What?is that...?",
+            "Let me have a look...?",
+            "wanna...get there..."
         ],
-        "idle": [
-            "So quiet¡­¡­",
-            "No prey¡­¡­",
-            "Break time¡­¡­"
+        "Idle": [
+            "So quiet...",
+            "No prey...",
+            "Break time..."
         ],
-        "idlefriend": [
+        "IdleFriend": [
             "Friend...",
             "Follow them...",
-            "My lord..."
+            "Mylord..."
         ],
-        "hunt": [
-            "Food£¡",
-            "Follow it£¡",
-            "Hold it£¡"
+        "Hunt": [
+            "Food!",
+            "Follow it!",
+            "Holdit!"
         ],
-        "flee": [
-            "Monster£¿£¡",
-            "Run£¡",
-            "Watch out£¡"
+        "Flee": [
+            "Monster?!",
+            "Run!",
+            "Watch out!"
         ],
-        "escaperain": [
-            "It's raining£¡",
-            "Flood¡­¡­is coming¡­¡­",
-            "Go Home£¡",
-            "I am leaving£¡"
+        "EscapeRain": [
+            "It's raining!",
+            "Flood...is coming...",
+            "Go Home!",
+            "I am leaving!"
         ],
-        "returnprey": [
-            "Food¡­¡­gotcha¡­¡­",
-            "Go back¡­¡­",
-            "Store it¡­¡­"
+        "ReturnPrey": [
+            "Food...gotcha...",
+            "Go back...",
+            "Store it..."
         ],
-        "injured": [
-            "It hurts£¡",
-            "Ouch£¡",
-            "Ah£¡"
+        "Injured": [
+            "It hurts!",
+            "Ouch!",
+            "Ah!"
         ],
-        "fighting?": [
-            "Bite£¡",
-            "Fight£¡",
-            "Halt£¡"
+        "Fighting": [
+            "Bite!",
+            "Fight!",
+            "Halt!"
         ],
-        "frustrated": [
-            "It flees¡­¡­",
-            "What a pity¡­¡­",
-            "I failed¡­¡­"
+        "Frustrated": [
+            "It flees...",
+            "What a pity...",
+            "I failed..."
         ],
-        "actingoutmission?": [
-            "Go away£¡",
-            "Stand back£¡",
-            "Back off£¡"
+        "ActingOutMission": [
+            "Go away!",
+            "Stand back!",
+            "Back off!"
         ],
-        "lurk": [],
-        "standard": [],
-        "hearsound?": [
-            "What's that noise£¿",
-            "Have a look¡­¡­",
-            "Prey£¿"
+        "Lurk": [],
+        "Standard": [],
+        "HearSound": [
+            "What's that noise?",
+            "Have a look...",
+            "Prey?"
         ],
-        "investigatesound": [
-            "Take a look¡­¡­",
-            "Pray£¿"
+        "InvestigateSound": [
+            "Take a look...",
+            "Pray?"
         ],
-        "preyrespotted": [
-            "You again£¡",
-            "Don't move£¡"
+        "PreyReSpotted": [
+            "You again!",
+            "Don't move!"
         ],
-        "preyspotted": [
-            "Food£¡",
-            "Freeze£¡",
-            "Want to eat¡­¡­"
+        "PreySpotted": [
+            "Food!",
+            "Freeze!",
+            "Want to eat..."
         ],
-        "fightingstance": [
-            "Go away£¡",
-            "Back off£¡",
-            "Go to hell£¡",
-            "Get out of there£¡"
+        "FightingStance": [
+            "Go away!",
+            "Back off!",
+            "Go to hell!",
+            "Get out of there!"
         ],
-        "threatspotted": [
-            "Monster£¡",
-            "Run£¡",
-            "Hide£¡"
+        "ThreatSpotted": [
+            "Monster!",
+            "Run!",
+            "Hide!"
         ],
-        "threatrespotted": [
-            "Again£¿£¡",
-            "Please go¡­¡­",
-            "Hide again¡­¡­"
+        "ThreatReSpotted": [
+            "Again?!",
+            "Please go...",
+            "Hide again..."
         ],
-        "shoottongue": [
+        "ShootTongue": [
             "Give me this",
             "I'll take it!"  
         ],
-        "spit": [],
-        "lounge": [
-            "Come here£¡",
-            "I'll kill you£¡",
-            "Don't move£¡"
+        "Spit": [],
+        "Lounge": [
+            "Come here!",
+            "I'll kill you!",
+            "Don't move!"
         ],
-        "shakeprey?": [
+        "ShakePrey": [
             "Now you can't run away!",
-            "nice¡­¡­",
-            "Success¡­¡­"
+            "nice...",
+            "Success..."
         ]
     },
     "GreenLizard": {
         "Travelling":[],
         "Idle": [],
-        "Idle2": [],
+        "IdleFriend":[],
         "Hunt": [],
         "Flee": [],
         "EscapeRain": [],
         "ReturnPrey": [],
         "Injured": [],
-        "Fighting ": [],
+        "Fighting": [],
         "Frustrated": [],
-        "ActingOutMission ": [],
+        "ActingOutMission": [],
         "Lurk": [],
-        "-":[],
         "Standard": [],
-        "HearSound ": [],
+        "HearSound": [],
         "InvestigateSound": [],
         "PreyReSpotted": [],
         "PreySpotted": [],
@@ -133,24 +132,23 @@
         "ShootTongue": [],
         "Spit": [],
         "Lounge": [],
-        "ShakePrey ": []
+        "ShakePrey": []
     },
     "BlueLizard": {
         "Travelling":[],
         "Idle": [],
-        "Idle2": [],
+        "IdleFriend":[],
         "Hunt": [],
         "Flee": [],
         "EscapeRain": [],
         "ReturnPrey": [],
         "Injured": [],
-        "Fighting ": [],
+        "Fighting": [],
         "Frustrated": [],
-        "ActingOutMission ": [],
+        "ActingOutMission": [],
         "Lurk": [],
-        "-":[],
         "Standard": [],
-        "HearSound ": [],
+        "HearSound": [],
         "InvestigateSound": [],
         "PreyReSpotted": [],
         "PreySpotted": [],
@@ -160,24 +158,23 @@
         "ShootTongue": [],
         "Spit": [],
         "Lounge": [],
-        "ShakePrey ": []
+        "ShakePrey": []
     },
     "YellowLizard": {
         "Travelling":[],
         "Idle": [],
-        "Idle2": [],
+        "IdleFriend":[],
         "Hunt": [],
         "Flee": [],
         "EscapeRain": [],
         "ReturnPrey": [],
         "Injured": [],
-        "Fighting ": [],
+        "Fighting": [],
         "Frustrated": [],
-        "ActingOutMission ": [],
+        "ActingOutMission": [],
         "Lurk": [],
-        "-":[],
         "Standard": [],
-        "HearSound ": [],
+        "HearSound": [],
         "InvestigateSound": [],
         "PreyReSpotted": [],
         "PreySpotted": [],
@@ -187,24 +184,23 @@
         "ShootTongue": [],
         "Spit": [],
         "Lounge": [],
-        "ShakePrey ": []
+        "ShakePrey": []
     },
     "WhiteLizard": {
         "Travelling":[],
         "Idle": [],
-        "Idle2": [],
+        "IdleFriend":[],
         "Hunt": [],
         "Flee": [],
         "EscapeRain": [],
         "ReturnPrey": [],
         "Injured": [],
-        "Fighting ": [],
+        "Fighting": [],
         "Frustrated": [],
-        "ActingOutMission ": [],
+        "ActingOutMission": [],
         "Lurk": [],
-        "-":[],
         "Standard": [],
-        "HearSound ": [],
+        "HearSound": [],
         "InvestigateSound": [],
         "PreyReSpotted": [],
         "PreySpotted": [],
@@ -214,24 +210,23 @@
         "ShootTongue": [],
         "Spit": [],
         "Lounge": [],
-        "ShakePrey ": []
+        "ShakePrey": []
     },
     "RedLizard": {
         "Travelling":[],
         "Idle": [],
-        "Idle2": [],
+        "IdleFriend":[],
         "Hunt": [],
         "Flee": [],
         "EscapeRain": [],
         "ReturnPrey": [],
         "Injured": [],
-        "Fighting ": [],
+        "Fighting": [],
         "Frustrated": [],
-        "ActingOutMission ": [],
+        "ActingOutMission": [],
         "Lurk": [],
-        "-":[],
         "Standard": [],
-        "HearSound ": [],
+        "HearSound": [],
         "InvestigateSound": [],
         "PreyReSpotted": [],
         "PreySpotted": [],
@@ -241,24 +236,23 @@
         "ShootTongue": [],
         "Spit": [],
         "Lounge": [],
-        "ShakePrey ": []
+        "ShakePrey": []
     },
     "BlackLizard": {
         "Travelling":[],
         "Idle": [],
-        "Idle2": [],
+        "IdleFriend":[],
         "Hunt": [],
         "Flee": [],
         "EscapeRain": [],
         "ReturnPrey": [],
         "Injured": [],
-        "Fighting ": [],
+        "Fighting": [],
         "Frustrated": [],
-        "ActingOutMission ": [],
+        "ActingOutMission": [],
         "Lurk": [],
-        "-":[],
         "Standard": [],
-        "HearSound ": [],
+        "HearSound": [],
         "InvestigateSound": [],
         "PreyReSpotted": [],
         "PreySpotted": [],
@@ -268,24 +262,23 @@
         "ShootTongue": [],
         "Spit": [],
         "Lounge": [],
-        "ShakePrey ": []
+        "ShakePrey": []
     },
     "Salamander": {
         "Travelling":[],
         "Idle": [],
-        "Idle2": [],
+        "IdleFriend":[],
         "Hunt": [],
         "Flee": [],
         "EscapeRain": [],
         "ReturnPrey": [],
         "Injured": [],
-        "Fighting ": [],
+        "Fighting": [],
         "Frustrated": [],
-        "ActingOutMission ": [],
+        "ActingOutMission": [],
         "Lurk": [],
-        "-":[],
         "Standard": [],
-        "HearSound ": [],
+        "HearSound": [],
         "InvestigateSound": [],
         "PreyReSpotted": [],
         "PreySpotted": [],
@@ -295,24 +288,23 @@
         "ShootTongue": [],
         "Spit": [],
         "Lounge": [],
-        "ShakePrey ": []
+        "ShakePrey": []
     },
     "CyanLizard": {
         "Travelling":[],
         "Idle": [],
-        "Idle2": [],
+        "IdleFriend":[],
         "Hunt": [],
         "Flee": [],
         "EscapeRain": [],
         "ReturnPrey": [],
         "Injured": [],
-        "Fighting ": [],
+        "Fighting": [],
         "Frustrated": [],
-        "ActingOutMission ": [],
+        "ActingOutMission": [],
         "Lurk": [],
-        "-":[],
         "Standard": [],
-        "HearSound ": [],
+        "HearSound": [],
         "InvestigateSound": [],
         "PreyReSpotted": [],
         "PreySpotted": [],
@@ -322,24 +314,23 @@
         "ShootTongue": [],
         "Spit": [],
         "Lounge": [],
-        "ShakePrey ": []
+        "ShakePrey": []
     },
     "SpitLizard": {
         "Travelling":[],
         "Idle": [],
-        "Idle2": [],
+        "IdleFriend":[],
         "Hunt": [],
         "Flee": [],
         "EscapeRain": [],
         "ReturnPrey": [],
         "Injured": [],
-        "Fighting ": [],
+        "Fighting": [],
         "Frustrated": [],
-        "ActingOutMission ": [],
+        "ActingOutMission": [],
         "Lurk": [],
-        "-":[],
         "Standard": [],
-        "HearSound ": [],
+        "HearSound": [],
         "InvestigateSound": [],
         "PreyReSpotted": [],
         "PreySpotted": [],
@@ -349,24 +340,23 @@
         "ShootTongue": [],
         "Spit": [],
         "Lounge": [],
-        "ShakePrey ": []
+        "ShakePrey": []
     },
     "EelLizard": {
         "Travelling":[],
         "Idle": [],
-        "Idle2": [],
+        "IdleFriend":[],
         "Hunt": [],
         "Flee": [],
         "EscapeRain": [],
         "ReturnPrey": [],
         "Injured": [],
-        "Fighting ": [],
+        "Fighting": [],
         "Frustrated": [],
-        "ActingOutMission ": [],
+        "ActingOutMission": [],
         "Lurk": [],
-        "-":[],
         "Standard": [],
-        "HearSound ": [],
+        "HearSound": [],
         "InvestigateSound": [],
         "PreyReSpotted": [],
         "PreySpotted": [],
@@ -376,24 +366,23 @@
         "ShootTongue": [],
         "Spit": [],
         "Lounge": [],
-        "ShakePrey ": []
+        "ShakePrey": []
     },
     "ZoopLizard": {
         "Travelling":[],
         "Idle": [],
-        "Idle2": [],
+        "IdleFriend":[],
         "Hunt": [],
         "Flee": [],
         "EscapeRain": [],
         "ReturnPrey": [],
         "Injured": [],
-        "Fighting ": [],
+        "Fighting": [],
         "Frustrated": [],
-        "ActingOutMission ": [],
+        "ActingOutMission": [],
         "Lurk": [],
-        "-":[],
         "Standard": [],
-        "HearSound ": [],
+        "HearSound": [],
         "InvestigateSound": [],
         "PreyReSpotted": [],
         "PreySpotted": [],
@@ -403,6 +392,6 @@
         "ShootTongue": [],
         "Spit": [],
         "Lounge": [],
-        "ShakePrey ": []
+        "ShakePrey": []
     }
 }
