@@ -8,7 +8,7 @@ using Pkuyo.Wanderer.Options;
 
 namespace Pkuyo.Wanderer
 {
-    [BepInPlugin("pkuyo.thewanderer", "The Wanderer", "1.0.0")]
+    [BepInPlugin("pkuyo.thevanguard", "The Vanguard", "1.0.0")]
     public class WandererCharacterMod : BaseUnityPlugin
     {
         public WandererCharacterMod()
@@ -41,6 +41,8 @@ namespace Pkuyo.Wanderer
             {
                 Logger.LogError(e.Message + e.StackTrace);
             }
+            //TODO : 防止重复加载
+            Futile.atlasManager.LoadAtlas("atlases/wandererSprite");
         }
 
         private List<FeatureBase> _features;

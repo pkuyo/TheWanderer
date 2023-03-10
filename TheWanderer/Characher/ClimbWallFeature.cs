@@ -142,8 +142,8 @@ namespace Pkuyo.Wanderer.Characher
 
         public bool IsClimb = false;
 
-        public float MaxSpeed = 7;
-        public float DefaultSpeed = 7;
+        public float MaxSpeed = 1;
+        public float DefaultSpeed = 3;
         public readonly float BodyWidth = 6;
 
         ManualLogSource _log;
@@ -212,9 +212,9 @@ namespace Pkuyo.Wanderer.Characher
             if (IsClimb)
             {
                 //设置状态
-                if ((owner.bodyMode == Player.BodyModeIndex.Default
-                    || owner.bodyMode == Player.BodyModeIndex.WallClimb
-                    || owner.bodyMode == Player.BodyModeIndex.ClimbingOnBeam) || owner.bodyMode == WandererModEnum.PlayerBodyModeIndex.ClimbBackWall)
+                if (owner.bodyMode == Player.BodyModeIndex.Default
+                    || owner.bodyMode == Player.BodyModeIndex.WallClimb || owner.bodyMode == Player.BodyModeIndex.ZeroG
+                    || owner.bodyMode == Player.BodyModeIndex.ClimbingOnBeam || owner.bodyMode == WandererModEnum.PlayerBodyModeIndex.ClimbBackWall)
                 {
                     owner.bodyMode = WandererModEnum.PlayerBodyModeIndex.ClimbBackWall;
                     //防止卡杆子
@@ -252,18 +252,18 @@ namespace Pkuyo.Wanderer.Characher
             {
                
                 //速度计算
-                vel.y = owner.input[0].y * 4f;
-                vel.x = owner.input[0].x * 6f;
+                vel.y += owner.input[0].y * 4f * MaxSpeed;
+                vel.x += owner.input[0].x * 6f * MaxSpeed;
                 vel = (vel.magnitude > Mathf.Lerp(0, MaxSpeed * DefaultSpeed,
-                    (10 - SlowDownCount) / 10.0f)) ? vel.normalized * Mathf.Lerp(0, MaxSpeed * DefaultSpeed, (10 - SlowDownCount) / 10.0f) : vel;
+                   Mathf.Pow((10 - SlowDownCount) / 10.0f,0.5f))) ? vel.normalized * Mathf.Lerp(0, MaxSpeed * DefaultSpeed, Mathf.Pow((10 - SlowDownCount) / 10.0f, 0.5f)) : vel;
 
                 //速度衰减
                 vel *= owner.airFriction;
 
                 //计算边界位置 并尝试减速
                 var pos = owner.mainBodyChunk.pos;
-                if (CheckCanClimb(owner, pos, Custom.DirVec(owner.bodyChunks[0].pos, owner.bodyChunks[1].pos), BodyWidth, new Vector2(vel.x, 0.0f)) == 0) vel.x *= 0.3f;
-                if (CheckCanClimb(owner, pos, Custom.DirVec(owner.bodyChunks[0].pos, owner.bodyChunks[1].pos), BodyWidth, new Vector2(0.0f, vel.y)) == 0) vel.y *= 0.3f;
+                if (CheckCanClimb(owner, pos, Custom.DirVec(owner.bodyChunks[0].pos, owner.bodyChunks[1].pos), BodyWidth, new Vector2(vel.x, 0.0f)) == 0) vel.x *= 0.5f;
+                if (CheckCanClimb(owner, pos, Custom.DirVec(owner.bodyChunks[0].pos, owner.bodyChunks[1].pos), BodyWidth, new Vector2(0.0f, vel.y)) == 0) vel.y *= 0.5f;
 
                 owner.bodyChunks[0].vel = owner.bodyChunks[1].vel = BodyVel = vel;
 

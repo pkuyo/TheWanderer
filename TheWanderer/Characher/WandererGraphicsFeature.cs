@@ -143,10 +143,13 @@ namespace Pkuyo.Wanderer.Characher
 				return;
 
 			AddCosmetic(new WandererTailEffect(self, _log));
-			AddCosmetic(new WandererLongHair(self, _log));
+			AddCosmetic(new WandererBodyFront(self, _log));
 			AddCosmetic(new WandererTailFin(self, _log));
 			AddCosmetic(new WandererSpineSpikes(self, _log));
-			AddCosmetic(new WandererBumpHawk(self, _log));
+			AddCosmetic(new WandererLongHair(self, _log));
+
+		
+			//AddCosmetic(new WandererBumpHawk(self, _log));
 		}
 
 		private void AddCosmetic(CosmeticBase cosmetic)

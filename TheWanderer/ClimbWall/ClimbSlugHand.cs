@@ -63,10 +63,13 @@ namespace Pkuyo.Wanderer.Characher
         }
         private bool SlugcatHand_EngageInMovement(On.SlugcatHand.orig_EngageInMovement orig, SlugcatHand self)
         {
+
             var re = orig(self);
             Player player;
             if (_HandOwner.TryGetValue(self, out player) && player != null)
             {
+                float maxSpeed;
+                ClimbWallFeature.ClimbWallSpeed.TryGet(player, out maxSpeed);
                 if (player.bodyMode == WandererModEnum.PlayerBodyModeIndex.ClimbBackWall)
                 {
                     ClimbSlugHand data;
@@ -98,9 +101,11 @@ namespace Pkuyo.Wanderer.Characher
                         PlayerBackClimb backwall = null;
                         if (data.playerBackClimbRef.TryGetTarget(out backwall))
                         {
-                            backwall.SlowDownCount += 5;
+                            backwall.SlowDownCount += (int)(5 / maxSpeed);
                             backwall.SlowDownCount = Mathf.Min(backwall.SlowDownCount, 9);
                         }
+                        else
+                            throw new Exception();
                     }
                     return false;
                 }

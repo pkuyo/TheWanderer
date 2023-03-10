@@ -105,7 +105,7 @@
     <Compile Include="Characher\ScareLizardFeature.cs" />
     <Compile Include="Characher\WandererGraphicsFeature.cs" />
     <Compile Include="Cosmetic\CosmeticBase.cs" />
-    <Compile Include="Cosmetic\WandererBumpHawk.cs" />
+    <Compile Include="Cosmetic\WandererBodyFront.cs" />
     <Compile Include="Cosmetic\WandererLongHair.cs" />
     <Compile Include="Cosmetic\WandererSpineSpikes.cs" />
     <Compile Include="Cosmetic\WandererTailEffect.cs" />

@@ -1,5 +1,6 @@
 ﻿using BepInEx.Logging;
 using HUD;
+using RWCustom;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -13,7 +14,9 @@ namespace Pkuyo.Wanderer.LizardMessage
     {
         public WandererLizard(Lizard self)
         {
-            lizardRef = new WeakReference<Lizard>(self);         
+            lizardRef = new WeakReference<Lizard>(self);
+            ConstantCounter =  Random.Range(0, 200);
+            InstantCounter = Random.Range(0, 200);
         }
 
         //false代表程序错误
@@ -109,15 +112,54 @@ namespace Pkuyo.Wanderer.LizardMessage
         {
             _camera = camera;
             _room = target.abstractCreature.Room.realizedRoom;
-            _pos = target.mainBodyChunk.pos +new Vector2(25.0f,25.0f);
+            _pos = target.mainBodyChunk.pos +new Vector2(Random.Range(-25,25),25.0f + Random.Range(-10, 10));
             Priority = pri;
-            base.NewMessage(message,60);
+
+            float dis = 10000f;
+            float like = 0;
+
+            //朋友蜥蜴蓝色
+            if (target.AI.friendTracker.friend != null && target.AI.friendTracker.friend is Player && target.AI.friendTracker.followClosestFriend)
+                currentColor = new Color(79 / 255f, 208 / 255f, 234 / 255f);
+            //根据距离最近的玩家设置好感度
+            if (_room != null)
+            {
+                foreach(var player in _room.PlayersInRoom)
+                {
+                    if(player.slugcatStats.name.value == "wanderer" && Custom.DistLess(player.mainBodyChunk.pos,target.mainBodyChunk.pos,dis))
+                    {
+                        dis = Custom.Dist(player.mainBodyChunk.pos, target.mainBodyChunk.pos);
+                        like = LikeOfPlayer(target, player);
+                    }
+                }
+            }
+
+            currentColor = Color.Lerp(Color.red,Color.green,Mathf.InverseLerp(-1,1, like));
+            NewMessage(message,60);
+        }
+
+        public float LikeOfPlayer(Lizard lizard,Player player)
+        {
+            var ai = lizard.AI;
+            if (player == null)
+            {
+                return 0f;
+            }
+            float num = ai.creature.world.game.session.creatureCommunities.LikeOfPlayer(ai.creature.creatureTemplate.communityID, ai.creature.world.RegionNumber, (player.State as PlayerState).playerNumber);
+            num = Mathf.Lerp(num, -lizard.spawnDataEvil, Mathf.Abs(lizard.spawnDataEvil));
+            float tempLike = ai.creature.state.socialMemory.GetTempLike(player.abstractCreature.ID);
+            num = Mathf.Lerp(num, tempLike, Mathf.Abs(tempLike));
+            if (ai.friendTracker.giftOfferedToMe != null && ai.friendTracker.giftOfferedToMe.owner == player)
+            {
+                num = Custom.LerpMap(num, -0.5f, 1f, 0f, 1f, 0.8f);
+            }
+            return num;
         }
 
         public override void Update()
         {
             base.Update();
-            if (this._camera.room != this._room || this.messages.Count == 0)
+            if (_room == null || _camera.room != _room || messages.Count == 0)
             {
                 this.slatedForDeletion = true;
                 this._room = null;
@@ -259,6 +301,8 @@ namespace Pkuyo.Wanderer.LizardMessage
                 fileStream.Read(a, 0, (int)fileStream.Length);
                 var all = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, int>>(Encoding.UTF8.GetString(a));
                 bool flag = false; //是否到达anim区段
+
+                //TODO 化简 写的什么破烂
                 foreach (var pri in all)
                 {
                     if (pri.Value == -1)

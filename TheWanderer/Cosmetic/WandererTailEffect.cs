@@ -52,7 +52,12 @@ namespace Pkuyo.Wanderer.Cosmetic
 
             var mesh = (sLeaser.sprites[2] as TriangleMesh);
             for (int i = 0; i < mesh.verticeColors.Length; i++)
-                mesh.verticeColors[i] = Color.Lerp(GetBodyColor(iGraphics), GetFaceColor(iGraphics, rCam), Mathf.Pow(Mathf.InverseLerp(0, mesh.verticeColors.Length, i), 3f));
+                if (i >= 7 && i<=9)
+                    mesh.verticeColors[i] = Color.Lerp(GetBodyColor(iGraphics), GetFaceColor(iGraphics, rCam), Mathf.Pow(Mathf.InverseLerp(7, 9, i), 3f));
+                else if (i < 7)
+                    mesh.verticeColors[i] = GetBodyColor(iGraphics);
+                else
+                    mesh.verticeColors[i] = GetFaceColor(iGraphics, rCam);
         }
     }
 }

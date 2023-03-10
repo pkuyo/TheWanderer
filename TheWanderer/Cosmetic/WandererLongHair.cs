@@ -37,34 +37,52 @@ namespace Pkuyo.Wanderer.Cosmetic
             if (!iGraphicsRef.TryGetTarget(out iGraphics))
                 return;
 
+            Vector2 drawPos1 = Vector2.Lerp(iGraphics.drawPositions[1, 1], iGraphics.drawPositions[1, 0], timeStacker);
+            Vector2 headPos = Vector2.Lerp(iGraphics.head.lastPos, iGraphics.head.pos, timeStacker);
+
+            //通过身体角度判断移动
+            var moveDeg = Mathf.Clamp(Custom.AimFromOneVectorToAnother(Vector2.zero, (headPos - drawPos1).normalized), -22.5f, 22.5f);
+
+            //实际头发偏移
+            var nowHairSpacing = HairSpacing * ((Mathf.Abs(moveDeg) > 10) ? 0.3f : 1f);
+
+            //还原图层
+            for (int i = 0; i < 2; i++)
+                sLeaser.sprites[startSprite + i].MoveInFrontOfOtherNode(sLeaser.sprites[startSprite - 1 + i]);
+
+            //设置图层
+            if (moveDeg > 10f)
+                sLeaser.sprites[startSprite].MoveBehindOtherNode(sLeaser.sprites[0]);
+            else if(moveDeg < -10f)
+                sLeaser.sprites[startSprite + 1].MoveBehindOtherNode(sLeaser.sprites[0]);
+
             for (int k=0;k<2;k++)
             {
-                var dir = Custom.DirVec(iGraphics.owner.bodyChunks[0].pos, iGraphics.owner.bodyChunks[1].pos).normalized;
-                var RootPos = iGraphics.head.pos + (k == 0 ? -1 : 1) * Custom.PerpendicularVector(dir).normalized * HairSpacing + dir * -0f;
+                var dir = Custom.DirVec(iGraphics.drawPositions[0, 0], iGraphics.drawPositions[1, 0]).normalized;
+                var rootPos = iGraphics.head.pos + (k == 0 ? -1 : 1) * Custom.PerpendicularVector(dir).normalized * nowHairSpacing + dir * -0.2f;
 
-                Vector2 vector = RootPos;
-                var lastDir = Custom.DirVec(iGraphics.owner.bodyChunks[0].lastPos, iGraphics.owner.bodyChunks[1].lastPos).normalized;
-                Vector2 vector2 = Vector2.Lerp(iGraphics.head.lastPos + (k == 0 ? -1 : 1) * Custom.PerpendicularVector(lastDir).normalized * HairSpacing + lastDir * 5f, RootPos, timeStacker);
-                Vector2 vector4 = (vector2 * 3f + vector) / 4f;
+                var lastDir = Custom.DirVec(iGraphics.drawPositions[0,1], iGraphics.drawPositions[1, 1]).normalized;
+                Vector2 vector2 = Vector2.Lerp(iGraphics.head.lastPos + (k == 0 ? -1 : 1) * Custom.PerpendicularVector(lastDir).normalized * nowHairSpacing + lastDir * 5f, rootPos, timeStacker);
+                Vector2 vector4 = (vector2 * 3f + rootPos) / 4f;
                 float HairWidth = 0.2f;
                 float d2 = 6f;
                 for (int i = 0; i < 4; i++)
                 {
                     Vector2 vector5 = Vector2.Lerp(Hairs[k * 4 + i].lastPos, Hairs[k * 4 + i].pos, timeStacker);
                     Vector2 normalized = (vector5 - vector4).normalized;
-                    Vector2 a = Custom.PerpendicularVector(normalized);
+                    Vector2 widthDir = Custom.PerpendicularVector(normalized);
                     float d3 = Vector2.Distance(vector5, vector4) / 5f;
                     if (i == 0)
                     {
                         d3 = 0f;
                     }
                     //设置坐标
-                    (sLeaser.sprites[startSprite+k] as TriangleMesh).MoveVertice(i * 4, vector4 - a * d2 * HairWidth + normalized * d3 - camPos);
-                    (sLeaser.sprites[startSprite+k] as TriangleMesh).MoveVertice(i * 4 + 1, vector4 + a * d2 * HairWidth + normalized * d3 - camPos);
+                    (sLeaser.sprites[startSprite+k] as TriangleMesh).MoveVertice(i * 4, vector4 - widthDir * d2 * HairWidth + normalized * d3 - camPos);
+                    (sLeaser.sprites[startSprite+k] as TriangleMesh).MoveVertice(i * 4 + 1, vector4 + widthDir * d2 * HairWidth + normalized * d3 - camPos);
                     if (i < 3)
                     {
-                        (sLeaser.sprites[startSprite+k] as TriangleMesh).MoveVertice(i * 4 + 2, vector5 - a * Hairs[k * 4 + i].StretchedRad * HairWidth - normalized * d3 - camPos);
-                        (sLeaser.sprites[startSprite+k] as TriangleMesh).MoveVertice(i * 4 + 3, vector5 + a * Hairs[k * 4 + i].StretchedRad * HairWidth - normalized * d3 - camPos);
+                        (sLeaser.sprites[startSprite+k] as TriangleMesh).MoveVertice(i * 4 + 2, vector5 - widthDir * Hairs[k * 4 + i].StretchedRad * HairWidth - normalized * d3 - camPos);
+                        (sLeaser.sprites[startSprite+k] as TriangleMesh).MoveVertice(i * 4 + 3, vector5 + widthDir * Hairs[k * 4 + i].StretchedRad * HairWidth - normalized * d3 - camPos);
                     }
                     else
                     {
@@ -130,19 +148,30 @@ namespace Pkuyo.Wanderer.Cosmetic
             if (!iGraphicsRef.TryGetTarget(out iGraphics))
                 return;
 
+
+            var player = (iGraphics.owner as Player);
+            Vector2 drawPos1 = iGraphics.drawPositions[1, 1];
+            Vector2 headPos = iGraphics.head.pos;
+
+            //通过身体角度判断移动
+            var moveDeg = Mathf.Clamp(Custom.AimFromOneVectorToAnother(Vector2.zero, (headPos - drawPos1).normalized), -22.5f, 22.5f);
+            //实际头发偏移
+            var nowHairSpacing = HairSpacing * ((Mathf.Abs(moveDeg) >10) ? 0.3f : 1f);
+
+
+
             for (int i = 0; i < 2; i++)
             {
                 var dir = Custom.DirVec(iGraphics.owner.bodyChunks[0].pos, iGraphics.owner.bodyChunks[1].pos).normalized;
-                var RootPos = iGraphics.head.pos + (i == 0 ? -1 : 1) * Custom.PerpendicularVector(dir).normalized * HairSpacing + dir * -0f;
+                var rootPos = iGraphics.head.pos + (i == 0 ? -1 : 1) * Custom.PerpendicularVector(dir).normalized * nowHairSpacing + dir * -0.2f;
 
                 var num3 = 1f - Mathf.Clamp((Mathf.Abs(iGraphics.owner.bodyChunks[1].vel.x) - 1f) * 0.5f, 0f, 1f);
-                bool flag = (Mathf.Abs(iGraphics.owner.bodyChunks[0].vel.x) > 2f && Mathf.Abs(iGraphics.owner.bodyChunks[1].vel.x) > 2f);
-                Vector2 vector2 = RootPos;
 
-                Vector2 pos = RootPos;
+                Vector2 vector2 = rootPos;
+                Vector2 pos = rootPos;
                 float num9 = 28f;
 
-                Hairs[i*4].connectedPoint = new Vector2?(RootPos);
+                Hairs[i*4].connectedPoint = new Vector2?(rootPos);
                 for (int k = 0; k < 4; k++)
                 {
                     Hairs[k + i * 4].Update();
@@ -150,10 +179,13 @@ namespace Pkuyo.Wanderer.Cosmetic
                     TailSegment tailSegment7 = Hairs[k + i * 4];
                     tailSegment7.vel.y = tailSegment7.vel.y - Mathf.Lerp(0.1f, 0.5f, num3) * (1f - iGraphics.owner.bodyChunks[1].submersion) * iGraphics.owner.EffectiveRoomGravity;
                     num3 = (num3 * 10f + 1f) / 11f;
-                    if (!Custom.DistLess(Hairs[k + i * 4].pos, RootPos, MaxLength * (float)(k + 1)))
+
+                    //超出长度限位
+                    if (!Custom.DistLess(Hairs[k + i * 4].pos, rootPos, MaxLength * (float)(k + 1)))
                     {
-                        Hairs[k + i * 4].pos = RootPos + Custom.DirVec(RootPos, Hairs[k + i * 4].pos) * MaxLength * (float)(k + 1);
+                        Hairs[k + i * 4].pos = rootPos + Custom.DirVec(rootPos, Hairs[k + i * 4].pos) * MaxLength * (float)(k + 1);
                     }
+
                     Hairs[k + i * 4].vel += Custom.DirVec(vector2, Hairs[k + i * 4].pos) * num9 / Vector2.Distance(vector2, Hairs[k + i * 4].pos);
                     num9 *= 0.5f;
                     vector2 = pos;

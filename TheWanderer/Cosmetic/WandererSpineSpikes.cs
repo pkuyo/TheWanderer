@@ -30,13 +30,13 @@ namespace Pkuyo.Wanderer.Cosmetic
 			sizeMax = Mathf.Min(sizeMax, 0.6f);
 			
 			sizeExponent = 0.6f;
-			bumps = 7;
+			bumps = 4;
 			if (graphics.RenderAsPup)
 			{
 				bumps = 3;
 			}
 
-			scaleX = 0.7f*2;
+			scaleX = 0.7f*2f;
 			graphic = 0;
 			numberOfSprites = ((colored) ? (bumps * 2) : bumps);
 		}
@@ -65,7 +65,7 @@ namespace Pkuyo.Wanderer.Cosmetic
 					sLeaser.sprites[i + bumps].y = SpineData.outerPos.y - camPos.y;
 					sLeaser.sprites[i + bumps].rotation = Custom.AimFromOneVectorToAnother(-SpineData.perp * SpineData.depthRotation, SpineData.perp * SpineData.depthRotation);
 					sLeaser.sprites[i + bumps].scaleX = Mathf.Sign(iGraphicsDepthRotation) * scaleX * num2 ;
-					sLeaser.sprites[i + bumps].scaleY = num2 * Mathf.Max(0.2f, Mathf.InverseLerp(0f, 0.5f, Mathf.Abs(iGraphicsDepthRotation))) * 1;
+					sLeaser.sprites[i + bumps].scaleY = num2 * Mathf.Max(0.2f, Mathf.InverseLerp(0f, 0.5f, Mathf.Abs(iGraphicsDepthRotation))) * 1.5f;
 				}
 			}
 		}
