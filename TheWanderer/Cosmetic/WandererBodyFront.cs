@@ -91,7 +91,7 @@ namespace Pkuyo.Wanderer.Cosmetic
                 if (iGraphicsRef.TryGetTarget(out owner))
                 {
                     var bodyColor = GetBodyColor(owner);
-                    var faceColor = GetFaceColor(owner, rCam);
+                    var faceColor = GetFaceColor(owner);
 
                     bodyFront.verticeColors[0] = Color.Lerp(bodyColor, faceColor, 1);
                     bodyFront.verticeColors[1] = Color.Lerp(bodyColor, faceColor, 1);
@@ -103,8 +103,8 @@ namespace Pkuyo.Wanderer.Cosmetic
             }
         }
 
-        private float HeightSize = 0.4f;
+        private float HeightSize = 0.5f;
         private float SideHeight = 0.1f;
-        private float StartHeight = -0.3f;
+        private float StartHeight = -0.35f;
     }
 }

@@ -1,0 +1,12 @@
+{
+	"id": "sleep-wanderer",
+	"scene_folder": "slugbase/scenes/sleep-wanderer",
+	"images": [
+		{"name": "sleep_wander_flat", "pos": [750, 80], "depth": -1.0, "flatmode": true},
+		{"name": "sleep_wander_white", "pos": [498, -38], "depth": 4.8, "shader": "Basic"},
+		{"name": "sleep_wander_grass", "pos": [750, 80], "depth": 4, "shader": "Basic"},
+		{"name": "sleep_wander_main", "pos": [750, 80], "depth": 3, "shader": "Basic"}
+	],
+	"idle_depths": [2.9],
+	"sleep scene_depth": 3.0
+}

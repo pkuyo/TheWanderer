@@ -86,6 +86,10 @@
     <Reference Include="UnityEngine">
       <HintPath>..\..\..\SteamLibrary\steamapps\common\Rain World\RainWorld_Data\Managed\UnityEngine.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEngine.AssetBundleModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\SteamLibrary\steamapps\common\Rain World\RainWorld_Data\Managed\UnityEngine.AssetBundleModule.dll</HintPath>
+    </Reference>
     <Reference Include="UnityEngine.CoreModule">
       <HintPath>..\..\..\SteamLibrary\steamapps\common\Rain World\RainWorld_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
     </Reference>
@@ -95,8 +99,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Characher\LizardRelationFeature.cs" />
+    <Compile Include="Characher\WandererAssetFeature.cs" />
     <Compile Include="Characher\WandererTurtorial.cs" />
-    <Compile Include="Characher\WandererRoomFeature.cs" />
     <Compile Include="ClimbWall\ClimbSlugHand.cs" />
     <Compile Include="Characher\ClimbWallFeature.cs" />
     <Compile Include="Characher\FeatureBase.cs" />
@@ -107,6 +111,7 @@
     <Compile Include="Cosmetic\CosmeticBase.cs" />
     <Compile Include="Cosmetic\WandererBodyFront.cs" />
     <Compile Include="Cosmetic\WandererLongHair.cs" />
+    <Compile Include="Cosmetic\WandererShaderTest.cs" />
     <Compile Include="Cosmetic\WandererSpineSpikes.cs" />
     <Compile Include="Cosmetic\WandererTailEffect.cs" />
     <Compile Include="Cosmetic\WandererTailFin.cs" />
@@ -119,10 +124,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
-    <None Include="LizardText\lizard_cn.json" />
-    <None Include="LizardText\lizard_en.json" />
-    <None Include="LizardText\longlist.json" />
-    <None Include="LizardText\shortlist.json" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

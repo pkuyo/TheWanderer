@@ -1,0 +1,6 @@
+The Vanguard|先驱者
+THE VANGUARD|先驱者
+While in the air, tap jump and pick-up together to climb background wall.|在空中同时按下跳跃和拾取可以攀爬背景墙。
+hold grab and throw to make a noise to scare lizards.|按住拾取和投掷可以发出异响来恐吓蜥蜴。
+Avoid hurting the lizards, try to have a good relationship with them!|避免伤害蜥蜴，尝试和它们交朋友吧！
+This is the description.<LINE>line 2.|探索未知的先驱者，凭借不可思议的移动手段游历世间。<LINE>行走在险峻的地形在你眼里如漫步一般，然而撑起在你身上沉重的责任可不是这么简单……

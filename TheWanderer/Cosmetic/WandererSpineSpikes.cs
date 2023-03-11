@@ -92,10 +92,10 @@ namespace Pkuyo.Wanderer.Cosmetic
 
 			for (int i = startSprite; i < startSprite + bumps; i++)
 			{
+				sLeaser.sprites[i].color = Color.Lerp(GetBodyColor(iGraphics), GetFaceColor(iGraphics),Mathf.InverseLerp(startSprite, startSprite + bumps-1, i));
 				if (colored)
 				{
-					float f = Mathf.InverseLerp(startSprite, (startSprite + bumps - 1), i);
-					sLeaser.sprites[i + bumps].color = Color.Lerp(GetBodyColor(iGraphics), GetFaceColor(iGraphics, rCam), Mathf.Pow(f, 0.5f));
+					sLeaser.sprites[i + bumps].color =  GetFaceColor(iGraphics);
 				}
 			}
 		}

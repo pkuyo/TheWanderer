@@ -148,8 +148,7 @@ namespace Pkuyo.Wanderer.Characher
 			AddCosmetic(new WandererSpineSpikes(self, _log));
 			AddCosmetic(new WandererLongHair(self, _log));
 
-		
-			//AddCosmetic(new WandererBumpHawk(self, _log));
+			//AddCosmetic(new WandererShaderTest(self, _log));
 		}
 
 		private void AddCosmetic(CosmeticBase cosmetic)
@@ -167,8 +166,11 @@ namespace Pkuyo.Wanderer.Characher
 			if ((self.owner as Player).slugcatStats.name.value != "wanderer")
 				return;
 
+			//位置更新
 			foreach (var cosmetic in Cosmetics)
+			{
 				cosmetic.DrawSprites(sLeaser, rCam, timeStacker, camPos);
+			}
 
 
 		}
@@ -199,8 +201,12 @@ namespace Pkuyo.Wanderer.Characher
 			else
 				Array.Resize(ref sLeaser.sprites, EndSprites);
 
+
+			//初始化贴图
 			foreach (var cosmetic in Cosmetics)
+			{
 				cosmetic.InitiateSprites(sLeaser, rCam);
+			}
 
 			FContainer newContatiner = rCam.ReturnFContainer("Midground");
 			for (int i = OriginSprites; i < EndSprites; i++)
@@ -214,6 +220,7 @@ namespace Pkuyo.Wanderer.Characher
 			if ((self.owner as Player).slugcatStats.name.value != "wanderer")
 				return;
 
+			//设置颜色
 			TailEffect.ApplyPalette(sLeaser, rCam, palette);
 			foreach (var cosmetic in Cosmetics)
 				cosmetic.ApplyPalette(sLeaser, rCam, palette);

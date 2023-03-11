@@ -110,7 +110,7 @@ namespace Pkuyo.Wanderer.Cosmetic
 					if (colored)
 					{
 						float f = Mathf.InverseLerp(startSprite, (startSprite + bumps - 1), j);
-						sLeaser.sprites[j + bumps + num].color = Color.Lerp(GetBodyColor(iGraphics), GetFaceColor(iGraphics,rCam), Mathf.Pow(f, 0.5f));
+						sLeaser.sprites[j + bumps + num].color = Color.Lerp(GetBodyColor(iGraphics), GetFaceColor(iGraphics), Mathf.Pow(f, 0.5f));
 					}
 				}
 

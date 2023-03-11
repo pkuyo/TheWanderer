@@ -80,13 +80,13 @@ namespace Pkuyo.Wanderer.LizardMessage
         //对外接口
         public static string GetRandomMessage(Lizard target,StatePriority priority)
         {
-            if(target.lizardParams.template == CreatureTemplate.Type.YellowLizard)
+            if (target.lizardParams.template == CreatureTemplate.Type.YellowLizard)
             {
                 string message = string.Empty;
                 int lastIndex = -1;
 
                 //构建乱码
-                for(int i=0;i<Random.Range(4,7);i++)
+                for (int i = 0; i < Random.Range(4, 7); i++)
                 {
                     int index;
                     while ((index = Random.Range(0, 9)) == lastIndex) ;
@@ -95,10 +95,10 @@ namespace Pkuyo.Wanderer.LizardMessage
                 }
                 return message;
             }
-            else if (priority._anim != null)
-                return GetRandomMessage(target, priority._anim.value);
+            else if (priority.State != null)
+                return GetRandomMessage(target, priority.State);
             else
-                return GetRandomMessage(target, priority._behavior.value);
+                return null;
         }
 
 

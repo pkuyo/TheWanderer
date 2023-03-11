@@ -15,8 +15,10 @@ namespace Pkuyo.Wanderer.LizardMessage
         public WandererLizard(Lizard self)
         {
             lizardRef = new WeakReference<Lizard>(self);
-            ConstantCounter =  Random.Range(0, 200);
-            InstantCounter = Random.Range(0, 200);
+            speakSpeed = Custom.LerpMap(self.abstractCreature.personality.energy * 4,0,0.5f,1.3f,0.7f);
+            ConstantCounter = (int)(Random.Range(0, 200) * speakSpeed);
+            InstantCounter = (int)(Random.Range(0, 200) * speakSpeed);
+            
         }
 
         //false代表程序错误
@@ -49,7 +51,7 @@ namespace Pkuyo.Wanderer.LizardMessage
                 if (ConstantCounter == 0)
                 {
                     dialog = LizardDialogBox.CreateLizardDialog(lizard, new StatePriority());
-                    ConstantCounter = 350 + Random.Range(50, 200);
+                    ConstantCounter = (int)((350 + Random.Range(50, 200)) * speakSpeed);
                 }
                 return true;
             }
@@ -61,22 +63,24 @@ namespace Pkuyo.Wanderer.LizardMessage
 
 
             //判断需要即时触发的
-            var astate = new StatePriority(lizard.animation);
+            var astate = new StatePriority(lizard.animation, true);
             var bstate = new StatePriority(lizard.AI.behavior, true);
             var instantState = astate > bstate ? astate : bstate;
             if ((InstantCounter == 0 || instantState > lastPriority) && instantState.priority != -1)
             {
                 dialog = LizardDialogBox.CreateLizardDialog(lizard, instantState);
-                InstantCounter = 150 + Random.Range(25, 200);
+                InstantCounter = (int)((150 + Random.Range(25, 200))*speakSpeed);
             }
             else
             {
                 //判断通常触发的
-                var constantState = new StatePriority(lizard.AI.behavior, false);
+                var castate = new StatePriority(lizard.animation, false);
+                var cbstate = new StatePriority(lizard.AI.behavior, false);
+                var constantState = castate > cbstate ? castate : cbstate;
                 if (ConstantCounter == 0 && constantState.priority !=-1)
                 {
                     dialog = LizardDialogBox.CreateLizardDialog(lizard, constantState);
-                    ConstantCounter = 250 + Random.Range(50, 250);
+                    ConstantCounter = (int)((250 + Random.Range(50, 250)) * speakSpeed);
                 }
             }
 
@@ -103,7 +107,8 @@ namespace Pkuyo.Wanderer.LizardMessage
         private LizardDialogBox dialogBox = null;
         public WeakReference<Lizard> lizardRef;
 
-        public bool needDelete=false;
+        public float speakSpeed;
+
     }
 
     class LizardDialogBox : DialogBox
@@ -136,6 +141,7 @@ namespace Pkuyo.Wanderer.LizardMessage
 
             currentColor = Color.Lerp(Color.red,Color.green,Mathf.InverseLerp(-1,1, like));
             NewMessage(message,60);
+            
         }
 
         public float LikeOfPlayer(Lizard lizard,Player player)
@@ -161,10 +167,7 @@ namespace Pkuyo.Wanderer.LizardMessage
             base.Update();
             if (_room == null || _camera.room != _room || messages.Count == 0)
             {
-                this.slatedForDeletion = true;
-                this._room = null;
-                this._camera = null;
-                this.messages.Clear();
+                DeleteDialogBox();
                 return;
             }
         }
@@ -173,7 +176,7 @@ namespace Pkuyo.Wanderer.LizardMessage
         {
             if (this._camera == null || this._camera.room != this._room)
             {
-                this.messages.Clear();
+                DeleteDialogBox();
             }
             else if (this.messages.Count > 0)
             {
@@ -187,8 +190,11 @@ namespace Pkuyo.Wanderer.LizardMessage
 
         public void DeleteDialogBox()
         {
-            this.messages.Clear();
             this.slatedForDeletion = true;
+            this._room = null;
+            this._camera = null;
+            this.messages.Clear();
+            this.label.RemoveFromContainer();
         }
 
 
@@ -242,45 +248,62 @@ namespace Pkuyo.Wanderer.LizardMessage
 
         public StatePriority(LizardAI.Behavior behavior, bool isIns)
         {
-            this._behavior = behavior;
-
+            string value = behavior.value;
             if (isIns)
             {
-                if (_behaivornInstantPri.ContainsKey(behavior))
+                if (InstantPri.ContainsKey(value))
                 {
                     this.isInstant = 1;
-                    priority = _behaivornInstantPri[behavior];
+                    priority = InstantPri[value];
                 }
                 else
                     priority = -1;
             }
             else
             {
-                if (_behaivornInstantPri.ContainsKey(behavior))
-                    priority = _behaivornConstantPri[behavior];
+                if (ConstantPri.ContainsKey(value))
+                {
+                    this.isInstant = 2;
+                    priority = ConstantPri[value];
+                }
                 else
                     priority = -1;
             }
+            if (priority != -1)
+                State = value;
         }
 
-        public StatePriority(Lizard.Animation anim)
+        public StatePriority(Lizard.Animation anim, bool isIns)
         {
-            this._anim = anim;
-
-            if (_animInstantPri.ContainsKey(anim))
+            string value = anim.value;
+            if (isIns)
             {
-                this.isInstant = 2;
-                priority = _animInstantPri[anim];
+                if (InstantPri.ContainsKey(value))
+                {
+                    this.isInstant = 2;
+                    priority = InstantPri[value];
+                }
+                else
+                    priority = -1;
             }
             else
-                priority = -1;
+            {
+                if (ConstantPri.ContainsKey(value))
+                {
+                    this.isInstant = 2;
+                    priority = ConstantPri[value];
+                }
+                else
+                    priority = -1;
+                if (priority != -1)
+                    State = value;
+            }
         }
 
         public int priority { get; protected set; }
         private int isInstant = 0;
 
-        public LizardAI.Behavior _behavior { get; protected set; }
-        public Lizard.Animation _anim { get; protected set; }
+        public string State { get; protected set; }
 
 
         /// STATIC PART ///
@@ -288,40 +311,20 @@ namespace Pkuyo.Wanderer.LizardMessage
         public static void InitStatePriority(ManualLogSource log)
         {
             _log = log;
-            _animInstantPri = new Dictionary<Lizard.Animation, int>();
-            _behaivornInstantPri = new Dictionary<LizardAI.Behavior, int>();
-            _behaivornConstantPri = new Dictionary<LizardAI.Behavior, int>();
+            InstantPri = new Dictionary<string, int>();
+            ConstantPri = new Dictionary<string, int>();
 
             {
                 //打开文件-即时触发行为
                 var path = AssetManager.ResolveFilePath("text/wanderer/shortlist.json");
                 FileStream fileStream = new FileStream(path, FileMode.Open);
-                //反序列化Json
                 byte[] a = new byte[fileStream.Length];
                 fileStream.Read(a, 0, (int)fileStream.Length);
                 var all = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, int>>(Encoding.UTF8.GetString(a));
-                bool flag = false; //是否到达anim区段
 
-                //TODO 化简 写的什么破烂
                 foreach (var pri in all)
-                {
-                    if (pri.Value == -1)
-                    {
-                        flag = true;
-                        continue;
-                        //更换区段
-                    }
-
-                    if (!flag)
-                    {
-                        LizardAI.Behavior behavior = (LizardAI.Behavior)ExtEnumBase.Parse(typeof(LizardAI.Behavior), pri.Key, false);
-                        _behaivornInstantPri.Add(behavior, pri.Value);
-                    }
-                    else
-                    {
-                        Lizard.Animation anim = (Lizard.Animation)ExtEnumBase.Parse(typeof(Lizard.Animation), pri.Key, false);
-                        _animInstantPri.Add(anim, pri.Value);
-                    }
+                {    
+                       InstantPri.Add(pri.Key, pri.Value); 
                 }
                 _log.LogDebug("ShortList loaded");
             }
@@ -330,14 +333,12 @@ namespace Pkuyo.Wanderer.LizardMessage
                 //打开文件-长期触发行为
                 var path = AssetManager.ResolveFilePath("text/wanderer/longlist.json");
                 FileStream fileStream = new FileStream(path, FileMode.Open);
-                //反序列化Json
                 byte[] a = new byte[fileStream.Length];
                 fileStream.Read(a, 0, (int)fileStream.Length);
                 var all = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, int>>(Encoding.UTF8.GetString(a));
                 foreach (var pri in all)
                 {
-                    LizardAI.Behavior behavior = (LizardAI.Behavior)ExtEnumBase.Parse(typeof(LizardAI.Behavior), pri.Key, false);
-                    _behaivornConstantPri.Add(behavior, pri.Value);
+                    ConstantPri.Add(pri.Key, pri.Value);
 
                 }
                 _log.LogDebug("LongList Loaded");
@@ -361,7 +362,7 @@ namespace Pkuyo.Wanderer.LizardMessage
 
         static public bool operator ==(StatePriority a, StatePriority b)
         {
-            if (a.priority != b.priority || a._anim != b._anim || (a._anim != b._anim && a._behavior != b._behavior))
+            if (a.priority != b.priority || a.State != b.State)
                 return false;
             return true;
         }
@@ -370,9 +371,9 @@ namespace Pkuyo.Wanderer.LizardMessage
             return !(a == b);
         }
 
-        private static Dictionary<Lizard.Animation, int> _animInstantPri;
-        private static Dictionary<LizardAI.Behavior, int> _behaivornInstantPri;
-        private static Dictionary<LizardAI.Behavior, int> _behaivornConstantPri;
+        
+        private static Dictionary<string, int> InstantPri;
+        private static Dictionary<string, int> ConstantPri;
         private static ManualLogSource _log;
 
     }

@@ -129,7 +129,7 @@ namespace Pkuyo.Wanderer.Cosmetic
             if (!iGraphicsRef.TryGetTarget(out iGraphics))
                 return;
 
-            var faceColor = GetFaceColor(iGraphics, rCam);
+            var faceColor = GetFaceColor(iGraphics);
             var bodyColor = GetBodyColor(iGraphics);
             var fadeLength = 2;
             for (int i = 0; i < 2; i++)

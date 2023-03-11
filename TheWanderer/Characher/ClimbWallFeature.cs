@@ -258,7 +258,7 @@ namespace Pkuyo.Wanderer.Characher
                    Mathf.Pow((10 - SlowDownCount) / 10.0f,0.5f))) ? vel.normalized * Mathf.Lerp(0, MaxSpeed * DefaultSpeed, Mathf.Pow((10 - SlowDownCount) / 10.0f, 0.5f)) : vel;
 
                 //速度衰减
-                vel *= owner.airFriction;
+                vel *= owner.airFriction / Mathf.Pow(MaxSpeed,0.5f);
 
                 //计算边界位置 并尝试减速
                 var pos = owner.mainBodyChunk.pos;

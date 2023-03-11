@@ -155,7 +155,7 @@ namespace Pkuyo.Wanderer.Characher
                 sprites[i].height = 10f;
             }
 
-            for(int i=0;i<2;i++)
+            for (int i=0;i<2;i++)
             {
                 sprites[i].width = 2f;
                 sprites[i].SetPosition(tmppos);

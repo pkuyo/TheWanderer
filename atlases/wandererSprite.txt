@@ -1,0 +1,20 @@
+{"frames": {
+
+"Wanderer_Front.png":
+{
+	"frame": {"x":1,"y":1,"w":34,"h":24},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":34,"h":24},
+	"sourceSize": {"w":34,"h":24}
+}},
+"meta": {
+	"app": "https://www.codeandweb.com/texturepacker",
+	"version": "1.0",
+	"image": "wandererSprite.png",
+	"format": "RGBA8888",
+	"size": {"w":36,"h":26},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:71415dd4da937077550f0ed1447b499b:ab098a95bb84dccd54d71abfd445deed:093d7a2a97c87f175f89f0898783c6c1$"
+}
+}
