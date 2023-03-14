@@ -1,4 +1,5 @@
 ﻿using BepInEx.Logging;
+using Pkuyo.Wanderer.Characher;
 using RWCustom;
 using System;
 using System.Collections.Generic;
@@ -33,6 +34,7 @@ namespace Pkuyo.Wanderer.Cosmetic
 
                 bodyFront.MoveBehindOtherNode(sLeaser.sprites[3]);
             }
+            base.InitiateSprites(sLeaser, rCam);
         }
 
         public override void DrawSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
@@ -78,7 +80,7 @@ namespace Pkuyo.Wanderer.Cosmetic
 
                
             }
-
+            base.DrawSprites(sLeaser, rCam, timeStacker, camPos);
         }
 
         public override void ApplyPalette(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, RoomPalette palette)
@@ -101,6 +103,7 @@ namespace Pkuyo.Wanderer.Cosmetic
                     
                 }
             }
+            base.ApplyPalette(sLeaser, rCam, palette);
         }
 
         private float HeightSize = 0.5f;

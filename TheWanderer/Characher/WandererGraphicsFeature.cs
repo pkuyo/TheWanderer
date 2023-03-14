@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using SlugBase.DataTypes;
 using UnityEngine;
 using System.Runtime.CompilerServices;
 
@@ -14,10 +15,17 @@ namespace Pkuyo.Wanderer.Characher
 {
     class WandererGraphicsFeature : FeatureBase
 	{
-		public WandererGraphicsFeature(ManualLogSource log) :base(log)
+		WandererGraphicsFeature(ManualLogSource log) :base(log)
         {
-			wandererGraphics = new ConditionalWeakTable<PlayerGraphics, WandererGraphics>();
+			WandererGraphics = new ConditionalWeakTable<PlayerGraphics, WandererGraphics>();
 		}
+
+		static public WandererGraphicsFeature Instance(ManualLogSource log)
+        {
+			if (_Instance == null)
+				_Instance = new WandererGraphicsFeature(log);
+			return _Instance;
+        }
 
 		public override void OnModsInit(RainWorld rainWorld)
         {
@@ -45,7 +53,7 @@ namespace Pkuyo.Wanderer.Characher
 				c.Emit(Mono.Cecil.Cil.OpCodes.Ldarg_0);
 				c.EmitDelegate<Func<PlayerGraphics, string>>((self) =>
 				 {
-					 return (self.owner as Player).slugcatStats.name.value == "wanderer" ? "HeadB0" : "HeadA0";
+					 return (self.owner as Player).slugcatStats.name.value == "wanderer" ? "WandererHeadA0" : "HeadA0";
 				 });
 			}
         }
@@ -60,7 +68,7 @@ namespace Pkuyo.Wanderer.Characher
 				c.Emit(Mono.Cecil.Cil.OpCodes.Ldarg_0);
 				c.EmitDelegate<Func<PlayerGraphics, string>>((self) =>
 				{
-					return (self.owner as Player).slugcatStats.name.value == "wanderer" ? "HeadB" : "HeadA";
+					return (self.owner as Player).slugcatStats.name.value == "wanderer" ? "WandererHeadA" : "HeadA";
 				});
 			}
 		}
@@ -75,8 +83,8 @@ namespace Pkuyo.Wanderer.Characher
 				return;
 
 			WandererGraphics graphics;
-			if (!wandererGraphics.TryGetValue(self, out graphics))
-				wandererGraphics.Add(self,new WandererGraphics(self, _log));
+			if (!WandererGraphics.TryGetValue(self, out graphics))
+				WandererGraphics.Add(self,new WandererGraphics(self, _log));
 
 		}
 
@@ -85,7 +93,7 @@ namespace Pkuyo.Wanderer.Characher
 			orig(self, sLeaser, rCam, timeStacker, camPos);
 
 			WandererGraphics graphics;
-			if (wandererGraphics.TryGetValue(self, out graphics))
+			if (WandererGraphics.TryGetValue(self, out graphics))
 				graphics.DrawSprites(sLeaser, rCam, timeStacker, camPos);
 
 
@@ -97,7 +105,7 @@ namespace Pkuyo.Wanderer.Characher
 			orig(self, sLeaser, rCam);
 
 			WandererGraphics graphics;
-			if (wandererGraphics.TryGetValue(self, out graphics))
+			if (WandererGraphics.TryGetValue(self, out graphics))
 				graphics.InitiateSprites(sLeaser, rCam);
 
 		}
@@ -107,7 +115,7 @@ namespace Pkuyo.Wanderer.Characher
 			orig(self, sLeaser, rCam, palette);
 
 			WandererGraphics graphics;
-			if (wandererGraphics.TryGetValue(self, out graphics))
+			if (WandererGraphics.TryGetValue(self, out graphics))
 				graphics.ApplyPalette(sLeaser, rCam, palette);
 
 		}
@@ -117,16 +125,15 @@ namespace Pkuyo.Wanderer.Characher
 			orig(self);
 
 			WandererGraphics graphics;
-			if (wandererGraphics.TryGetValue(self, out graphics))
+			if (WandererGraphics.TryGetValue(self, out graphics))
 				graphics.Update();
 		}
 
 
 
-		ConditionalWeakTable<PlayerGraphics, WandererGraphics> wandererGraphics;
+		public ConditionalWeakTable<PlayerGraphics, WandererGraphics> WandererGraphics;
 
-
-
+		static WandererGraphicsFeature _Instance;
 	}
 
 	class WandererGraphics
@@ -135,6 +142,7 @@ namespace Pkuyo.Wanderer.Characher
 		public WandererGraphics(PlayerGraphics self, ManualLogSource log)
 		{
 			Cosmetics = new List<CosmeticBase>();
+			BeforeCosmetics = new List<CosmeticBase>();
 			this.self = self;
 			_log = log;
 			OriginSprites = EndSprites = -1;
@@ -142,7 +150,8 @@ namespace Pkuyo.Wanderer.Characher
 			if ((self.owner as Player).slugcatStats.name.value != "wanderer")
 				return;
 
-			AddCosmetic(new WandererTailEffect(self, _log));
+			AddCosmetic(new WandererTailEffect(self, _log),true);
+			AddCosmetic(new WandererHead(self, _log),true);
 			AddCosmetic(new WandererBodyFront(self, _log));
 			AddCosmetic(new WandererTailFin(self, _log));
 			AddCosmetic(new WandererSpineSpikes(self, _log));
@@ -151,14 +160,12 @@ namespace Pkuyo.Wanderer.Characher
 			//AddCosmetic(new WandererShaderTest(self, _log));
 		}
 
-		private void AddCosmetic(CosmeticBase cosmetic)
+		private void AddCosmetic(CosmeticBase cosmetic,bool isBefore=false)
 		{
-			if (cosmetic is WandererTailEffect)
-			{
-				TailEffect = (cosmetic as WandererTailEffect);
-				return;
-			}
-			Cosmetics.Add(cosmetic);
+			if (isBefore)
+				BeforeCosmetics.Add(cosmetic);
+			else
+				Cosmetics.Add(cosmetic);
 		}
 
 		public void DrawSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
@@ -167,10 +174,12 @@ namespace Pkuyo.Wanderer.Characher
 				return;
 
 			//位置更新
-			foreach (var cosmetic in Cosmetics)
-			{
+			foreach (var cosmetic in BeforeCosmetics)
 				cosmetic.DrawSprites(sLeaser, rCam, timeStacker, camPos);
-			}
+			
+			foreach (var cosmetic in Cosmetics)
+				cosmetic.DrawSprites(sLeaser, rCam, timeStacker, camPos);
+			
 
 
 		}
@@ -180,9 +189,10 @@ namespace Pkuyo.Wanderer.Characher
 			if ((self.owner as Player).slugcatStats.name.value != "wanderer")
 				return;
 
-	
 
-			TailEffect.InitiateSprites(sLeaser, rCam);
+
+			foreach (var cosmetic in BeforeCosmetics)
+				cosmetic.InitiateSprites(sLeaser, rCam);
 
 			//第一次设定位置
 			if (OriginSprites == -1)
@@ -221,7 +231,8 @@ namespace Pkuyo.Wanderer.Characher
 				return;
 
 			//设置颜色
-			TailEffect.ApplyPalette(sLeaser, rCam, palette);
+			foreach (var cosmetic in BeforeCosmetics)
+				cosmetic.ApplyPalette(sLeaser, rCam, palette);
 			foreach (var cosmetic in Cosmetics)
 				cosmetic.ApplyPalette(sLeaser, rCam, palette);
 		}
@@ -231,17 +242,37 @@ namespace Pkuyo.Wanderer.Characher
 
 			if ((self.owner as Player).slugcatStats.name.value != "wanderer")
 				return;
-
+			foreach (var cosmetic in BeforeCosmetics)
+				cosmetic.Update();
 			foreach (var cosmetic in Cosmetics)
 				cosmetic.Update();
 		}
 
-
+	
 		PlayerGraphics self;
 		ManualLogSource _log;
-		WandererTailEffect TailEffect;
+		List<CosmeticBase> BeforeCosmetics;
 		List<CosmeticBase> Cosmetics;
 
+		public bool IsLounge
+        {
+			get
+            {
+				return _IsLounge;
+            }
+            set
+            {
+				if(IsLounge!=value)
+                {
+					foreach (var cosmetic in BeforeCosmetics)
+						cosmetic.IsLounge = value;
+					foreach (var cosmetic in Cosmetics)
+						cosmetic.IsLounge = value;
+					_IsLounge = value;
+				}
+            }
+        }
+		private bool _IsLounge;
 		public int OriginSprites;
 		public int EndSprites;
 	}

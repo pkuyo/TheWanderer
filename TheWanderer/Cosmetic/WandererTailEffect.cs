@@ -1,5 +1,6 @@
 ﻿using BepInEx.Logging;
 using HarmonyLib;
+using Pkuyo.Wanderer.Characher;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -45,8 +46,7 @@ namespace Pkuyo.Wanderer.Cosmetic
             sLeaser.sprites[2] = triangleMesh;
             iGraphics.AddToContainer(sLeaser, rCam, null);
 
-            isDirty = true;
-
+            base.InitiateSprites(sLeaser, rCam);
         }
 
         public override void ApplyPalette(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, RoomPalette palette)
@@ -91,8 +91,8 @@ namespace Pkuyo.Wanderer.Cosmetic
 
             for (int i = 0; i < triangleMesh.verticeColors.Length; i++)
                 triangleMesh.verticeColors[i] =  Color.Lerp(GetBodyColor(iGraphics), GetFaceColor(iGraphics),Mathf.InverseLerp(4,triangleMesh.verticeColors.Length-1,i));
-        }
+            base.ApplyPalette(sLeaser, rCam, palette);
 
-        bool isDirty = true;
+        }
     }
 }

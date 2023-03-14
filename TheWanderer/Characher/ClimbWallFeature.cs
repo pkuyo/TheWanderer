@@ -10,6 +10,7 @@ using BepInEx.Logging;
 using HarmonyLib;
 using MonoMod.Cil;
 using Mono.Cecil.Cil;
+using System.Runtime.CompilerServices;
 
 namespace Pkuyo.Wanderer.Characher
 {
@@ -17,12 +18,18 @@ namespace Pkuyo.Wanderer.Characher
     {
         static public readonly PlayerFeature<bool> ClimbWall = PlayerBool("wanderer/wall_climb");
         static public readonly PlayerFeature<float> ClimbWallSpeed = PlayerFloat("wanderer/wall_climb_speed");
-        public ClimbWallFeature(ManualLogSource log) :base(log)
+        ClimbWallFeature(ManualLogSource log) :base(log)
         {
             _climbSlugHandGraphics = new ClimbSlugHandGraphics(log);
-            ClimbArg = new Dictionary<Player, PlayerBackClimb>();
+            ClimbArg = new ConditionalWeakTable<Player, PlayerBackClimb>();
         }
 
+        static public ClimbWallFeature Instance(ManualLogSource log)
+        {
+            if (_Instance==null)
+                _Instance = new ClimbWallFeature(log);
+            return _Instance;
+        }
 
         public override void OnModsInit(RainWorld rainWorld)
         {
@@ -53,16 +60,13 @@ namespace Pkuyo.Wanderer.Characher
 
         private void Player_ctor(On.Player.orig_ctor orig, Player self, AbstractCreature abstractCreature, World world)
         {
-            foreach(var arg in ClimbArg)
-            {
-                if (arg.Key == null)
-                    ClimbArg.Remove(arg.Key);
-            }
 
             orig(self, abstractCreature, world);
 
             var CanClimb = false;
-            if (!ClimbArg.ContainsKey(self) && ClimbWall.TryGet(self, out CanClimb) && CanClimb)
+
+            PlayerBackClimb tmp = null;
+            if (!ClimbArg.TryGetValue(self,out tmp) && ClimbWall.TryGet(self, out CanClimb) && CanClimb)
                 ClimbArg.Add(self, new PlayerBackClimb(_log, self));
   
         }
@@ -120,7 +124,9 @@ namespace Pkuyo.Wanderer.Characher
  
         private ClimbSlugHandGraphics _climbSlugHandGraphics;
 
-        public static Dictionary<Player, PlayerBackClimb> ClimbArg;
+        public ConditionalWeakTable<Player, PlayerBackClimb> ClimbArg;
+
+        static ClimbWallFeature _Instance;
     }
 
     public class PlayerBackClimb

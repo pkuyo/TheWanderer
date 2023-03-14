@@ -19,17 +19,22 @@ namespace Pkuyo.Wanderer.Cosmetic
         }
         public virtual void DrawSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
         {
-
+            if (IsDirty)
+                if (UpdateDirtyShader(sLeaser, rCam))
+                {
+                    ApplyPalette(sLeaser, rCam,new RoomPalette());
+                    IsDirty = false;
+                }
         }
 
         public virtual void InitiateSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam)
         {
-
+            IsDirty = true;
         }
 
         public virtual void ApplyPalette(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, RoomPalette palette)
         {
- 
+           
         }
 
         public virtual void Update()
@@ -37,6 +42,10 @@ namespace Pkuyo.Wanderer.Cosmetic
 
         }
 
+        public virtual bool UpdateDirtyShader(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam)
+        {
+            return true;
+        }
         protected Color GetBodyColor(PlayerGraphics self)
         {
             Color color = PlayerGraphics.SlugcatColor(self.CharacterForColor);
@@ -49,13 +58,18 @@ namespace Pkuyo.Wanderer.Cosmetic
         protected Color GetFaceColor(PlayerGraphics self)
         {
             Color color = new Color(186 / 255.0f, 252 / 255.0f, 240 / 255.0f);
-            if (self.useJollyColor)
-                color = PlayerGraphics.JollyColor((self.owner as Player).playerState.playerNumber, 1);
-            if (PlayerGraphics.CustomColorsEnabled())
-                color = PlayerGraphics.CustomColorSafety(1);
+            //if (self.useJollyColor)
+            //    color = PlayerGraphics.JollyColor((self.owner as Player).playerState.playerNumber, 1);
+            //if (PlayerGraphics.CustomColorsEnabled())
+            //    color = PlayerGraphics.CustomColorSafety(1);
 
             if (EyeColor.GetColor(self) != null)
                 color = (Color)EyeColor.GetColor(self);
+            if (IsLounge)
+            {
+                if (LoungeColor.GetColor(self) != null)
+                    color = (Color)LoungeColor.GetColor(self);
+            }
 
             return color;
         }
@@ -81,9 +95,26 @@ namespace Pkuyo.Wanderer.Cosmetic
         public int startSprite;
         public int numberOfSprites;
 
+        public bool IsLounge
+        {
+            get
+            {
+                return _IsLounge;
+            }
+            set
+            {
+                if(_IsLounge != value)
+                    IsDirty = true;
+                _IsLounge = value;
+            }
+        }
+      
+        private bool _IsLounge;
+        private bool IsDirty = true;
+
         public WeakReference<PlayerGraphics> iGraphicsRef;
 
-
+        static PlayerColor LoungeColor = new PlayerColor("Lounge");
         static PlayerColor EyeColor = new PlayerColor("Eyes");
         static PlayerColor BodyColor = new PlayerColor("Body");
     }

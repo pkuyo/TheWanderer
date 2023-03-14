@@ -74,6 +74,8 @@ namespace Pkuyo.Wanderer.Cosmetic
 					}
 				}
 			}
+			base.DrawSprites(sLeaser, rCam, timeStacker, camPos);
+
 		}
 
 		public override void InitiateSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam)
@@ -93,6 +95,7 @@ namespace Pkuyo.Wanderer.Cosmetic
 					}
 				}
 			}
+			base.InitiateSprites(sLeaser, rCam);
 		}
 
 		public override void ApplyPalette(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, RoomPalette palette)
@@ -115,6 +118,7 @@ namespace Pkuyo.Wanderer.Cosmetic
 				}
 
 			}
+			base.ApplyPalette(sLeaser, rCam, palette);
 		}
 
 		private bool colored = true;

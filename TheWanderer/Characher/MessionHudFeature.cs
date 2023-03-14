@@ -11,9 +11,16 @@ namespace Pkuyo.Wanderer.Characher
 {
     class MessionHudFeature : FeatureBase
     {
-        public MessionHudFeature(ManualLogSource log) : base(log)
+        MessionHudFeature(ManualLogSource log) : base(log)
         {
            
+        }
+
+        static public MessionHudFeature Instance(ManualLogSource log)
+        {
+            if (_Instance == null)
+                _Instance = new MessionHudFeature(log);
+            return _Instance;
         }
 
         public override void OnModsInit(RainWorld rainWorld)
@@ -58,6 +65,7 @@ namespace Pkuyo.Wanderer.Characher
             }
         }
 
+        static private MessionHudFeature _Instance;
 
         WandererMessionHud wandererHud;
     }

@@ -1,4 +1,5 @@
 ﻿using BepInEx.Logging;
+using Pkuyo.Wanderer.Characher;
 using RWCustom;
 
 using System.Collections.Generic;
@@ -68,6 +69,8 @@ namespace Pkuyo.Wanderer.Cosmetic
 					sLeaser.sprites[i + bumps].scaleY = num2 * Mathf.Max(0.2f, Mathf.InverseLerp(0f, 0.5f, Mathf.Abs(iGraphicsDepthRotation))) * 1.5f;
 				}
 			}
+			base.DrawSprites(sLeaser, rCam, timeStacker, camPos);
+
 		}
 
 		public override void InitiateSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam)
@@ -82,6 +85,7 @@ namespace Pkuyo.Wanderer.Cosmetic
 					sLeaser.sprites[i + bumps].anchorY = 0.15f;
 				}
 			}
+			base.InitiateSprites(sLeaser, rCam);
 		}
 
 		public override void ApplyPalette(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, RoomPalette palette)
@@ -95,13 +99,15 @@ namespace Pkuyo.Wanderer.Cosmetic
 				sLeaser.sprites[i].color = Color.Lerp(GetBodyColor(iGraphics), GetFaceColor(iGraphics),Mathf.InverseLerp(startSprite, startSprite + bumps-1, i));
 				if (colored)
 				{
-					sLeaser.sprites[i + bumps].color =  GetFaceColor(iGraphics);
+					sLeaser.sprites[i + bumps].color = GetFaceColor(iGraphics);
 				}
 			}
+			base.ApplyPalette(sLeaser, rCam, palette);
+
 		}
 
 
-	
+
 		private bool colored = true;
 		public int bumps;
 		public int graphic;

@@ -11,8 +11,15 @@ namespace Pkuyo.Wanderer.Characher
 {
     class LizardRelationFeature : FeatureBase
     {
-        public LizardRelationFeature(ManualLogSource log) : base(log)
+        LizardRelationFeature(ManualLogSource log) : base(log)
         {
+        }
+
+        static public LizardRelationFeature Instance(ManualLogSource log)
+        {
+            if (_Instance == null)
+                _Instance = new LizardRelationFeature(log) ;
+            return _Instance;
         }
 
         public override void OnModsInit(RainWorld rainWorld)
@@ -140,6 +147,8 @@ namespace Pkuyo.Wanderer.Characher
         ///////////////////////////////////////////////////
         bool ChangeLizardAIOption = true;
         bool ChangeLizardFriendFire = true;
+
+        static private LizardRelationFeature _Instance;
 
     }
 }

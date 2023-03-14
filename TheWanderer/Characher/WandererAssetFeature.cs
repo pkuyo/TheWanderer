@@ -11,8 +11,15 @@ namespace Pkuyo.Wanderer.Characher
     class WandererAssetFeature : FeatureBase
     {
         bool ResourceLoaded = false;
-        public WandererAssetFeature(ManualLogSource log) : base(log)
+        WandererAssetFeature(ManualLogSource log) : base(log)
         {
+        }
+
+        static public WandererAssetFeature Instance(ManualLogSource log)
+        {
+            if (_Instance == null)
+                _Instance = new WandererAssetFeature(log);
+            return _Instance;
         }
 
         public override void OnModsInit(RainWorld rainWorld)
@@ -27,5 +34,7 @@ namespace Pkuyo.Wanderer.Characher
                 ResourceLoaded = true;
             }
         }
+
+        static private WandererAssetFeature _Instance;
     }
 }

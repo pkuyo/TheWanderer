@@ -9,15 +9,23 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using System.Runtime.CompilerServices;
 
 namespace Pkuyo.Wanderer.Characher
 {
     class ScareLizardFeature : FeatureBase
     {
         static readonly PlayerFeature<bool> ScareLizard = PlayerBool("wanderer/scare_lizard");
-        public ScareLizardFeature(ManualLogSource log) : base(log)
+        ScareLizardFeature(ManualLogSource log) : base(log)
         {
-            _ScareLizardData = new Dictionary<Player, int>();
+            _ScareLizardData = new ConditionalWeakTable<Player, PlayerScareLizard>();
+        }
+
+        public static ScareLizardFeature Instance(ManualLogSource log)
+        {
+            if (_Instance == null)
+                _Instance = new ScareLizardFeature(log);
+            return _Instance;
         }
 
         public override void OnModsInit(RainWorld rainWorld)
@@ -31,64 +39,115 @@ namespace Pkuyo.Wanderer.Characher
         private void PlayerGraphics_Update(On.PlayerGraphics.orig_Update orig, PlayerGraphics self)
         {
             orig(self);
-            var player = self.owner as Player;
-            bool isEnable;
-            ScareLizard.TryGet(player, out isEnable);
-            if (isEnable && _ScareLizardData[player]>0)
-            {
-                self.blink = 5;
-            }
+            PlayerScareLizard tmp = null;
+            if (_ScareLizardData.TryGetValue(self.owner as Player, out tmp))
+                tmp.GraphicsUpdate();
         }
 
         //为了修改输入
         private void Player_checkInput(On.Player.orig_checkInput orig, Player self)
         {
             orig(self);
-            bool isEnable;
-            ScareLizard.TryGet(self, out isEnable);
-            if (isEnable && self.input[0].pckp && self.input[0].thrw && !self.lungsExhausted && _ScareLizardData[self] >= 20 && self.dangerGrasp == null)
-            {
-                self.input[0].thrw = false;
-                self.input[0].pckp = false;
 
-                _ScareLizardData[self] = 0;
+            PlayerScareLizard tmp = null;
+            if (_ScareLizardData.TryGetValue(self, out tmp))
+                tmp.CheckInput();
 
-                //劳累状态
-                self.lungsExhausted = true;
-                self.airInLungs = 0.05f;
-                self.Stun(5);
 
-                //惊吓物体
-                var scareObject = new WandererScareObject(self.mainBodyChunk.pos);
-                self.room.AddObject(new ShockWave(self.mainBodyChunk.pos, 175f, 0.035f, 15, false));
-                self.room.AddObject(scareObject);
-                
-                self.room.PlaySound(SoundID.Firecracker_Disintegrate, self.mainBodyChunk.pos);
-
-            }
-            else if (isEnable && self.input[0].pckp && self.input[0].thrw )
-            {
-                if(!self.lungsExhausted)
-                    _ScareLizardData[self]++;
-
-                self.input[0].thrw = false;
-                self.input[0].pckp = false;
-            }
-            else if (isEnable && !(self.input[0].pckp && self.input[0].thrw) && _ScareLizardData[self] > 0)
-                _ScareLizardData[self]--;
         }
 
         private void Player_ctor(On.Player.orig_ctor orig, Player self, AbstractCreature abstractCreature, World world)
         {
-            foreach (var data in _ScareLizardData)
-                if (data.Key == null)
-                    _ScareLizardData.Remove(data.Key);
-
             orig(self, abstractCreature, world);
 
-            if(!_ScareLizardData.ContainsKey(self))
-                _ScareLizardData.Add(self, 0);
+            bool isEnable;
+
+            if (!ScareLizard.TryGet(self, out isEnable))
+                return;
+
+            PlayerScareLizard tmp = null;
+            if (!_ScareLizardData.TryGetValue(self, out tmp) && isEnable)
+                _ScareLizardData.Add(self, new PlayerScareLizard(self));
+
+
         }
+
+        ConditionalWeakTable<Player, PlayerScareLizard> _ScareLizardData;
+
+        static private ScareLizardFeature _Instance;
+
+        class PlayerScareLizard
+        {
+            public PlayerScareLizard(Player player)
+            {
+                PlayerRef = new WeakReference<Player>(player);
+            }
+            public void CheckInput()
+            {
+                Player self = null;
+                if (!PlayerRef.TryGetTarget(out self))
+                    return;
+
+
+                if (self.input[0].pckp && self.input[0].thrw && !self.lungsExhausted && ScareLizardCD >= 20 && self.dangerGrasp == null)
+                {
+                    self.input[0].thrw = false;
+                    self.input[0].pckp = false;
+
+                    ScareLizardCD = 0;
+
+                    
+
+                    //劳累状态
+                    self.lungsExhausted = true;
+                    self.airInLungs = 0.05f;
+                    self.Stun(5);
+
+                    //惊吓物体
+                    var scareObject = new WandererScareObject(self.mainBodyChunk.pos);
+                    self.room.AddObject(new ShockWave(self.mainBodyChunk.pos, 175f, 0.035f, 15, false));
+                    self.room.AddObject(scareObject);
+
+                    //一个粒子效果
+                    for (int i = 0; i < 4; i++)
+                    {
+                        Vector2 a = Custom.RNV();
+                        self.room.AddObject(new Spark(self.mainBodyChunk.pos + a * 10f, a.normalized * 10, Color.white, null, 8, 24));
+                    }
+
+                self.room.PlaySound(SoundID.Firecracker_Disintegrate, self.mainBodyChunk.pos);
+
+                }
+                else if (self.input[0].pckp && self.input[0].thrw)
+                {
+                    if (!self.lungsExhausted)
+                        ScareLizardCD++;
+
+                    self.input[0].thrw = false;
+                    self.input[0].pckp = false;
+                }
+                else if (!(self.input[0].pckp && self.input[0].thrw) && ScareLizardCD > 0)
+                    ScareLizardCD--;
+            }
+
+            public void GraphicsUpdate()
+            {
+                Player self = null;
+                if (!PlayerRef.TryGetTarget(out self))
+                    return;
+                
+                if (ScareLizardCD > 0 && self.graphicsModule !=null)
+                {
+                    (self.graphicsModule as PlayerGraphics).blink = 5;
+                }
+            }
+
+            WeakReference<Player> PlayerRef;
+
+            int ScareLizardCD = 0;
+
+        }
+
 
         class WandererScareObject : UpdatableAndDeletable
         {
@@ -170,7 +229,7 @@ namespace Pkuyo.Wanderer.Characher
             public float fearRange;
         }
 
-        Dictionary<Player, int> _ScareLizardData;
+        
 
     }
 }

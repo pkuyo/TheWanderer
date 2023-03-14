@@ -1,4 +1,5 @@
 ﻿using BepInEx.Logging;
+using Pkuyo.Wanderer.Characher;
 using RWCustom;
 using System;
 using System.Collections.Generic;
@@ -60,6 +61,7 @@ namespace Pkuyo.Wanderer.Cosmetic
             {
                 var dir = Custom.DirVec(iGraphics.drawPositions[0, 0], iGraphics.drawPositions[1, 0]).normalized;
                 var rootPos = iGraphics.head.pos + (k == 0 ? -1 : 1) * Custom.PerpendicularVector(dir).normalized * nowHairSpacing + dir * -0.2f;
+                
 
                 var lastDir = Custom.DirVec(iGraphics.drawPositions[0,1], iGraphics.drawPositions[1, 1]).normalized;
                 Vector2 vector2 = Vector2.Lerp(iGraphics.head.lastPos + (k == 0 ? -1 : 1) * Custom.PerpendicularVector(lastDir).normalized * nowHairSpacing + lastDir * 5f, rootPos, timeStacker);
@@ -92,6 +94,8 @@ namespace Pkuyo.Wanderer.Cosmetic
                     vector4 = vector5;
                 }
             }
+            base.DrawSprites(sLeaser, rCam, timeStacker, camPos);
+
         }
 
         public override void InitiateSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam)
@@ -121,6 +125,7 @@ namespace Pkuyo.Wanderer.Cosmetic
 
                 //TODO 切屏防止闪现
             }
+            base.InitiateSprites(sLeaser, rCam);
         }
 
         public override void ApplyPalette(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, RoomPalette palette)
@@ -140,6 +145,8 @@ namespace Pkuyo.Wanderer.Cosmetic
                 for (int j = fadeLength; j < mesh.verticeColors.Length; j++)
                     mesh.verticeColors[j] = faceColor;
             }
+            base.ApplyPalette(sLeaser, rCam, palette);
+
         }
 
         public override void Update()

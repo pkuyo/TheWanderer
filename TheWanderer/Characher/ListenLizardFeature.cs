@@ -14,11 +14,17 @@ namespace Pkuyo.Wanderer.Characher
     class ListenLizardFeature : FeatureBase
     {
 
-        public ListenLizardFeature(ManualLogSource log) :base(log)
+        ListenLizardFeature(ManualLogSource log) :base(log)
         {
             WandererLizards = new ConditionalWeakTable<Lizard, WandererLizard>();
         }
 
+        static public ListenLizardFeature Instance(ManualLogSource log)
+        {
+            if (_Instance == null)
+                _Instance = new ListenLizardFeature(log);
+            return _Instance;
+        }
 
         public override void OnModsInit(RainWorld rainWorld)
         {
@@ -51,6 +57,8 @@ namespace Pkuyo.Wanderer.Characher
             if(!WandererLizards.TryGetValue(self,out lizard))
                 WandererLizards.Add(self, new WandererLizard(self));
         }
+
+        static private ListenLizardFeature _Instance;
         ConditionalWeakTable<Lizard,WandererLizard> WandererLizards;
     }
 }

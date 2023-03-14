@@ -15,14 +15,19 @@ namespace Pkuyo.Wanderer
         {
             _features = new List<FeatureBase>();
 
-            _features.Add(new ClimbWallFeature(Logger));
-            _features.Add(new ListenLizardFeature(Logger));
-            _features.Add(new WandererGraphicsFeature(Logger));
-            _features.Add(new ScareLizardFeature(Logger));
-            _features.Add(new LizardRelationFeature(Logger));
-            _features.Add(new MessionHudFeature(Logger));
-            _features.Add(new WandererAssetFeature(Logger));
-            _wandererOptions = new WandererOptions(Logger);
+            _features.Add(WandererAssetFeature.Instance(Logger));
+            _features.Add(ShitRegionMergeFix.Instance(Logger));
+
+            _features.Add(ClimbWallFeature.Instance(Logger));
+            _features.Add(ListenLizardFeature.Instance(Logger));
+            _features.Add(LoungeFeature.Instance(Logger));
+            _features.Add(ScareLizardFeature.Instance(Logger));
+            _features.Add(LizardRelationFeature.Instance(Logger));
+
+            _features.Add(WandererGraphicsFeature.Instance(Logger));
+            _features.Add(MessionHudFeature.Instance(Logger));
+
+            WandererOptions = new WandererOptions(Logger);
 
             On.RainWorld.OnModsInit += RainWorld_OnModsInit;
         }
@@ -31,11 +36,12 @@ namespace Pkuyo.Wanderer
         {
      
             orig(self);
+            MachineConnector.SetRegisteredOI("pkuyo.thevanguard", WandererOptions);
             try
             {
                 foreach (var feature in _features)
                     feature.OnModsInit(self);
-                _wandererOptions.OnModsInit(self);
+                
             }
             catch(Exception e)
             {
@@ -44,10 +50,10 @@ namespace Pkuyo.Wanderer
             
         }
 
-        private List<FeatureBase> _features;
+        static private List<FeatureBase> _features;
 
   
 
-        private WandererOptions _wandererOptions;
+        static public WandererOptions WandererOptions;
     }
 }
