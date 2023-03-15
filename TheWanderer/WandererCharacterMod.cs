@@ -5,6 +5,8 @@ using System.Text;
 using BepInEx;
 using Pkuyo.Wanderer.Characher;
 using Pkuyo.Wanderer.Options;
+using Pkuyo.Wanderer.Post;
+using UnityEngine;
 
 namespace Pkuyo.Wanderer
 {
@@ -41,7 +43,6 @@ namespace Pkuyo.Wanderer
             {
                 foreach (var feature in _features)
                     feature.OnModsInit(self);
-                
             }
             catch(Exception e)
             {
@@ -51,8 +52,6 @@ namespace Pkuyo.Wanderer
         }
 
         static private List<FeatureBase> _features;
-
-  
 
         static public WandererOptions WandererOptions;
     }

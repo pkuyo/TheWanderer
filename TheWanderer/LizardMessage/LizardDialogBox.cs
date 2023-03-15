@@ -123,23 +123,28 @@ namespace Pkuyo.Wanderer.LizardMessage
             float dis = 10000f;
             float like = 0;
 
-            //朋友蜥蜴蓝色
-            if (target.AI.friendTracker.friend != null && target.AI.friendTracker.friend is Player && target.AI.friendTracker.followClosestFriend)
-                currentColor = new Color(79 / 255f, 208 / 255f, 234 / 255f);
-            //根据距离最近的玩家设置好感度
-            if (_room != null)
+            if (target.abstractCreature.creatureTemplate.type != CreatureTemplate.Type.YellowLizard)
             {
-                foreach(var player in _room.PlayersInRoom)
+
+                //朋友蜥蜴蓝色
+                if (target.AI.friendTracker.friend != null && target.AI.friendTracker.friend is Player && target.AI.friendTracker.followClosestFriend)
+                    currentColor = new Color(79 / 255f, 208 / 255f, 234 / 255f);
+                //根据距离最近的玩家设置好感度
+                else if (_room != null)
                 {
-                    if(player.slugcatStats.name.value == "wanderer" && Custom.DistLess(player.mainBodyChunk.pos,target.mainBodyChunk.pos,dis))
+                    foreach (var player in _room.PlayersInRoom)
                     {
-                        dis = Custom.Dist(player.mainBodyChunk.pos, target.mainBodyChunk.pos);
-                        like = LikeOfPlayer(target, player);
+                        if (player.slugcatStats.name.value == "wanderer" && Custom.DistLess(player.mainBodyChunk.pos, target.mainBodyChunk.pos, dis))
+                        {
+                            dis = Custom.Dist(player.mainBodyChunk.pos, target.mainBodyChunk.pos);
+                            like = LikeOfPlayer(target, player);
+                        }
                     }
                 }
+
+                currentColor = (like>0) ? Color.Lerp(Color.white, Color.green, like) : Color.Lerp(Color.white, Color.red, Mathf.Abs(like));
             }
 
-            currentColor = Color.Lerp(Color.red,Color.green,Mathf.InverseLerp(-1,1, like));
             NewMessage(message,60);
             
         }

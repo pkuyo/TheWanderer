@@ -22,6 +22,7 @@ namespace Pkuyo.Wanderer.Characher
         LoungeFeature(ManualLogSource log) : base(log)
         {
             LoungeData = new ConditionalWeakTable<Player, PlayerLounge>();
+           
         }
 
 
@@ -38,10 +39,28 @@ namespace Pkuyo.Wanderer.Characher
             On.Player.ctor += Player_ctor;
             On.Player.MovementUpdate += Player_MovementUpdate;
             On.Player.Update += Player_Update;
-
             On.RoomCamera.ApplyFade += RoomCamera_ApplyFade;
-
             On.Mushroom.BitByPlayer += Mushroom_BitByPlayer;
+            On.PlayerGraphics.DrawSprites += PlayerGraphics_DrawSprites;
+
+            On.Player.Jump += Player_Jump;
+            _log.LogDebug("Lounge Feature Init");
+        }
+
+        private void PlayerGraphics_DrawSprites(On.PlayerGraphics.orig_DrawSprites orig, PlayerGraphics self, RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
+        {
+            orig(self, sLeaser, rCam, timeStacker, camPos);
+            PlayerLounge lounge;
+            if (LoungeData.TryGetValue(self.owner as Player, out lounge))
+                lounge.DrawSprites(sLeaser);
+        }
+
+        private void Player_Jump(On.Player.orig_Jump orig, Player self)
+        {
+            orig(self);
+            PlayerLounge lounge;
+            if (LoungeData.TryGetValue(self, out lounge))
+                lounge.Jump();
         }
 
         private void Mushroom_BitByPlayer(On.Mushroom.orig_BitByPlayer orig, Mushroom self, Creature.Grasp grasp, bool eu)
@@ -103,7 +122,6 @@ namespace Pkuyo.Wanderer.Characher
             public PlayerLounge(Player player)
             {
                 PlayerRef = new WeakReference<Player>(player);
-                WaveRef = new WeakReference<ShockWave>(null);
                 keyCode = WandererCharacterMod.WandererOptions.LoungeKeys[player.playerState.playerNumber].Value;
             }
             public void MovementUpdate()
@@ -116,7 +134,8 @@ namespace Pkuyo.Wanderer.Characher
                         (self.bodyMode == Player.BodyModeIndex.Default || self.bodyMode == Player.BodyModeIndex.Stand))
                 {
                     Vector2 a = Custom.RNV();
-                    self.room.AddObject(new Spark(self.bodyChunks[1].pos + a * 5f, (a - self.firstChunk.vel).normalized * self.firstChunk.vel.magnitude * 3, Color.white, null, 4, 8));
+                    //移动的火星
+                    self.room.AddObject(new Spark(self.bodyChunks[1].pos + a * 5f, (a - self.firstChunk.vel).normalized * self.firstChunk.vel.magnitude * 2, Color.white, null, 6, 12));
                 }
             }
 
@@ -126,33 +145,49 @@ namespace Pkuyo.Wanderer.Characher
                 if (!PlayerRef.TryGetTarget(out self))
                     return;
 
+               
                 if (IsLounge)
+                {
                     if (++FoodCount == 400)
                     {
                         self.AddFood(-1);
                         FoodCount -= 400;
                         if (self.playerState.foodInStomach == 0)
                         {
-                            IsLounge = false;
+                            StartLounge(self);
                             IntroCount = 15;
                         }
                     }
 
-                if (IsLounge && IntroCount >= 0)
-                {
-                    self.mushroomEffect = Custom.LerpAndTick(self.mushroomEffect, 3f, 0.15f, 0.025f);
-                    Traverse.Create(self.adrenalineEffect).Field("intensity").SetValue(3 * (Traverse.Create(self.adrenalineEffect).Field("intensity").GetValue<float>()) );
-                    IntroCount--;
-                    reset = true;
-                    return;
-                }else if(reset && self.mushroomEffect>0)
-                {
-                    self.mushroomEffect = Custom.LerpAndTick(self.mushroomEffect, 0f, 0.15f, 0.025f);
-                    if(self.mushroomEffect<=0)
-                        reset = false;
-                    return;
+                    //进入特效
+                    if (IntroCount >= 0)
+                    {
+                        self.mushroomEffect = Custom.LerpAndTick(self.mushroomEffect, 3f, 0.15f, 0.025f);
+                        Traverse.Create(self.adrenalineEffect).Field("intensity").SetValue(3 * (Traverse.Create(self.adrenalineEffect).Field("intensity").GetValue<float>()));
+                        IntroCount--;
+                        reset = true;
+                        return;
+                    }
+                    //进入特效后半程
+                    else if (reset && self.mushroomEffect > 0)
+                    {
+                        self.mushroomEffect = Custom.LerpAndTick(self.mushroomEffect, 0f, 0.15f, 0.025f);
+                        if (self.mushroomEffect <= 0.2)
+                            reset = false;
+                        return;
+                    }
+                    //进行时特效
+                    else
+                    {
+                        self.mushroomEffect = self.mushroomEffect >= 0.2f ? self.mushroomEffect : 0.2f;
+
+                        if (Traverse.Create(self.adrenalineEffect).Field("intensity").GetValue<float>() < 0.5)
+                            Traverse.Create(self.adrenalineEffect).Field("intensity").SetValue(0.5f);
+                    }
                 }
 
+
+                //长按判断
                 if (Input.GetKey(keyCode))
                 {
                     keyDown = true;
@@ -162,57 +197,88 @@ namespace Pkuyo.Wanderer.Characher
                     keyUse = false;
                     keyDown = false;
                 }
+
+                //切换状态
                 if(self.playerState.foodInStomach != 0 && keyDown &&!keyUse && ! IsLounge && self.mushroomCounter==0)
                 {
-                    self.slugcatStats.runspeedFac *= 1.7f;
-                    self.slugcatStats.poleClimbSpeedFac *= 2f;
-                    self.slugcatStats.lungsFac *= 2f;
-                    self.slugcatStats.corridorClimbSpeedFac *= 1.7f;
-                    self.slugcatStats.loudnessFac *= 1.5f;
-                    self.slugcatStats.throwingSkill = 2;
-                    IntroCount = 15;
-                    PlayerBackClimb climb;
-                    if (ClimbWallFeature.Instance(null).ClimbArg.TryGetValue(self, out climb))
-                        climb.MaxSpeed *= 1.7f;
-
-                    //var wave = new ShockWave(self.mainBodyChunk.pos, 300f, 0.015f, 30, false);
-                    //self.room.AddObject(wave);
-                    //WaveRef = new WeakReference<ShockWave>(wave);
-
-                    WandererGraphics graphics;
-                    if (self.graphicsModule != null && WandererGraphicsFeature.Instance(null).WandererGraphics.TryGetValue((self.graphicsModule as PlayerGraphics), out graphics))
-                        graphics.IsLounge = true;
-
-                    IsLounge = true;
+                    StartLounge(self);
                     keyUse = true;
                     return;
                 }
                 else if(keyDown && !keyUse && IsLounge)
                 {
-                    self.slugcatStats.runspeedFac /= 1.7f;
-                    self.slugcatStats.poleClimbSpeedFac /= 2f;
-                    self.slugcatStats.lungsFac /= 2f;
-                    self.slugcatStats.corridorClimbSpeedFac /= 1.7f;
-                    self.slugcatStats.loudnessFac /= 1.5f;
-                    self.slugcatStats.throwingSkill = 1;
-
-                    IntroCount = 15;
-                    PlayerBackClimb climb;
-                    if (ClimbWallFeature.Instance(null).ClimbArg.TryGetValue(self, out climb))
-                        climb.MaxSpeed /= 1.7f;
-
-                    WandererGraphics graphics;
-                    if (self.graphicsModule != null && WandererGraphicsFeature.Instance(null).WandererGraphics.TryGetValue((self.graphicsModule as PlayerGraphics), out graphics))
-                        graphics.IsLounge = false;
-
-                    IsLounge = false;
+                    StopLounge(self);
                     keyUse = true;
                     return;
                 }
 
-                if(IntroCount>=0)
-                    IntroCount--;
+                if(IntroCount>=0) IntroCount--;
 
+            }
+            public void DrawSprites(RoomCamera.SpriteLeaser leaser)
+            {
+                var post = WandererAssetFeature.Instance(null).PostEffect;
+                if (IsLounge)
+                {
+                    //多人取最高
+                    if (IntroCount >= 0 && post.timeStacker < Mathf.Pow(Mathf.InverseLerp(15, 0, IntroCount), 0.7f))
+                        post.timeStacker = Mathf.Pow(Mathf.InverseLerp(15, 0, IntroCount),0.7f);
+                    post.blurCenter = leaser.sprites[3].GetPosition() / (Custom.rainWorld.screenSize);
+                }
+                else if(IntroCount >= 0 && post.timeStacker <= Mathf.Pow(Mathf.InverseLerp(0, 15, IntroCount+1), 1.5f))
+                    post.timeStacker = Mathf.Pow(Mathf.InverseLerp(0, 15, IntroCount),1.5f);
+            }
+            public void Jump()
+            {
+                Player self;
+                if (!PlayerRef.TryGetTarget(out self))
+                    return;
+                if (self.jumpBoost != 0 && IsLounge)
+                    self.jumpBoost *=1.3f;
+            }
+
+            private void StartLounge(Player self)
+            {
+                self.slugcatStats.runspeedFac *= 1.5f;
+                self.slugcatStats.poleClimbSpeedFac *= 1.7f;
+                self.slugcatStats.corridorClimbSpeedFac *= 1.7f;
+                self.slugcatStats.loudnessFac *= 1.5f;
+                self.slugcatStats.throwingSkill = 2;
+
+                PlayerBackClimb climb;
+                if (ClimbWallFeature.Instance(null).ClimbArg.TryGetValue(self, out climb))
+                    climb.MaxSpeed *= 1.7f;
+
+                IntroCount = 15;
+                //修改shader
+                WandererGraphics graphics;
+                if (self.graphicsModule != null && WandererGraphicsFeature.Instance(null).WandererGraphics.TryGetValue((self.graphicsModule as PlayerGraphics), out graphics))
+                    graphics.IsLounge = true;
+
+                IsLounge = true;
+            }
+
+
+            private void StopLounge(Player self)
+            {
+                self.slugcatStats.runspeedFac /= 1.5f;
+                self.slugcatStats.poleClimbSpeedFac /= 1.7f;
+                self.slugcatStats.corridorClimbSpeedFac /= 1.7f;
+                self.slugcatStats.loudnessFac /= 1.5f;
+                self.slugcatStats.throwingSkill = 1;
+
+                PlayerBackClimb climb;
+                if (ClimbWallFeature.Instance(null).ClimbArg.TryGetValue(self, out climb))
+                    climb.MaxSpeed /= 1.7f;
+
+                IntroCount = 15;
+                //修改shader
+                WandererGraphics graphics;
+                if (self.graphicsModule != null && WandererGraphicsFeature.Instance(null).WandererGraphics.TryGetValue((self.graphicsModule as PlayerGraphics), out graphics))
+                    graphics.IsLounge = false;
+
+      
+                IsLounge = false;
             }
 
             public void SetMushroomEffect(RoomCamera rCam)
@@ -236,7 +302,8 @@ namespace Pkuyo.Wanderer.Characher
             int FoodCount = 0;
 
             WeakReference<Player> PlayerRef;
-            WeakReference<ShockWave> WaveRef;
+
+          
         }
     }
 }

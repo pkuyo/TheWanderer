@@ -1,4 +1,5 @@
 ﻿using BepInEx.Logging;
+using Pkuyo.Wanderer.Post;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +14,7 @@ namespace Pkuyo.Wanderer.Characher
         bool ResourceLoaded = false;
         WandererAssetFeature(ManualLogSource log) : base(log)
         {
+            PostShaders = new Dictionary<string, Shader>();
         }
 
         static public WandererAssetFeature Instance(ManualLogSource log)
@@ -28,12 +30,22 @@ namespace Pkuyo.Wanderer.Characher
             {
                 var bundle = AssetBundle.LoadFromFile(AssetManager.ResolveFilePath("AssetBundles/shaders/wanderershaders"));
                 rainWorld.Shaders.Add("TwoColorShader", FShader.CreateShader("TwoColorShader", bundle.LoadAsset<Shader>("TwoColorShader")));
+                PostShaders.Add("LoungePost",bundle.LoadAsset<Shader>("LoungePost"));
 
                 Futile.atlasManager.LoadAtlas("atlases/wandererSprite");
-          
+
+                Camera cam = GameObject.FindObjectOfType<Camera>();
+                PostEffect = cam.gameObject.AddComponent<PostEffect>();
+
+
                 ResourceLoaded = true;
             }
         }
+
+        public Dictionary<string, Shader> PostShaders;
+
+
+        public PostEffect PostEffect;
 
         static private WandererAssetFeature _Instance;
     }
