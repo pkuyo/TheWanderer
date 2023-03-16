@@ -143,15 +143,13 @@ namespace Pkuyo.Wanderer.Characher
 		{
 			Cosmetics = new List<CosmeticBase>();
 			BeforeCosmetics = new List<CosmeticBase>();
-			this.self = self;
+			selfRef = new WeakReference<PlayerGraphics>(self);
 			_log = log;
 			OriginSprites = EndSprites = -1;
 
-			if ((self.owner as Player).slugcatStats.name.value != "wanderer")
-				return;
-
 			AddCosmetic(new WandererTailEffect(self, _log),true);
 			AddCosmetic(new WandererHead(self, _log),true);
+			AddCosmetic(new WandererClimbShow(self, _log));
 			AddCosmetic(new WandererBodyFront(self, _log));
 			AddCosmetic(new WandererTailFin(self, _log));
 			AddCosmetic(new WandererSpineSpikes(self, _log));
@@ -170,7 +168,8 @@ namespace Pkuyo.Wanderer.Characher
 
 		public void DrawSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
 		{
-			if ((self.owner as Player).slugcatStats.name.value != "wanderer")
+			PlayerGraphics self;
+			if (!selfRef.TryGetTarget(out self))
 				return;
 
 			//位置更新
@@ -186,10 +185,9 @@ namespace Pkuyo.Wanderer.Characher
 
 		public void InitiateSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam)
 		{
-			if ((self.owner as Player).slugcatStats.name.value != "wanderer")
+			PlayerGraphics self;
+			if (!selfRef.TryGetTarget(out self))
 				return;
-
-
 
 			foreach (var cosmetic in BeforeCosmetics)
 				cosmetic.InitiateSprites(sLeaser, rCam);
@@ -212,7 +210,6 @@ namespace Pkuyo.Wanderer.Characher
 				Array.Resize(ref sLeaser.sprites, EndSprites);
 
 
-			//初始化贴图
 			foreach (var cosmetic in Cosmetics)
 			{
 				cosmetic.InitiateSprites(sLeaser, rCam);
@@ -220,15 +217,20 @@ namespace Pkuyo.Wanderer.Characher
 
 			FContainer newContatiner = rCam.ReturnFContainer("Midground");
 			for (int i = OriginSprites; i < EndSprites; i++)
+			{
+				sLeaser.sprites[i].RemoveFromContainer();
 				newContatiner.AddChild(sLeaser.sprites[i]);
+			}
 
 
 		}
 
 		public void ApplyPalette(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, RoomPalette palette)
 		{
-			if ((self.owner as Player).slugcatStats.name.value != "wanderer")
+			PlayerGraphics self;
+			if (!selfRef.TryGetTarget(out self))
 				return;
+
 
 			//设置颜色
 			foreach (var cosmetic in BeforeCosmetics)
@@ -240,8 +242,10 @@ namespace Pkuyo.Wanderer.Characher
 		public void Update()
 		{
 
-			if ((self.owner as Player).slugcatStats.name.value != "wanderer")
+			PlayerGraphics self;
+			if (!selfRef.TryGetTarget(out self))
 				return;
+
 			foreach (var cosmetic in BeforeCosmetics)
 				cosmetic.Update();
 			foreach (var cosmetic in Cosmetics)
@@ -249,7 +253,7 @@ namespace Pkuyo.Wanderer.Characher
 		}
 
 	
-		PlayerGraphics self;
+		WeakReference<PlayerGraphics> selfRef;
 		ManualLogSource _log;
 		List<CosmeticBase> BeforeCosmetics;
 		List<CosmeticBase> Cosmetics;

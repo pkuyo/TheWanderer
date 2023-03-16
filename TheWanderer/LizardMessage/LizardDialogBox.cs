@@ -34,8 +34,9 @@ namespace Pkuyo.Wanderer.LizardMessage
                return false;
             
             foreach (var player in lizard.room.game.Players)
-                if ((player.realizedCreature as Player).slugcatStats.name.value == "wanderer")
+                if (player.realizedCreature != null && (player.realizedCreature as Player).slugcatStats.name.value == "wanderer")
                     canListen = true;
+
             if (!canListen)
                 return true;
 
@@ -140,9 +141,8 @@ namespace Pkuyo.Wanderer.LizardMessage
                             like = LikeOfPlayer(target, player);
                         }
                     }
+                    currentColor = Color.Lerp(Color.red, Color.green, like);
                 }
-
-                currentColor = (like>0) ? Color.Lerp(Color.white, Color.green, like) : Color.Lerp(Color.white, Color.red, Mathf.Abs(like));
             }
 
             NewMessage(message,60);

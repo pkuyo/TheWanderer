@@ -74,7 +74,18 @@ namespace Pkuyo.Wanderer.Cosmetic
             return color;
         }
 
-        
+        protected Color GetLoungeColor(PlayerGraphics self)
+        {
+            Color color = new Color(186 / 255.0f, 252 / 255.0f, 240 / 255.0f);
+
+            if (LoungeColor.GetColor(self) != null)
+                color = (Color)LoungeColor.GetColor(self);
+            
+
+            return color;
+        }
+
+
         protected bool TryGetMaterial(FSprite sprite,out Material material)
         {
             material = null;

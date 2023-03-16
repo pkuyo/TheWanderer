@@ -30,8 +30,8 @@ namespace Pkuyo.Wanderer.Characher
             {
                 var bundle = AssetBundle.LoadFromFile(AssetManager.ResolveFilePath("AssetBundles/shaders/wanderershaders"));
                 rainWorld.Shaders.Add("TwoColorShader", FShader.CreateShader("TwoColorShader", bundle.LoadAsset<Shader>("TwoColorShader")));
+                rainWorld.Shaders.Add("ShowWall", FShader.CreateShader("ShowWall", bundle.LoadAsset<Shader>("ShowWall")));
                 PostShaders.Add("LoungePost",bundle.LoadAsset<Shader>("LoungePost"));
-
                 Futile.atlasManager.LoadAtlas("atlases/wandererSprite");
 
                 Camera cam = GameObject.FindObjectOfType<Camera>();

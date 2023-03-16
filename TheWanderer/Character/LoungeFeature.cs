@@ -123,6 +123,11 @@ namespace Pkuyo.Wanderer.Characher
             {
                 PlayerRef = new WeakReference<Player>(player);
                 keyCode = WandererCharacterMod.WandererOptions.LoungeKeys[player.playerState.playerNumber].Value;
+
+                runspeedFac = player.slugcatStats.runspeedFac *= 1.5f;
+                poleClimbSpeedFac = player.slugcatStats.poleClimbSpeedFac *= 1.7f;
+                corridorClimbSpeedFac = player.slugcatStats.corridorClimbSpeedFac *= 1.7f;
+                loudnessFac = player.slugcatStats.loudnessFac *= 1.5f;
             }
             public void MovementUpdate()
             {
@@ -225,7 +230,7 @@ namespace Pkuyo.Wanderer.Characher
                         post.timeStacker = Mathf.Pow(Mathf.InverseLerp(15, 0, IntroCount),0.7f);
                     post.blurCenter = leaser.sprites[3].GetPosition() / (Custom.rainWorld.screenSize);
                 }
-                else if(IntroCount >= 0 && post.timeStacker <= Mathf.Pow(Mathf.InverseLerp(0, 15, IntroCount+1), 1.5f))
+                else if(IntroCount >= 0)
                     post.timeStacker = Mathf.Pow(Mathf.InverseLerp(0, 15, IntroCount),1.5f);
             }
             public void Jump()
@@ -239,10 +244,10 @@ namespace Pkuyo.Wanderer.Characher
 
             private void StartLounge(Player self)
             {
-                self.slugcatStats.runspeedFac *= 1.5f;
-                self.slugcatStats.poleClimbSpeedFac *= 1.7f;
-                self.slugcatStats.corridorClimbSpeedFac *= 1.7f;
-                self.slugcatStats.loudnessFac *= 1.5f;
+                self.slugcatStats.runspeedFac = runspeedFac*1.5f;
+                self.slugcatStats.poleClimbSpeedFac = poleClimbSpeedFac*1.7f;
+                self.slugcatStats.corridorClimbSpeedFac = corridorClimbSpeedFac*1.7f;
+                self.slugcatStats.loudnessFac = loudnessFac*1.5f;
                 self.slugcatStats.throwingSkill = 2;
 
                 PlayerBackClimb climb;
@@ -261,10 +266,10 @@ namespace Pkuyo.Wanderer.Characher
 
             private void StopLounge(Player self)
             {
-                self.slugcatStats.runspeedFac /= 1.5f;
-                self.slugcatStats.poleClimbSpeedFac /= 1.7f;
-                self.slugcatStats.corridorClimbSpeedFac /= 1.7f;
-                self.slugcatStats.loudnessFac /= 1.5f;
+                self.slugcatStats.runspeedFac = runspeedFac;
+                self.slugcatStats.poleClimbSpeedFac = poleClimbSpeedFac;
+                self.slugcatStats.corridorClimbSpeedFac = corridorClimbSpeedFac;
+                self.slugcatStats.loudnessFac = loudnessFac;
                 self.slugcatStats.throwingSkill = 1;
 
                 PlayerBackClimb climb;
@@ -301,9 +306,16 @@ namespace Pkuyo.Wanderer.Characher
 
             int FoodCount = 0;
 
+            float runspeedFac;
+            float poleClimbSpeedFac;
+            float corridorClimbSpeedFac;
+            float loudnessFac;
+
             WeakReference<Player> PlayerRef;
 
           
         }
+
+        
     }
 }

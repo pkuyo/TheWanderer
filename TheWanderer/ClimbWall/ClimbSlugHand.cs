@@ -11,6 +11,7 @@ using UnityEngine;
 
 namespace Pkuyo.Wanderer.Characher
 {
+    //全场最烂 千万不要看
     class ClimbSlugHandGraphics
     {
         public ClimbSlugHandGraphics(ManualLogSource log)
