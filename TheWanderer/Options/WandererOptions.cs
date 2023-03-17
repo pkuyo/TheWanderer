@@ -1,6 +1,6 @@
 ﻿using BepInEx.Logging;
 using Menu.Remix.MixedUI;
-using Pkuyo.Wanderer.Characher;
+using Pkuyo.Wanderer;
 using RWCustom;
 using System;
 using System.Collections.Generic;

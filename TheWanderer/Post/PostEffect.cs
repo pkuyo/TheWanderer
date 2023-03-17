@@ -1,4 +1,4 @@
-﻿using Pkuyo.Wanderer.Characher;
+﻿using Pkuyo.Wanderer;
 using RWCustom;
 using System;
 using System.Collections.Generic;
@@ -24,7 +24,7 @@ namespace Pkuyo.Wanderer.Post
         {
             try
             {
-                LoungeMat = new Material(WandererAssetFeature.Instance(null).PostShaders["LoungePost"]);
+                LoungeMat = new Material(WandererAssetManager.Instance(null).PostShaders["LoungePost"]);
             }
             catch(Exception e)
             {

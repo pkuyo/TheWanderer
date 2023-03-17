@@ -1,13 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Permissions;
 using System.Text;
 using BepInEx;
-using Pkuyo.Wanderer.Characher;
+using Pkuyo.Wanderer;
+using Pkuyo.Wanderer.Feature;
 using Pkuyo.Wanderer.Options;
 using Pkuyo.Wanderer.Post;
 using UnityEngine;
-
+#pragma warning disable CS0618
+[assembly: SecurityPermission(SecurityAction.RequestMinimum, SkipVerification = true)]
+#pragma warning restore CS0618
 namespace Pkuyo.Wanderer
 {
     [BepInPlugin("pkuyo.thevanguard", "The Vanguard", "1.0.0")]
@@ -15,19 +19,21 @@ namespace Pkuyo.Wanderer
     {
         public WandererCharacterMod()
         {
-            _features = new List<FeatureBase>();
+            _hooks = new List<HookBase>();
 
-            _features.Add(WandererAssetFeature.Instance(Logger));
-            _features.Add(ShitRegionMergeFix.Instance(Logger));
+            _hooks.Add(WandererAssetManager.Instance(Logger));
+            _hooks.Add(ShitRegionMergeFix.Instance(Logger));
+            _hooks.Add(MessionHook.Instance(Logger));
+            _hooks.Add(SSOracleHook.Instance(Logger));
 
-            _features.Add(ClimbWallFeature.Instance(Logger));
-            _features.Add(ListenLizardFeature.Instance(Logger));
-            _features.Add(LoungeFeature.Instance(Logger));
-            _features.Add(ScareLizardFeature.Instance(Logger));
-            _features.Add(LizardRelationFeature.Instance(Logger));
+            _hooks.Add(ClimbWallFeature.Instance(Logger));
+            _hooks.Add(ListenLizardFeature.Instance(Logger));
+            _hooks.Add(LoungeFeature.Instance(Logger));
+            _hooks.Add(ScareLizardFeature.Instance(Logger));
+            _hooks.Add(LizardRelationFeature.Instance(Logger));
+            _hooks.Add(WandererGraphicsFeature.Instance(Logger));
 
-            _features.Add(WandererGraphicsFeature.Instance(Logger));
-            _features.Add(MessionHudFeature.Instance(Logger));
+            
 
             WandererOptions = new WandererOptions(Logger);
 
@@ -41,8 +47,9 @@ namespace Pkuyo.Wanderer
             MachineConnector.SetRegisteredOI("pkuyo.thevanguard", WandererOptions);
             try
             {
-                foreach (var feature in _features)
+                foreach (var feature in _hooks)
                     feature.OnModsInit(self);
+                WandererModEnum.RegisterValues();
             }
             catch(Exception e)
             {
@@ -51,7 +58,7 @@ namespace Pkuyo.Wanderer
             
         }
 
-        static private List<FeatureBase> _features;
+        static private List<HookBase> _hooks;
 
         static public WandererOptions WandererOptions;
     }

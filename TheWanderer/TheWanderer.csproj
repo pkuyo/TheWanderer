@@ -36,9 +36,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\SteamLibrary\steamapps\common\Rain World\BepInEx\core\0Harmony.dll</HintPath>
     </Reference>
-    <Reference Include="Assembly-CSharp">
-      <HintPath>..\..\..\SteamLibrary\steamapps\common\Rain World\RainWorld_Data\Managed\Assembly-CSharp.dll</HintPath>
-    </Reference>
     <Reference Include="BepInEx">
       <HintPath>..\..\..\SteamLibrary\steamapps\common\Rain World\BepInEx\core\BepInEx.dll</HintPath>
     </Reference>
@@ -67,6 +64,9 @@
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.13.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="PUBLIC-Assembly-CSharp">
+      <HintPath>..\..\..\SteamLibrary\steamapps\common\Rain World\BepInEx\utils\PUBLIC-Assembly-CSharp.dll</HintPath>
     </Reference>
     <Reference Include="SlugBase">
       <HintPath>..\..\..\SteamLibrary\steamapps\common\Rain World\RainWorld_Data\SlugBase.dll</HintPath>
@@ -98,19 +98,20 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Character\LizardRelationFeature.cs" />
-    <Compile Include="Character\LoungeFeature.cs" />
-    <Compile Include="Character\ShitRegionMergeFix.cs" />
-    <Compile Include="Character\WandererAssetFeature.cs" />
+    <Compile Include="Hook\Feature\LizardRelationFeature.cs" />
+    <Compile Include="Hook\Feature\LoungeFeature.cs" />
+    <Compile Include="Hook\ShitRegionMergeFix.cs" />
+    <Compile Include="Hook\SSOracleHook.cs" />
+    <Compile Include="Hook\WandererAssetManager.cs" />
     <Compile Include="Post\PostEffect.cs" />
     <Compile Include="Scene\WandererTurtorial.cs" />
     <Compile Include="ClimbWall\ClimbSlugHand.cs" />
-    <Compile Include="Character\ClimbWallFeature.cs" />
-    <Compile Include="Character\FeatureBase.cs" />
-    <Compile Include="Character\ListenLizardFeature.cs" />
-    <Compile Include="Character\MessionHudFeature.cs" />
-    <Compile Include="Character\ScareLizardFeature.cs" />
-    <Compile Include="Character\WandererGraphicsFeature.cs" />
+    <Compile Include="Hook\Feature\ClimbWallFeature.cs" />
+    <Compile Include="Hook\HookBase.cs" />
+    <Compile Include="Hook\Feature\ListenLizardFeature.cs" />
+    <Compile Include="Hook\MessionHook.cs" />
+    <Compile Include="Hook\Feature\ScareLizardFeature.cs" />
+    <Compile Include="Hook\Feature\WandererGraphicsFeature.cs" />
     <Compile Include="Cosmetic\CosmeticBase.cs" />
     <Compile Include="Cosmetic\WandererBodyFront.cs" />
     <Compile Include="Cosmetic\WandererHead.cs" />

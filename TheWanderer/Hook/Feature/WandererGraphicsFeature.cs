@@ -11,9 +11,9 @@ using SlugBase.DataTypes;
 using UnityEngine;
 using System.Runtime.CompilerServices;
 
-namespace Pkuyo.Wanderer.Characher
+namespace Pkuyo.Wanderer.Feature
 {
-    class WandererGraphicsFeature : FeatureBase
+    class WandererGraphicsFeature : HookBase
 	{
 		WandererGraphicsFeature(ManualLogSource log) :base(log)
         {
@@ -149,7 +149,7 @@ namespace Pkuyo.Wanderer.Characher
 
 			AddCosmetic(new WandererTailEffect(self, _log),true);
 			AddCosmetic(new WandererHead(self, _log),true);
-			AddCosmetic(new WandererClimbShow(self, _log));
+			//AddCosmetic(new WandererClimbShow(self, _log));
 			AddCosmetic(new WandererBodyFront(self, _log));
 			AddCosmetic(new WandererTailFin(self, _log));
 			AddCosmetic(new WandererSpineSpikes(self, _log));

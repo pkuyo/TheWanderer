@@ -12,9 +12,9 @@ using MonoMod.Cil;
 using Mono.Cecil.Cil;
 using System.Runtime.CompilerServices;
 
-namespace Pkuyo.Wanderer.Characher
+namespace Pkuyo.Wanderer.Feature
 {
-    class ClimbWallFeature : FeatureBase
+    class ClimbWallFeature : HookBase
     {
         static public readonly PlayerFeature<bool> ClimbWall = PlayerBool("wanderer/wall_climb");
         static public readonly PlayerFeature<float> ClimbWallSpeed = PlayerFloat("wanderer/wall_climb_speed");

@@ -1,5 +1,5 @@
 ﻿using BepInEx.Logging;
-using Pkuyo.Wanderer.Characher;
+using Pkuyo.Wanderer;
 using RWCustom;
 
 using System.Collections.Generic;

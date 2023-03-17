@@ -1,5 +1,6 @@
 ﻿using BepInEx.Logging;
 using HarmonyLib;
+using Pkuyo.Wanderer.Feature;
 using RWCustom;
 using System;
 using System.Collections.Generic;
@@ -9,7 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 
-namespace Pkuyo.Wanderer.Characher
+namespace Pkuyo.Wanderer
 {
     //全场最烂 千万不要看
     class ClimbSlugHandGraphics

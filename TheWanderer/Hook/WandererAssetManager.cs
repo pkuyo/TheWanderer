@@ -7,20 +7,20 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 
-namespace Pkuyo.Wanderer.Characher
+namespace Pkuyo.Wanderer
 {
-    class WandererAssetFeature : FeatureBase
+    class WandererAssetManager : HookBase
     {
         bool ResourceLoaded = false;
-        WandererAssetFeature(ManualLogSource log) : base(log)
+        WandererAssetManager(ManualLogSource log) : base(log)
         {
             PostShaders = new Dictionary<string, Shader>();
         }
 
-        static public WandererAssetFeature Instance(ManualLogSource log)
+        static public WandererAssetManager Instance(ManualLogSource log)
         {
             if (_Instance == null)
-                _Instance = new WandererAssetFeature(log);
+                _Instance = new WandererAssetManager(log);
             return _Instance;
         }
 
@@ -47,6 +47,6 @@ namespace Pkuyo.Wanderer.Characher
 
         public PostEffect PostEffect;
 
-        static private WandererAssetFeature _Instance;
+        static private WandererAssetManager _Instance;
     }
 }

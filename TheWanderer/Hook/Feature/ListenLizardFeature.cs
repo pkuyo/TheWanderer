@@ -9,9 +9,9 @@ using BepInEx.Logging;
 using Pkuyo.Wanderer.LizardMessage;
 using System.Runtime.CompilerServices;
 
-namespace Pkuyo.Wanderer.Characher
+namespace Pkuyo.Wanderer.Feature
 {
-    class ListenLizardFeature : FeatureBase
+    class ListenLizardFeature : HookBase
     {
 
         ListenLizardFeature(ManualLogSource log) :base(log)

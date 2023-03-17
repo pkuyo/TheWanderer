@@ -1,6 +1,6 @@
 ﻿using BepInEx.Logging;
 using HarmonyLib;
-using Pkuyo.Wanderer.Characher;
+using Pkuyo.Wanderer;
 using System;
 using System.Collections.Generic;
 using System.Linq;

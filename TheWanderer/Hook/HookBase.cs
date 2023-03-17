@@ -5,11 +5,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Pkuyo.Wanderer.Characher
+namespace Pkuyo.Wanderer
 {
-    class FeatureBase
+    class HookBase
     {
-        public FeatureBase(ManualLogSource log)
+        public HookBase(ManualLogSource log)
         {
             _log = log;
         }

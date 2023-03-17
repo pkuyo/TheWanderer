@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Pkuyo.Wanderer.Characher
+namespace Pkuyo.Wanderer
 {
 
     class WandererClimbTurtorial : UpdatableAndDeletable

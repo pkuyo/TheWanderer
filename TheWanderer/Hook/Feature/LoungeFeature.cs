@@ -14,9 +14,9 @@ using System.Runtime.CompilerServices;
 using System.Reflection;
 using HarmonyLib;
 
-namespace Pkuyo.Wanderer.Characher
+namespace Pkuyo.Wanderer.Feature
 {
-    class LoungeFeature : FeatureBase
+    class LoungeFeature : HookBase
     {
         static public readonly PlayerFeature<bool> CanLounge = PlayerBool("wanderer/lounge");
         LoungeFeature(ManualLogSource log) : base(log)
@@ -222,7 +222,7 @@ namespace Pkuyo.Wanderer.Characher
             }
             public void DrawSprites(RoomCamera.SpriteLeaser leaser)
             {
-                var post = WandererAssetFeature.Instance(null).PostEffect;
+                var post = WandererAssetManager.Instance(null).PostEffect;
                 if (IsLounge)
                 {
                     //多人取最高

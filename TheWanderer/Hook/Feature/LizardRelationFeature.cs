@@ -7,9 +7,9 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 
-namespace Pkuyo.Wanderer.Characher
+namespace Pkuyo.Wanderer.Feature
 {
-    class LizardRelationFeature : FeatureBase
+    class LizardRelationFeature : HookBase
     {
         LizardRelationFeature(ManualLogSource log) : base(log)
         {

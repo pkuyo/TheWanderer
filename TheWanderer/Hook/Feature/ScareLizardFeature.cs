@@ -11,9 +11,9 @@ using System.Threading.Tasks;
 using UnityEngine;
 using System.Runtime.CompilerServices;
 
-namespace Pkuyo.Wanderer.Characher
+namespace Pkuyo.Wanderer.Feature
 {
-    class ScareLizardFeature : FeatureBase
+    class ScareLizardFeature : HookBase
     {
         static readonly PlayerFeature<bool> ScareLizard = PlayerBool("wanderer/scare_lizard");
         ScareLizardFeature(ManualLogSource log) : base(log)

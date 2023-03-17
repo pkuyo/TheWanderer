@@ -7,19 +7,19 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 
-namespace Pkuyo.Wanderer.Characher
+namespace Pkuyo.Wanderer
 {
-    class MessionHudFeature : FeatureBase
+    class MessionHook : HookBase
     {
-        MessionHudFeature(ManualLogSource log) : base(log)
+        MessionHook(ManualLogSource log) : base(log)
         {
            
         }
 
-        static public MessionHudFeature Instance(ManualLogSource log)
+        static public MessionHook Instance(ManualLogSource log)
         {
             if (_Instance == null)
-                _Instance = new MessionHudFeature(log);
+                _Instance = new MessionHook(log);
             return _Instance;
         }
 
@@ -65,7 +65,7 @@ namespace Pkuyo.Wanderer.Characher
             }
         }
 
-        static private MessionHudFeature _Instance;
+        static private MessionHook _Instance;
 
         WandererMessionHud wandererHud;
     }
