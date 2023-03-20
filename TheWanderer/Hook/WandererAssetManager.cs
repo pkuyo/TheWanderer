@@ -31,10 +31,14 @@ namespace Pkuyo.Wanderer
                 var bundle = AssetBundle.LoadFromFile(AssetManager.ResolveFilePath("AssetBundles/shaders/wanderershaders"));
                 rainWorld.Shaders.Add("TwoColorShader", FShader.CreateShader("TwoColorShader", bundle.LoadAsset<Shader>("TwoColorShader")));
                 rainWorld.Shaders.Add("ShowWall", FShader.CreateShader("ShowWall", bundle.LoadAsset<Shader>("ShowWall")));
-                PostShaders.Add("LoungePost",bundle.LoadAsset<Shader>("LoungePost"));
-                Futile.atlasManager.LoadAtlas("atlases/wandererSprite");
+                rainWorld.Shaders.Add("ToolHoloGird", FShader.CreateShader("ToolHoloGird", bundle.LoadAsset<Shader>("ToolHoloGird")));
 
-                Camera cam = GameObject.FindObjectOfType<Camera>();
+
+                PostShaders.Add("LoungePost",bundle.LoadAsset<Shader>("LoungePost"));
+
+                Futile.atlasManager.LoadAtlas("atlases/wandererSprite");
+                Futile.atlasManager.LoadImage("illustrations/fade");
+               Camera cam = GameObject.FindObjectOfType<Camera>();
                 PostEffect = cam.gameObject.AddComponent<PostEffect>();
 
 

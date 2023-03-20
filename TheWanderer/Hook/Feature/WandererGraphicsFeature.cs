@@ -192,25 +192,19 @@ namespace Pkuyo.Wanderer.Feature
 			foreach (var cosmetic in BeforeCosmetics)
 				cosmetic.InitiateSprites(sLeaser, rCam);
 
-			//第一次设定位置
-			if (OriginSprites == -1)
-			{
-				OriginSprites = sLeaser.sprites.Length;
-				var startLength = sLeaser.sprites.Length;
 
-				foreach (var cosmetic in Cosmetics)
-				{
-					cosmetic.startSprite = startLength;
-					startLength += cosmetic.numberOfSprites;
-				}
-				Array.Resize(ref sLeaser.sprites, startLength);
-				EndSprites = startLength;
-			}
-			else
-				Array.Resize(ref sLeaser.sprites, EndSprites);
+            OriginSprites = sLeaser.sprites.Length;
+            var startLength = sLeaser.sprites.Length;
 
+            foreach (var cosmetic in Cosmetics)
+            {
+                cosmetic.startSprite = startLength;
+                startLength += cosmetic.numberOfSprites;
+            }
+            Array.Resize(ref sLeaser.sprites, startLength);
+            EndSprites = startLength;
 
-			foreach (var cosmetic in Cosmetics)
+            foreach (var cosmetic in Cosmetics)
 			{
 				cosmetic.InitiateSprites(sLeaser, rCam);
 			}

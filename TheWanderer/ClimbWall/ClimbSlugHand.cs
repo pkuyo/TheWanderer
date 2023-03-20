@@ -106,8 +106,8 @@ namespace Pkuyo.Wanderer
                         PlayerBackClimb backwall = null;
                         if (data.playerBackClimbRef.TryGetTarget(out backwall))
                         {
-                            backwall.SlowDownCount += (int)(5 / maxSpeed);
-                            backwall.SlowDownCount = Mathf.Min(backwall.SlowDownCount, 9);
+                            backwall.SlowDownCount += (int)(4 / maxSpeed);
+                           backwall.SlowDownCount = Mathf.Min(backwall.SlowDownCount, 9);
                         }
                         else
                             throw new Exception();

@@ -132,10 +132,19 @@ namespace Pkuyo.Wanderer.Feature
     public class PlayerBackClimb
     {
    
-        private Player owner = null;
+        private Player owner
+        {
+            get
+            {
+                Player a;
+                if (ownerRef.TryGetTarget(out a))
+                    return a;
+                return null;
+            }
+        }
+        private WeakReference<Player> ownerRef;
 
         private Vector2 BodyVel = new Vector2();
-        private Vector2[] lastPos = new Vector2[2];
 
         private bool isSideWall = false;
         private bool isFall = false;
@@ -148,7 +157,23 @@ namespace Pkuyo.Wanderer.Feature
 
         public bool IsClimb = false;
 
-        public float MaxSpeed = 1;
+        private float maxSpeed = 1;
+
+        public float MaxSpeed
+        {
+            get
+            {
+                var player = owner;
+                if (player == null)
+                    return maxSpeed;
+                return maxSpeed * (EnergyCheck(player) ? 2 : 1);
+            }
+            set
+            {
+                maxSpeed = value;
+            }
+        }
+
         public float DefaultSpeed = 3;
         public readonly float BodyWidth = 6;
 
@@ -157,18 +182,19 @@ namespace Pkuyo.Wanderer.Feature
         public PlayerBackClimb(ManualLogSource log,Player self) 
         {
             _log = log;
-            owner = self;
-            ClimbWallFeature.ClimbWallSpeed.TryGet(owner, out MaxSpeed);
+            ownerRef = new WeakReference<Player>(self);
+            ClimbWallFeature.ClimbWallSpeed.TryGet(owner, out maxSpeed);
         }
         
         public void Reset()
         {
             BodyVel = owner.mainBodyChunk.vel;
-            lastPos = new Vector2[2];
         }
 
         private int CheckCanClimb(Player self, Vector2 pos, Vector2 bodyVec, float bodyWidth = 0.0f, Vector2 addpos = new Vector2(), bool ex = true)
         {
+            if (EnergyCheck(owner))
+                 return 3;
 
             int[] re = new int[2];
             re[1] = 3;
@@ -215,23 +241,27 @@ namespace Pkuyo.Wanderer.Feature
 
         public void UpdateBodyMode()
         {
+            var player = owner;
+            if (player == null)
+                return;
+
             if (IsClimb)
             {
                 //设置状态
-                if (owner.bodyMode == Player.BodyModeIndex.Default
-                    || owner.bodyMode == Player.BodyModeIndex.WallClimb || owner.bodyMode == Player.BodyModeIndex.ZeroG
-                    || owner.bodyMode == Player.BodyModeIndex.ClimbingOnBeam || owner.bodyMode == WandererModEnum.PlayerBodyModeIndex.ClimbBackWall)
+                if (player.bodyMode == Player.BodyModeIndex.Default
+                    || player.bodyMode == Player.BodyModeIndex.WallClimb || player.bodyMode == Player.BodyModeIndex.ZeroG
+                    || player.bodyMode == Player.BodyModeIndex.ClimbingOnBeam || player.bodyMode == WandererModEnum.PlayerBodyModeIndex.ClimbBackWall)
                 {
-                    owner.bodyMode = WandererModEnum.PlayerBodyModeIndex.ClimbBackWall;
+                    player.bodyMode = WandererModEnum.PlayerBodyModeIndex.ClimbBackWall;
                     //防止卡杆子
-                    owner.forceFeetToHorizontalBeamTile = 0;
-                    if (owner.animation == Player.AnimationIndex.HangFromBeam)
-                        owner.animation = Player.AnimationIndex.None;
+                    player.forceFeetToHorizontalBeamTile = 0;
+                    if (player.animation == Player.AnimationIndex.HangFromBeam)
+                        player.animation = Player.AnimationIndex.None;
                 }
                 else
                 {
                     //爬杆钻管道等优先级高的操作 直接取消爬墙
-                    _log.LogDebug("[Climb] Cancel climb cause by " + owner.bodyMode.ToString());
+                    _log.LogDebug("[Climb] Cancel climb cause by " + player.bodyMode.ToString());
                     CancelWallClimb();
                     return;
                 }
@@ -239,11 +269,15 @@ namespace Pkuyo.Wanderer.Feature
         }
         public void UpdateGravity()
         {
+            var player = owner;
+            if (player == null)
+                return;
+
             //先于updateMSC调用
-            if (owner.bodyMode == WandererModEnum.PlayerBodyModeIndex.ClimbBackWall)
-                owner.customPlayerGravity = 0;
+            if (player.bodyMode == WandererModEnum.PlayerBodyModeIndex.ClimbBackWall)
+                player.customPlayerGravity = 0;
             else
-                owner.customPlayerGravity = 0.9f;
+                player.customPlayerGravity = 0.9f;
         }
 
         public void MovementUpdate()
@@ -254,28 +288,34 @@ namespace Pkuyo.Wanderer.Feature
             var _isClimb = IsClimb;
             var vel = BodyVel;
 
+            var player = owner;
+            if (player == null)
+                return;
+
             if (_isClimb)
             {
-               
+
                 //速度计算
-                vel.y += owner.input[0].y * 4f * MaxSpeed;
-                vel.x += owner.input[0].x * 6f * MaxSpeed;
+                vel.y += player.input[0].y * 5f * MaxSpeed;
+                vel.x += player.input[0].x * 5f * MaxSpeed;
+                vel *= (0.8f / MaxSpeed);
                 vel = (vel.magnitude > Mathf.Lerp(0, MaxSpeed * DefaultSpeed,
-                   Mathf.Pow((10 - SlowDownCount) / 10.0f,0.5f))) ? vel.normalized * Mathf.Lerp(0, MaxSpeed * DefaultSpeed, Mathf.Pow((10 - SlowDownCount) / 10.0f, 0.5f)) : vel;
+                Mathf.Pow((10 - SlowDownCount) / 10.0f,0.5f))) ? vel.normalized * Mathf.Lerp(0, MaxSpeed * DefaultSpeed, Mathf.Pow((10 - SlowDownCount) / 10.0f, 0.5f)) : vel;
+                //vel = (vel.magnitude > MaxSpeed * DefaultSpeed )? vel.normalized * MaxSpeed * DefaultSpeed : vel;
 
                 //速度衰减
-                vel *= owner.airFriction / Mathf.Pow(MaxSpeed,0.5f);
+               
 
                 //计算边界位置 并尝试减速
-                var pos = owner.mainBodyChunk.pos;
-                if (CheckCanClimb(owner, pos, Custom.DirVec(owner.bodyChunks[0].pos, owner.bodyChunks[1].pos), BodyWidth, new Vector2(vel.x, 0.0f)) == 0) vel.x *= 0.5f;
-                if (CheckCanClimb(owner, pos, Custom.DirVec(owner.bodyChunks[0].pos, owner.bodyChunks[1].pos), BodyWidth, new Vector2(0.0f, vel.y)) == 0) vel.y *= 0.5f;
+                var pos = player.mainBodyChunk.pos;
+                if (CheckCanClimb(player, pos, Custom.DirVec(player.bodyChunks[0].pos, player.bodyChunks[1].pos), BodyWidth, new Vector2(vel.x, 0.0f)) == 0) vel.x *= 0.5f;
+                if (CheckCanClimb(player, pos, Custom.DirVec(player.bodyChunks[0].pos, player.bodyChunks[1].pos), BodyWidth, new Vector2(0.0f, vel.y)) == 0) vel.y *= 0.5f;
 
-                owner.bodyChunks[0].vel = owner.bodyChunks[1].vel = BodyVel = vel;
+                player.bodyChunks[0].vel = player.bodyChunks[1].vel = BodyVel = vel;
 
                 //从墙上掉落
-                var climbState = CheckCanClimb(owner, pos, Custom.DirVec(owner.bodyChunks[0].pos, owner.bodyChunks[1].pos), BodyWidth) |
-                    CheckCanClimb(owner, pos, Custom.DirVec(owner.bodyChunks[0].pos, owner.bodyChunks[1].pos), BodyWidth, Custom.DirVec(owner.bodyChunks[0].pos, owner.bodyChunks[1].pos));
+                var climbState = CheckCanClimb(player, pos, Custom.DirVec(player.bodyChunks[0].pos, player.bodyChunks[1].pos), BodyWidth) |
+                    CheckCanClimb(player, pos, Custom.DirVec(player.bodyChunks[0].pos, player.bodyChunks[1].pos), BodyWidth, Custom.DirVec(player.bodyChunks[0].pos, player.bodyChunks[1].pos));
                 if (climbState == 0)
                 {
                     CancelWallClimb();
@@ -290,33 +330,42 @@ namespace Pkuyo.Wanderer.Feature
 
 
                 //转向速度
-                if (!isSideWall && new Vector2(owner.input[0].x, owner.input[0].y) != Vector2.zero)
+                if (!isSideWall && new Vector2(player.input[0].x, player.input[0].y) != Vector2.zero)
                 {
-                    var turnSpeed = (new Vector2(owner.input[0].x, owner.input[0].y).normalized - (owner.bodyChunks[0].pos - owner.bodyChunks[1].pos).normalized) * 3;
+                    var turnSpeed = (new Vector2(player.input[0].x, player.input[0].y).normalized - (player.bodyChunks[0].pos - player.bodyChunks[1].pos).normalized) * 3;
                     var slowDown = vel.magnitude / (turnSpeed.magnitude * 3 + vel.magnitude);
                     //反向移动时速度降低
-                    owner.bodyChunks[1].vel *= slowDown;
-                    owner.bodyChunks[0].vel *= slowDown;
+                    player.bodyChunks[1].vel *= slowDown;
+                    player.bodyChunks[0].vel *= slowDown;
 
                     //撞墙取消横向速度
-                    if (!BlockBySoild(owner, owner.mainBodyChunk.pos, vel))
-                        owner.bodyChunks[0].vel += turnSpeed;
+                    if (!BlockBySoild(player, player.mainBodyChunk.pos, vel))
+                        player.bodyChunks[0].vel += turnSpeed;
 
                 }
             }
         }
 
+        private bool EnergyCheck(Player owner)
+        {
+
+            return (owner.grasps[0]!=null && owner.grasps[0].grabbed != null && owner.grasps[0].grabbed is CoolObject && (owner.grasps[0].grabbed as CoolObject).IsOpen());
+          
+        }
         public void UpdateInput()
         {
-            var pos = owner.mainBodyChunk.pos;
+            var player = owner;
+            var pos = player.mainBodyChunk.pos;
+            if (player == null)
+                return;
 
             //落地取消抓墙保护
-            if (owner.canJump > 0 && isFall)
+            if (player.canJump > 0 && isFall)
                 isFall = false;
 
             //抓墙保护判定
             if (isFall)
-                if (!IsClimb && CheckCanClimb(owner, pos, Vector2.zero, 0.0f, Vector2.zero, false) != 0)
+                if (!IsClimb && CheckCanClimb(player, pos, Vector2.zero, 0.0f, Vector2.zero, false) != 0)
                 {
                     _log.LogDebug("[Climb] Auto climb after fell");
                     StartWallClimb();
@@ -325,9 +374,9 @@ namespace Pkuyo.Wanderer.Feature
 
 
             //长按忽略
-            if ((owner.input[0].pckp && owner.wantToJump > 0) && !pressed)
+            if ((player.input[0].pckp && player.wantToJump > 0) && !pressed)
                 pressed = true;
-            if (!(owner.input[0].pckp && owner.wantToJump > 0))
+            if (!(player.input[0].pckp && player.wantToJump > 0))
             {
                 pressed = false;
                 pressedUsed = false;
@@ -335,7 +384,10 @@ namespace Pkuyo.Wanderer.Feature
 
             //爬墙触发
             //计算人物坐标
-            if (!IsClimb && pressed && !pressedUsed && owner.room.aimap.getAItile(pos).acc == AItile.Accessibility.Wall)
+
+            if (!IsClimb && pressed && !pressedUsed && 
+                (player.room.aimap.getAItile(pos).acc == AItile.Accessibility.Wall ||
+                EnergyCheck(player)) )
             {
                 StartWallClimb();
             }

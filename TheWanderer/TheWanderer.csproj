@@ -42,6 +42,9 @@
     <Reference Include="BepInEx.Harmony">
       <HintPath>..\..\..\SteamLibrary\steamapps\common\Rain World\BepInEx\core\BepInEx.Harmony.dll</HintPath>
     </Reference>
+    <Reference Include="Fisobs">
+      <HintPath>..\Fisobs.dll</HintPath>
+    </Reference>
     <Reference Include="HarmonyXInterop">
       <HintPath>..\..\..\SteamLibrary\steamapps\common\Rain World\BepInEx\core\HarmonyXInterop.dll</HintPath>
     </Reference>
@@ -100,9 +103,11 @@
   <ItemGroup>
     <Compile Include="Hook\Feature\LizardRelationFeature.cs" />
     <Compile Include="Hook\Feature\LoungeFeature.cs" />
+    <Compile Include="Hook\PlayerAbilityHook.cs" />
     <Compile Include="Hook\ShitRegionMergeFix.cs" />
     <Compile Include="Hook\SSOracleHook.cs" />
     <Compile Include="Hook\WandererAssetManager.cs" />
+    <Compile Include="Object\CoolObject.cs" />
     <Compile Include="Post\PostEffect.cs" />
     <Compile Include="Scene\WandererTurtorial.cs" />
     <Compile Include="ClimbWall\ClimbSlugHand.cs" />

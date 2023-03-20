@@ -25,6 +25,7 @@ namespace Pkuyo.Wanderer
             _hooks.Add(ShitRegionMergeFix.Instance(Logger));
             _hooks.Add(MessionHook.Instance(Logger));
             _hooks.Add(SSOracleHook.Instance(Logger));
+            _hooks.Add(PlayerAbilityHook.Instance(Logger));
 
             _hooks.Add(ClimbWallFeature.Instance(Logger));
             _hooks.Add(ListenLizardFeature.Instance(Logger));
