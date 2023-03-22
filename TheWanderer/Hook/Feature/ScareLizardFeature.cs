@@ -21,7 +21,7 @@ namespace Pkuyo.Wanderer.Feature
             _ScareLizardData = new ConditionalWeakTable<Player, PlayerScareLizard>();
         }
 
-        public static ScareLizardFeature Instance(ManualLogSource log)
+        public static ScareLizardFeature Instance(ManualLogSource log = null)
         {
             if (_Instance == null)
                 _Instance = new ScareLizardFeature(log);

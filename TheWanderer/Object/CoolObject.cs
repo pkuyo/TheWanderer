@@ -39,8 +39,8 @@ namespace Pkuyo.Wanderer
         public void InitiateSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam)
         {
             sLeaser.sprites = new FSprite[3];
-            sLeaser.sprites[0] = new FSprite("Futile_White", true);
-
+            sLeaser.sprites[0] = new FSprite("Wanderer_Tool" + (IsOpen ? 1 : (OpenTimer == 0 ? 0 : 2)), true);
+            sLeaser.sprites[0].scale = 0.7f;
             sLeaser.sprites[1] = new FSprite("Futile_White", true);
             sLeaser.sprites[1].shader = rCam.room.game.rainWorld.Shaders["GravityDisruptor"];
             sLeaser.sprites[1].scale = 20f;
@@ -51,7 +51,7 @@ namespace Pkuyo.Wanderer
             sLeaser.sprites[2].shader = rCam.room.game.rainWorld.Shaders["ToolHoloGird"];
             sLeaser.sprites[2].scale = 10f;
             sLeaser.sprites[2].alpha = 1f;
-            sLeaser.sprites[1].color = new Color(0.87f, 0.72f, 0.35f);
+            sLeaser.sprites[2].color = new Color(0, 162 / 255f, 232 / 255f);
 
 
 
@@ -59,6 +59,11 @@ namespace Pkuyo.Wanderer
         }
         public void DrawSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
         {
+            if(isDirty)
+            {
+                sLeaser.sprites[0].element = Futile.atlasManager.GetElementWithName("Wanderer_Tool" + (IsOpen ? 1 : ( OpenTimer == 0 ? 0 : 2)));
+                isDirty = false;
+            }
             sLeaser.sprites[0].x = Mathf.Lerp(firstChunk.lastPos.x, firstChunk.pos.x, timeStacker) - camPos.x;
             sLeaser.sprites[0].y = Mathf.Lerp(firstChunk.lastPos.y, firstChunk.pos.y, timeStacker) - camPos.y;
 
@@ -77,7 +82,7 @@ namespace Pkuyo.Wanderer
                 sLeaser.sprites[i].y = sLeaser.sprites[0].y;
             }
 
-            if (IsOpen())
+            if (IsOpen)
                 sLeaser.sprites[2].alpha = sLeaser.sprites[1].alpha = Mathf.Lerp(sLeaser.sprites[1].alpha, 0.5f, 0.15f);
             else
                 sLeaser.sprites[2].alpha = sLeaser.sprites[1].alpha = Mathf.Lerp(sLeaser.sprites[1].alpha, 0f, 0.15f);
@@ -89,7 +94,7 @@ namespace Pkuyo.Wanderer
 
         public void ApplyPalette(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, RoomPalette palette)
         {
-            sLeaser.sprites[0].color = IsOpen() ? new Color(1, 1, 255) : Color.white;
+           
         }
 
         public void AddToContainer(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, FContainer newContatiner)
@@ -101,20 +106,39 @@ namespace Pkuyo.Wanderer
         public override void NewRoom(Room newRoom)
         {
             base.NewRoom(newRoom);
-           
+            
+            if (SmallCircle != null&&!SmallCircle.slatedForDeletetion)
+                SmallCircle.slatedForDeletetion = true;
+            if(IsOpen)
+                AddSmallProjectedCircle();
         }
         public override void Update(bool eu)
         {
             base.Update(eu);
+
+            if (SmallCircle != null && !SmallCircle.slatedForDeletetion && SmallCircle.rad == 0)
+            {
+                SmallCircle.slatedForDeletetion = true;
+                SmallCircle = null;
+            }
+
             if (OpenTimer > 0)
             {
                 if (--OpenTimer == 0)
                 {
                     room.PlaySound(MoreSlugcatsEnums.MSCSoundID.Core_Ready, firstChunk.pos, 1f, 1f);
-                    gravity = 0.9f;
+                    isDirty = true;
                 }
                 else if (OpenTimer == 400)
+                {
                     room.PlaySound(MoreSlugcatsEnums.MSCSoundID.Core_Off, firstChunk.pos, 1f, 1f);
+                    gravity = 0.9f;
+                    if((!UnlockingGate ||unlockAnim.counter>=200) && !SmallCircle.slatedForDeletetion  )
+                    {
+                        SmallCircle.getToRad = 0;
+                    }
+                    isDirty = true;
+                }
             }
             
             if (FlyTarget!=null)
@@ -147,14 +171,11 @@ namespace Pkuyo.Wanderer
 
         public void AddSmallProjectedCircle()
         {
-            
-            room.AddObject(SmallCircle = new ToolProjectedCircle(room, this, 0, 20f));
+            if(SmallCircle==null || SmallCircle.slatedForDeletetion)
+                room.AddObject(SmallCircle = new ToolProjectedCircle(room, this, 0, 20f));
         }
 
-        public bool IsOpen()
-        {
-            return OpenTimer > CdTime;
-        }
+
         public void StoryMovement()
         {
             //简单寻路
@@ -236,6 +257,9 @@ namespace Pkuyo.Wanderer
                 room.InGameNoise(new InGameNoise(base.firstChunk.pos, 1000f, this, 1f));
                 OpenTimer = 600 + CdTime;
                 gravity = 0.0f;
+                AddSmallProjectedCircle();
+
+                isDirty = true;
             }
         }
 
@@ -250,14 +274,7 @@ namespace Pkuyo.Wanderer
 
         public ToolProjectedCircle SmallCircle;
 
-        public bool UnlockingGate
-        {
-            get
-            {
-                return unlockAnim != null && unlockAnim.slatedForDeletetion != true;
-            }
-
-        }
+  
         public UnlockGateAnimation unlockAnim;
         public int OpenTimer = 0;
         public readonly int CdTime = 400;
@@ -265,59 +282,23 @@ namespace Pkuyo.Wanderer
         public bool IsVis
         {
             get
-            {
-                return _isVis;
-            }
+            { return _isVis; }
         }
+
+        public bool IsOpen
+        {
+            get { return OpenTimer > CdTime; }
+        }
+
+        public bool UnlockingGate
+        {
+            get => unlockAnim != null && unlockAnim.slatedForDeletetion != true;
+        }
+
+        bool isDirty=false;
     }
 
-   
-
-    public class ToolProjectedCircle : ProjectedCircle
-    {
-        public ToolProjectedCircle(Room room, IOwnProjectedCircles owner, int index, float size = 60) : base(room, owner, index, 0)
-        {
-            rad = 0;
-            getToRad = size;
-            baseRad = size;
-            depthOffset = 0;
-            offScreenConnections = new Vector2[0];
-        }
-
-        public override void Update(bool eu)
-        {
-            base.Update(eu);
-            isFirst = false;
-            if (blinkGetTo < 0.3f)
-                blinkGetTo = Random.Range(0.3f, 0.7f);
-            updateDepth = false;
-            depthOffset = 0;
-        }
-        public override void AddToContainer(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, FContainer newContatiner)
-        {
-            for (int i = 1; i < sLeaser.sprites.Length; i++)
-            {
-                sLeaser.sprites[i].color = new Color(0, 162 / 255f, 232 / 255f);
-                sLeaser.sprites[i].alpha = 0.7f;
-            }
-
-            base.AddToContainer(sLeaser, rCam, newContatiner);
-        }
-        public override void DrawSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
-        {
-            if (slatedForDeletetion) return;
-            base.DrawSprites(sLeaser, rCam, timeStacker, camPos);
-            if (isFirst)
-                for (int i = 0; i < sLeaser.sprites.Length; i++)
-                    sLeaser.sprites[i].scale = 0;
-            if (Rad(timeStacker) <= rad / 5)
-                for (int i = 1; i < sLeaser.sprites.Length; i++)
-                    sLeaser.sprites[i].color = Color.Lerp(new Color(0.003921569f, 0f, 0f), new Color(0, 162 / 255f, 232 / 255f), Rad(timeStacker) / (rad / 5));
-
-        }
-        bool isFirst = true;
-
-    }
+  
 
     public class AbstractCoolObject : AbstractPhysicalObject
     {
@@ -406,7 +387,58 @@ namespace Pkuyo.Wanderer
             }
  
         }
+    }
+    public class ToolProjectedCircle : ProjectedCircle
+    {
+        public ToolProjectedCircle(Room room, IOwnProjectedCircles owner, int index, float size = 60) : base(room, owner, index, 0)
+        {
+            rad = 0.01f;
+            getToRad = size;
+            baseRad = size;
+            depthOffset = 0;
+            offScreenConnections = new Vector2[0];
+        }
 
-  
+        public override void Update(bool eu)
+        {
+            base.Update(eu);
+            isFirst = false;
+            if (blinkGetTo < 0.3f)
+                blinkGetTo = Random.Range(0.3f, 0.7f);
+            updateDepth = false;
+            depthOffset = 0;
+        }
+        public override void AddToContainer(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, FContainer newContatiner)
+        {
+            for (int i = 1; i < sLeaser.sprites.Length; i++)
+            {
+                sLeaser.sprites[i].color = new Color(0, 162 / 255f, 232 / 255f);
+            }
+
+            base.AddToContainer(sLeaser, rCam, newContatiner);
+        }
+        public override void ApplyPalette(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, RoomPalette palette)
+        {
+
+            for (int i = 1; i < sLeaser.sprites.Length; i++)
+            {
+                sLeaser.sprites[i].color = new Color(0, 162 / 255f, 232 / 255f);
+            }
+            base.ApplyPalette(sLeaser, rCam, palette);
+        }
+        public override void DrawSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
+        {
+            if (slatedForDeletetion) return;
+            base.DrawSprites(sLeaser, rCam, timeStacker, camPos);
+            if (isFirst)
+                for (int i = 0; i < sLeaser.sprites.Length; i++)
+                    sLeaser.sprites[i].scale = 0;
+            if (Rad(timeStacker) <= rad / 5)
+                for (int i = 1; i < sLeaser.sprites.Length; i++)
+                    sLeaser.sprites[i].color = Color.Lerp(new Color(0.003921569f, 0f, 0f), new Color(0, 162 / 255f, 232 / 255f), Rad(timeStacker) / (rad / 5));
+
+        }
+        bool isFirst = true;
+
     }
 }

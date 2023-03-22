@@ -1,14 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Security.Permissions;
-using System.Text;
 using BepInEx;
-using Pkuyo.Wanderer;
 using Pkuyo.Wanderer.Feature;
 using Pkuyo.Wanderer.Options;
-using Pkuyo.Wanderer.Post;
-using UnityEngine;
+
 #pragma warning disable CS0618
 [assembly: SecurityPermission(SecurityAction.RequestMinimum, SkipVerification = true)]
 #pragma warning restore CS0618
@@ -25,8 +21,9 @@ namespace Pkuyo.Wanderer
             _hooks.Add(ShitRegionMergeFix.Instance(Logger));
             _hooks.Add(MessionHook.Instance(Logger));
             _hooks.Add(SSOracleHook.Instance(Logger));
-            _hooks.Add(PlayerAbilityHook.Instance(Logger));
+            _hooks.Add(CoolObjectHook.Instance(Logger));
 
+            _hooks.Add(PlayerBaseFeature.Instance(Logger));
             _hooks.Add(ClimbWallFeature.Instance(Logger));
             _hooks.Add(ListenLizardFeature.Instance(Logger));
             _hooks.Add(LoungeFeature.Instance(Logger));

@@ -27,7 +27,7 @@ namespace Pkuyo.Wanderer.Feature
 
 
 
-        static public LoungeFeature Instance(ManualLogSource log)
+        static public LoungeFeature Instance(ManualLogSource log = null)
         {
             if (_Instance == null)
                 _Instance = new LoungeFeature(log);
@@ -42,9 +42,18 @@ namespace Pkuyo.Wanderer.Feature
             On.RoomCamera.ApplyFade += RoomCamera_ApplyFade;
             On.Mushroom.BitByPlayer += Mushroom_BitByPlayer;
             On.PlayerGraphics.DrawSprites += PlayerGraphics_DrawSprites;
+            On.Player.Die += Player_Die;
 
             On.Player.Jump += Player_Jump;
             _log.LogDebug("Lounge Feature Init");
+        }
+
+        private void Player_Die(On.Player.orig_Die orig, Player self)
+        {
+            PlayerLounge lounge;
+            if (LoungeData.TryGetValue(self, out lounge))
+                lounge.Die();
+            orig(self);
         }
 
         private void PlayerGraphics_DrawSprites(On.PlayerGraphics.orig_DrawSprites orig, PlayerGraphics self, RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
@@ -124,10 +133,32 @@ namespace Pkuyo.Wanderer.Feature
                 PlayerRef = new WeakReference<Player>(player);
                 keyCode = WandererCharacterMod.WandererOptions.LoungeKeys[player.playerState.playerNumber].Value;
 
-                runspeedFac = player.slugcatStats.runspeedFac *= 1.5f;
-                poleClimbSpeedFac = player.slugcatStats.poleClimbSpeedFac *= 1.7f;
-                corridorClimbSpeedFac = player.slugcatStats.corridorClimbSpeedFac *= 1.7f;
-                loudnessFac = player.slugcatStats.loudnessFac *= 1.5f;
+                runspeedFac = player.slugcatStats.runspeedFac;
+                poleClimbSpeedFac = player.slugcatStats.poleClimbSpeedFac ;
+                corridorClimbSpeedFac = player.slugcatStats.corridorClimbSpeedFac ;
+                loudnessFac = player.slugcatStats.loudnessFac;
+
+                PlayerBackClimb climb;
+                if (ClimbWallFeature.Instance().ClimbFeatures.TryGetValue(player, out climb))
+                        climbSpeed = climb.MaxSpeed;
+
+                PlayerBaseAbility baseAbility;
+                if (PlayerBaseFeature.Instance().BaseAbilityData.TryGetValue(player, out baseAbility))
+                {
+                    rollSpeed = baseAbility.rollSpeed;
+                    slideSpeed = baseAbility.slideSpeed;
+                    jumpBoost = baseAbility.jumpBoost;
+                }
+            }
+
+            public void Die()
+            {
+                Player self;
+                if (!PlayerRef.TryGetTarget(out self))
+                    return;
+                StopLounge(self);
+                IntroCount = 0;
+                WandererAssetManager.Instance(null).PostEffect.timeStacker=0;
             }
             public void MovementUpdate()
             {
@@ -140,7 +171,7 @@ namespace Pkuyo.Wanderer.Feature
                 {
                     Vector2 a = Custom.RNV();
                     //移动的火星
-                    self.room.AddObject(new Spark(self.bodyChunks[1].pos + a * 5f, (a - self.firstChunk.vel).normalized * self.firstChunk.vel.magnitude * 2, Color.white, null, 6, 12));
+                    self.room.AddObject(new Spark(self.bodyChunks[1].pos + a * 5f, (a - self.firstChunk.vel).normalized * self.firstChunk.vel.magnitude * 1.3f, Color.white, null, 6, 12));
                 }
             }
 
@@ -251,13 +282,21 @@ namespace Pkuyo.Wanderer.Feature
                 self.slugcatStats.throwingSkill = 2;
 
                 PlayerBackClimb climb;
-                if (ClimbWallFeature.Instance(null).ClimbArg.TryGetValue(self, out climb))
-                    climb.MaxSpeed *= 1.7f;
+                if (ClimbWallFeature.Instance().ClimbFeatures.TryGetValue(self, out climb))
+                    climb.MaxSpeed = climbSpeed * 1.7f;
+
+                PlayerBaseAbility baseAbility;
+                if(PlayerBaseFeature.Instance().BaseAbilityData.TryGetValue(self,out baseAbility))
+                {
+                    baseAbility.rollSpeed = rollSpeed * 1.5f;
+                    baseAbility.slideSpeed = slideSpeed * 1.5f;
+                    baseAbility.jumpBoost = jumpBoost * 1.1f;
+                }
 
                 IntroCount = 15;
                 //修改shader
                 WandererGraphics graphics;
-                if (self.graphicsModule != null && WandererGraphicsFeature.Instance(null).WandererGraphics.TryGetValue((self.graphicsModule as PlayerGraphics), out graphics))
+                if (self.graphicsModule != null && WandererGraphicsFeature.Instance().WandererGraphics.TryGetValue((self.graphicsModule as PlayerGraphics), out graphics))
                     graphics.IsLounge = true;
 
                 IsLounge = true;
@@ -273,13 +312,21 @@ namespace Pkuyo.Wanderer.Feature
                 self.slugcatStats.throwingSkill = 1;
 
                 PlayerBackClimb climb;
-                if (ClimbWallFeature.Instance(null).ClimbArg.TryGetValue(self, out climb))
-                    climb.MaxSpeed /= 1.7f;
+                if (ClimbWallFeature.Instance().ClimbFeatures.TryGetValue(self, out climb))
+                    climb.MaxSpeed = climbSpeed;
+
+                PlayerBaseAbility baseAbility;
+                if (PlayerBaseFeature.Instance().BaseAbilityData.TryGetValue(self, out baseAbility))
+                {
+                    baseAbility.rollSpeed = rollSpeed;
+                    baseAbility.slideSpeed = slideSpeed;
+                    baseAbility.jumpBoost = jumpBoost;
+                }
 
                 IntroCount = 15;
                 //修改shader
                 WandererGraphics graphics;
-                if (self.graphicsModule != null && WandererGraphicsFeature.Instance(null).WandererGraphics.TryGetValue((self.graphicsModule as PlayerGraphics), out graphics))
+                if (self.graphicsModule != null && WandererGraphicsFeature.Instance().WandererGraphics.TryGetValue((self.graphicsModule as PlayerGraphics), out graphics))
                     graphics.IsLounge = false;
 
       
@@ -310,6 +357,12 @@ namespace Pkuyo.Wanderer.Feature
             float poleClimbSpeedFac;
             float corridorClimbSpeedFac;
             float loudnessFac;
+
+            float climbSpeed;
+
+            float slideSpeed;
+            float jumpBoost;
+            float rollSpeed;
 
             WeakReference<Player> PlayerRef;
 

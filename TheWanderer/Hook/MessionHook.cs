@@ -16,7 +16,7 @@ namespace Pkuyo.Wanderer
            
         }
 
-        static public MessionHook Instance(ManualLogSource log)
+        static public MessionHook Instance(ManualLogSource log = null)
         {
             if (_Instance == null)
                 _Instance = new MessionHook(log);

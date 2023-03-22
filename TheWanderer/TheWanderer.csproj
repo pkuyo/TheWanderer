@@ -103,7 +103,8 @@
   <ItemGroup>
     <Compile Include="Hook\Feature\LizardRelationFeature.cs" />
     <Compile Include="Hook\Feature\LoungeFeature.cs" />
-    <Compile Include="Hook\PlayerAbilityHook.cs" />
+    <Compile Include="Hook\Feature\PlayerBaseFeature.cs" />
+    <Compile Include="Hook\CoolObjectHook.cs" />
     <Compile Include="Hook\ShitRegionMergeFix.cs" />
     <Compile Include="Hook\SSOracleHook.cs" />
     <Compile Include="Hook\WandererAssetManager.cs" />

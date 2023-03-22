@@ -19,7 +19,7 @@ namespace Pkuyo.Wanderer.Feature
             WandererLizards = new ConditionalWeakTable<Lizard, WandererLizard>();
         }
 
-        static public ListenLizardFeature Instance(ManualLogSource log)
+        static public ListenLizardFeature Instance(ManualLogSource log = null)
         {
             if (_Instance == null)
                 _Instance = new ListenLizardFeature(log);
@@ -43,9 +43,14 @@ namespace Pkuyo.Wanderer.Feature
             orig(self,eu);
             WandererLizard lizard;
             if (WandererLizards.TryGetValue(self, out lizard))
+            {
+                if (self.dead)
+                {
+                    WandererLizards.Remove(self);
+                    return;
+                }
                 lizard.Update();
-
-
+            }
         }
 
         private void Lizard_ctor(On.Lizard.orig_ctor orig, Lizard self, AbstractCreature abstractCreature, World world)

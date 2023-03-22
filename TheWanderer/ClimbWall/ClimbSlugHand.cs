@@ -34,7 +34,7 @@ namespace Pkuyo.Wanderer
             orig(self, ow);
             var player = self.owner as Player;
             PlayerBackClimb climb;
-            if ( !ClimbWallFeature.Instance(_log).ClimbArg.TryGetValue(player, out climb))
+            if ( !ClimbWallFeature.Instance(_log).ClimbFeatures.TryGetValue(player, out climb))
                 return;
 
             for (int i = 0; i < 2; i++)
@@ -43,7 +43,7 @@ namespace Pkuyo.Wanderer
                 {
                     player = self.owner as Player;
                     PlayerBackClimb tmp;
-                    if (!ClimbWallFeature.Instance(_log).ClimbArg.TryGetValue(player, out tmp))
+                    if (!ClimbWallFeature.Instance(_log).ClimbFeatures.TryGetValue(player, out tmp))
                         return;
                     _HandOwner.Add(self.hands[i], player);
                     _HandData.Add(self.hands[i], new ClimbSlugHand((i % 2 == 0) ? new Vector2(1, 1) : new Vector2(-1, -1), tmp));

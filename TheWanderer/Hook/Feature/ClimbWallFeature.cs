@@ -1,30 +1,25 @@
-﻿using System;
-using UnityEngine;
-using System.Collections.Generic;
-using System.Reflection;
-using MonoMod.RuntimeDetour;
-using SlugBase.Features;
-using static SlugBase.Features.FeatureTypes;
-using RWCustom;
-using BepInEx.Logging;
-using HarmonyLib;
-using MonoMod.Cil;
+﻿using BepInEx.Logging;
 using Mono.Cecil.Cil;
+using MonoMod.Cil;
+using RWCustom;
+using SlugBase.Features;
+using System;
 using System.Runtime.CompilerServices;
+using UnityEngine;
+using static SlugBase.Features.FeatureTypes;
 
 namespace Pkuyo.Wanderer.Feature
 {
     class ClimbWallFeature : HookBase
     {
-        static public readonly PlayerFeature<bool> ClimbWall = PlayerBool("wanderer/wall_climb");
         static public readonly PlayerFeature<float> ClimbWallSpeed = PlayerFloat("wanderer/wall_climb_speed");
         ClimbWallFeature(ManualLogSource log) :base(log)
         {
             _climbSlugHandGraphics = new ClimbSlugHandGraphics(log);
-            ClimbArg = new ConditionalWeakTable<Player, PlayerBackClimb>();
+            ClimbFeatures = new ConditionalWeakTable<Player, PlayerBackClimb>();
         }
 
-        static public ClimbWallFeature Instance(ManualLogSource log)
+        static public ClimbWallFeature Instance(ManualLogSource log = null)
         {
             if (_Instance==null)
                 _Instance = new ClimbWallFeature(log);
@@ -43,31 +38,61 @@ namespace Pkuyo.Wanderer.Feature
             On.Player.Jump += new On.Player.hook_Jump(Player_Jump);
             On.Player.GrabVerticalPole += new On.Player.hook_GrabVerticalPole(Player_GrabVerticalPole);
 
-            On.Player.ThrowObject += Player_ThrowObject;
+            IL.Player.ThrowObject += Player_ThrowObjectIL;
+
+            
 
             _climbSlugHandGraphics.OnModsInit();
 
             _log.LogDebug("ClimbWallFeature Init");
         }
 
-        private void Player_ThrowObject(On.Player.orig_ThrowObject orig, Player self, int grasp, bool eu)
+        private void Player_ThrowObjectIL(ILContext il)
         {
-            //TODO 下投矛
-            orig(self, grasp, eu);
+            ILCursor c = new ILCursor(il);
+
+            if(c.TryGotoNext(MoveType.After,
+                i => i.MatchCallOrCallvirt<Player>("get_ThrowDirection"),
+                i => i.OpCode == OpCodes.Ldc_I4_0,
+                i => i.MatchCall<IntVector2>(".ctor"),
+                i => i.OpCode==OpCodes.Ldarg_0,
+                i => i.MatchCallOrCallvirt<PhysicalObject>("get_firstChunk")))
+            {
+                c.GotoPrev(MoveType.After, i => i.OpCode == OpCodes.Ldarg_0);
+                var label = c.DefineLabel();
+                c.MarkLabel(label);
+
+                //插入状态判断
+                c.GotoPrev(MoveType.Before, i => i.OpCode == OpCodes.Ldarg_0);
+                c.Emit(OpCodes.Ldarg_0);
+                c.EmitDelegate<Func<Player, bool>>((player) =>
+                 {
+                     if (player.bodyMode == WandererModEnum.PlayerBodyModeIndex.ClimbBackWall && (player.input[0].x != 0 || player.input[0].y != 0))
+                     {
+                         return true;
+                     }
+                     return false;
+                 });
+                c.Emit(OpCodes.Brfalse,label);
+
+                //如果爬墙状态则修改投矛方向
+                c.Emit(OpCodes.Ldarg_0);
+                c.EmitDelegate<Func<Player, IntVector2>>((player) => new IntVector2(player.input[0].x, player.input[0].y));
+                c.Emit(OpCodes.Stloc_S, (byte)0);
+            }
+
         }
-
-
 
         private void Player_ctor(On.Player.orig_ctor orig, Player self, AbstractCreature abstractCreature, World world)
         {
 
             orig(self, abstractCreature, world);
 
-            var CanClimb = false;
+            var speed = 0.0f;
 
             PlayerBackClimb tmp = null;
-            if (!ClimbArg.TryGetValue(self,out tmp) && ClimbWall.TryGet(self, out CanClimb) && CanClimb)
-                ClimbArg.Add(self, new PlayerBackClimb(_log, self));
+            if (!ClimbFeatures.TryGetValue(self,out tmp) && ClimbWallSpeed.TryGet(self, out speed))
+                ClimbFeatures.Add(self, new PlayerBackClimb(_log, self));
   
         }
 
@@ -75,7 +100,7 @@ namespace Pkuyo.Wanderer.Feature
         {
             orig(self);
             PlayerBackClimb player;
-            if (ClimbArg.TryGetValue(self, out player))
+            if (ClimbFeatures.TryGetValue(self, out player))
                 player.UpdateBodyMode();
 
 
@@ -85,7 +110,7 @@ namespace Pkuyo.Wanderer.Feature
         {
             //先于updateMSC调用
             PlayerBackClimb player;
-            if (ClimbArg.TryGetValue(self, out player))
+            if (ClimbFeatures.TryGetValue(self, out player))
                 player.UpdateGravity();
             orig(self);
         }
@@ -94,14 +119,14 @@ namespace Pkuyo.Wanderer.Feature
         {
             orig(self,eu);
             PlayerBackClimb player;
-            if (ClimbArg.TryGetValue(self, out player))
+            if (ClimbFeatures.TryGetValue(self, out player))
                 player.MovementUpdate();
         }
 
         private void Player_Jump(On.Player.orig_Jump orig, Player self)
         {
             PlayerBackClimb player;
-            if (!ClimbArg.TryGetValue(self, out player) || !player.IsClimb)
+            if (!ClimbFeatures.TryGetValue(self, out player) || !player.IsClimb)
                 orig(self);
         }
 
@@ -109,7 +134,7 @@ namespace Pkuyo.Wanderer.Feature
         private void Player_GrabVerticalPole(On.Player.orig_GrabVerticalPole orig, Player self)
         {
             PlayerBackClimb player;
-            if (!ClimbArg.TryGetValue(self, out player) || !player.IsClimb)
+            if (!ClimbFeatures.TryGetValue(self, out player) || !player.IsClimb)
                 orig(self);
         }
 
@@ -118,13 +143,13 @@ namespace Pkuyo.Wanderer.Feature
         {
             orig(self, eu);
             PlayerBackClimb player;
-            if (ClimbArg.TryGetValue(self, out player))
+            if (ClimbFeatures.TryGetValue(self, out player))
                 player.UpdateInput();
         }
  
         private ClimbSlugHandGraphics _climbSlugHandGraphics;
 
-        public ConditionalWeakTable<Player, PlayerBackClimb> ClimbArg;
+        public ConditionalWeakTable<Player, PlayerBackClimb> ClimbFeatures;
 
         static ClimbWallFeature _Instance;
     }
@@ -349,7 +374,7 @@ namespace Pkuyo.Wanderer.Feature
         private bool EnergyCheck(Player owner)
         {
 
-            return (owner.grasps[0]!=null && owner.grasps[0].grabbed != null && owner.grasps[0].grabbed is CoolObject && (owner.grasps[0].grabbed as CoolObject).IsOpen());
+            return (owner.grasps[0]!=null && owner.grasps[0].grabbed != null && owner.grasps[0].grabbed is CoolObject && (owner.grasps[0].grabbed as CoolObject).IsOpen);
           
         }
         public void UpdateInput()

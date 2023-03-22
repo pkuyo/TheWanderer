@@ -22,10 +22,6 @@ namespace Pkuyo.Wanderer.Cosmetic
             PlayerGraphics owner = null;
             if (!iGraphicsRef.TryGetTarget(out owner))
                 return;
-            var bodyPos = sLeaser.sprites[1].GetPosition();
-            var bodyDir = Custom.DirVec(owner.owner.bodyChunks[0].pos, owner.owner.bodyChunks[1].pos);
-            var bodyW = sLeaser.sprites[1].width;
-            var bodyH = sLeaser.sprites[1].height;
             for (int i = 0; i < 2; i++)
             {
   

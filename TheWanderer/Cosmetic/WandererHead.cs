@@ -47,6 +47,13 @@ namespace Pkuyo.Wanderer.Cosmetic
             numberOfSprites = 1;
         }
 
+        public override void AddToContainer(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam)
+        {
+            FContainer newContatiner = rCam.ReturnFContainer("Midground");
+            sLeaser.sprites[startSprite].RemoveFromContainer();
+            newContatiner.AddChild(sLeaser.sprites[startSprite]);
+            
+        }
         public override void InitiateSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam)
         {
             sLeaser.sprites[startSprite] = new FSprite("Futile_White");

@@ -20,7 +20,7 @@ namespace Pkuyo.Wanderer.Feature
 			WandererGraphics = new ConditionalWeakTable<PlayerGraphics, WandererGraphics>();
 		}
 
-		static public WandererGraphicsFeature Instance(ManualLogSource log)
+		static public WandererGraphicsFeature Instance(ManualLogSource log = null)
         {
 			if (_Instance == null)
 				_Instance = new WandererGraphicsFeature(log);
@@ -161,7 +161,11 @@ namespace Pkuyo.Wanderer.Feature
 		private void AddCosmetic(CosmeticBase cosmetic,bool isBefore=false)
 		{
 			if (isBefore)
+			{
+				if (cosmetic.numberOfSprites != 0)
+					throw new Exception("Can't not insert cosmetic before playerGraphics.");
 				BeforeCosmetics.Add(cosmetic);
+			}
 			else
 				Cosmetics.Add(cosmetic);
 		}
@@ -208,15 +212,10 @@ namespace Pkuyo.Wanderer.Feature
 			{
 				cosmetic.InitiateSprites(sLeaser, rCam);
 			}
-
-			FContainer newContatiner = rCam.ReturnFContainer("Midground");
-			for (int i = OriginSprites; i < EndSprites; i++)
+			foreach (var cosmetic in Cosmetics)
 			{
-				sLeaser.sprites[i].RemoveFromContainer();
-				newContatiner.AddChild(sLeaser.sprites[i]);
+				cosmetic.AddToContainer(sLeaser, rCam);
 			}
-
-
 		}
 
 		public void ApplyPalette(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, RoomPalette palette)

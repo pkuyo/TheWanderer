@@ -15,7 +15,7 @@ namespace Pkuyo.Wanderer.Feature
         {
         }
 
-        static public LizardRelationFeature Instance(ManualLogSource log)
+        static public LizardRelationFeature Instance(ManualLogSource log = null)
         {
             if (_Instance == null)
                 _Instance = new LizardRelationFeature(log) ;

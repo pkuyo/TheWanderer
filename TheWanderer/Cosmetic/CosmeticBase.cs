@@ -119,7 +119,18 @@ namespace Pkuyo.Wanderer.Cosmetic
                 _IsLounge = value;
             }
         }
-      
+
+        virtual public void AddToContainer(RoomCamera.SpriteLeaser sLeaser,RoomCamera rCam)
+        {
+            FContainer newContatiner = rCam.ReturnFContainer("Midground");
+            for (int i = startSprite; i < startSprite + numberOfSprites; i++)
+            {
+                sLeaser.sprites[i].RemoveFromContainer();
+                newContatiner.AddChild(sLeaser.sprites[i]);
+            }
+        }
+
+
         private bool _IsLounge;
         private bool IsDirty = true;
 

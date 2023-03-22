@@ -15,7 +15,7 @@ namespace Pkuyo.Wanderer
             On.ModManager.ModMerger.WriteMergedFile += ModMerger_WriteMergedFile;
         }
 
-        static public ShitRegionMergeFix Instance(ManualLogSource log)
+        static public ShitRegionMergeFix Instance(ManualLogSource log = null)
         {
             if (_instance == null)
                 _instance = new ShitRegionMergeFix(log);

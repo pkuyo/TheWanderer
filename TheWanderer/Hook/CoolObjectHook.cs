@@ -9,22 +9,23 @@ using CoralBrain;
 
 namespace Pkuyo.Wanderer
 {
-    class PlayerAbilityHook : HookBase
+    class CoolObjectHook : HookBase
     {
-        PlayerAbilityHook(ManualLogSource log) : base(log)
+        CoolObjectHook(ManualLogSource log) : base(log)
         {
 
         }
-        static public PlayerAbilityHook Instance(ManualLogSource log = null)
+        static public CoolObjectHook Instance(ManualLogSource log = null)
         {
             if (_instance == null)
-                _instance = new PlayerAbilityHook(log);
+                _instance = new CoolObjectHook(log);
             return _instance;
         }
 
         public override void OnModsInit(RainWorld rainWorld)
         {
             On.Player.GrabUpdate += Player_GrabUpdate;
+
             On.RegionGate.Update += RegionGate_Update;
             On.GateKarmaGlyph.DrawSprites += GateKarmaGlyph_DrawSprites;
             On.GateKarmaGlyph.ShouldPlayCitizensIDAnimation += GateKarmaGlyph_ShouldPlayCitizensIDAnimation;
@@ -33,7 +34,7 @@ namespace Pkuyo.Wanderer
 
             Hook overseerColourHook = new Hook(
                 typeof(GateKarmaGlyph).GetProperty("GetToColor", propFlags).GetGetMethod(),
-                typeof(PlayerAbilityHook).GetMethod("GateKarmaGlyph_GetToColor_get", myMethodFlags)
+                typeof(CoolObjectHook).GetMethod("GateKarmaGlyph_GetToColor_get", myMethodFlags)
             );
             Content.Register(new CoolObjectFisob());
         }
@@ -138,7 +139,7 @@ namespace Pkuyo.Wanderer
 
         public delegate Color orig_GetToColor(GateKarmaGlyph self);
 
-        static private PlayerAbilityHook _instance;
+        static private CoolObjectHook _instance;
     }
     public class UnlockGateAnimation : CosmeticSprite, IOwnProjectedCircles
     {
@@ -289,7 +290,7 @@ namespace Pkuyo.Wanderer
                 ChangeGate();
                 circle.getToRad = 0;
                 circle.baseRad = 0;
-                if (origin != null && origin.SmallCircle != null && !origin.SmallCircle.slatedForDeletetion)
+                if (origin != null && !origin.IsOpen && origin.SmallCircle != null && !origin.SmallCircle.slatedForDeletetion)
                 {
                     origin.SmallCircle.getToRad = 0;
                     origin.SmallCircle.baseRad = 0;
@@ -298,7 +299,6 @@ namespace Pkuyo.Wanderer
             else if (circle.rad == 0)
             {
                 circle.Destroy();
-                origin.SmallCircle.Destroy();
                 slatedForDeletetion = true;
             }
         }

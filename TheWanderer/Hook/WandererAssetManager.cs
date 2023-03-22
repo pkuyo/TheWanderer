@@ -17,7 +17,7 @@ namespace Pkuyo.Wanderer
             PostShaders = new Dictionary<string, Shader>();
         }
 
-        static public WandererAssetManager Instance(ManualLogSource log)
+        static public WandererAssetManager Instance(ManualLogSource log = null)
         {
             if (_Instance == null)
                 _Instance = new WandererAssetManager(log);
@@ -38,7 +38,7 @@ namespace Pkuyo.Wanderer
 
                 Futile.atlasManager.LoadAtlas("atlases/wandererSprite");
                 Futile.atlasManager.LoadImage("illustrations/fade");
-               Camera cam = GameObject.FindObjectOfType<Camera>();
+                Camera cam = GameObject.FindObjectOfType<Camera>();
                 PostEffect = cam.gameObject.AddComponent<PostEffect>();
 
 
