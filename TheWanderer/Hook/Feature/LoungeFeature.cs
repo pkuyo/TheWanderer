@@ -75,7 +75,7 @@ namespace Pkuyo.Wanderer.Feature
         private void Mushroom_BitByPlayer(On.Mushroom.orig_BitByPlayer orig, Mushroom self, Creature.Grasp grasp, bool eu)
         {
             orig(self, grasp, eu);
-            if ((grasp.grabber as Player).slugcatStats.name.value == "wanderer")
+            if ((grasp.grabber as Player).slugcatStats.name.value == WandererCharacterMod.WandererName)
                 (grasp.grabber as Player).mushroomCounter -= 320;
         }
 

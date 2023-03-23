@@ -40,7 +40,7 @@ namespace Pkuyo.Wanderer.Feature
             var re = orig(projTracer, room, lastPos,ref pos, rad, collisionLayer, exemptObject, hitAppendages);
             if (ChangeLizardFriendFire)
                 if (re.obj is Lizard && exemptObject is Player && ((re.obj as Lizard).AI.friendTracker.friend != null || (re.obj as Lizard).abstractCreature.world.game.session.creatureCommunities.LikeOfPlayer(CreatureCommunities.CommunityID.Lizards, (re.obj as Lizard).abstractCreature.world.RegionNumber, (exemptObject as Player).playerState.playerNumber)==1)
-                      && (exemptObject as Player).slugcatStats.name.value == "wanderer")
+                      && (exemptObject as Player).slugcatStats.name.value == WandererCharacterMod.WandererName)
                     re.obj = null;
             return re;
         }
@@ -51,7 +51,7 @@ namespace Pkuyo.Wanderer.Feature
             var relationship = orig(self, dRelation);
 
             //漫游者猫猫养的
-            if (self.friendTracker.friend != null && (self.friendTracker.friend is Player) && (self.friendTracker.friend as Player).slugcatStats.name.value == "wanderer")
+            if (self.friendTracker.friend != null && (self.friendTracker.friend is Player) && (self.friendTracker.friend as Player).slugcatStats.name.value == WandererCharacterMod.WandererName)
             {
                 //如果角色为蛞蝓猫
                 if (ChangeLizardAIOption && dRelation.trackerRep.representedCreature.creatureTemplate.type == CreatureTemplate.Type.Slugcat)
@@ -88,7 +88,7 @@ namespace Pkuyo.Wanderer.Feature
                 //总体好感度高自动保护
                 foreach (var player in room.PlayersInRoom)
                 {
-                    if (player.slugcatStats.name.value == "wanderer" && room.game.session.creatureCommunities.LikeOfPlayer(CreatureCommunities.CommunityID.Lizards, room.game.world.RegionNumber, player.playerState.playerNumber) == 1.0f &&
+                    if (player.slugcatStats.name.value == WandererCharacterMod.WandererName && room.game.session.creatureCommunities.LikeOfPlayer(CreatureCommunities.CommunityID.Lizards, room.game.world.RegionNumber, player.playerState.playerNumber) == 1.0f &&
                              dRelation.trackerRep.representedCreature.creatureTemplate.dangerousToPlayer > 0f && dRelation.trackerRep.representedCreature.state.alive && dRelation.trackerRep.representedCreature.realizedCreature != null && 
                              !(dRelation.trackerRep.representedCreature.realizedCreature is Lizard) && dRelation.trackerRep.representedCreature.abstractAI != null && dRelation.trackerRep.representedCreature.abstractAI.RealAI != null)
                     {
@@ -121,7 +121,7 @@ namespace Pkuyo.Wanderer.Feature
         private void LizardAI_ctor(On.LizardAI.orig_ctor orig, LizardAI self, AbstractCreature creature, World world)
         {
             orig(self, creature, world);
-            if (creature.world.game.session.characterStats.name.value == "wanderer")
+            if (creature.world.game.session.characterStats.name.value == WandererCharacterMod.WandererName)
                 //降低驯服难度
                 self.friendTracker.tamingDifficlty = Mathf.Clamp(self.friendTracker.tamingDifficlty * 0.3f, 0.5f, 2f);
         }
@@ -129,7 +129,7 @@ namespace Pkuyo.Wanderer.Feature
         private void CreatureCommunities_InfluenceLikeOfPlayer(On.CreatureCommunities.orig_InfluenceLikeOfPlayer orig, CreatureCommunities self, CreatureCommunities.CommunityID commID, int region, int playerNumber, float influence, float interRegionBleed, float interCommunityBleed)
         {
 
-            if (self.session.characterStats.name.value == "wanderer")
+            if (self.session.characterStats.name.value == WandererCharacterMod.WandererName)
                 if (commID == CreatureCommunities.CommunityID.Lizards)
                 {
                     //区域影响全局乘2

@@ -45,7 +45,7 @@ namespace Pkuyo.Wanderer
             orig(self,cam);
             
             //判断是否为the wanderer战役
-            if (self.owner is Player && (self.owner as Player).abstractCreature.world.game.session.characterStats.name.value == "wanderer")
+            if (self.owner is Player && (self.owner as Player).abstractCreature.world.game.session.characterStats.name.value == WandererCharacterMod.WandererName)
             {
                 if (wandererHud != null)
                     wandererHud.Destroy();

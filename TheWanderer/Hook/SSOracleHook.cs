@@ -73,7 +73,7 @@ namespace Pkuyo.Wanderer
                     seePeople = true;
                 }
             }
-            if (seePeople && self.oracle.room.game.session.characterStats.name.value == "wanderer")
+            if (seePeople && self.oracle.room.game.session.characterStats.name.value == WandererCharacterMod.WandererName)
             {
                 //我们已经讨论过了（
                 if (self.oracle.room.game.GetStorySession.saveState.miscWorldSaveData.SSaiConversationsHad >= 3)

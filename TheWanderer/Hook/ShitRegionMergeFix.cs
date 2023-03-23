@@ -43,7 +43,7 @@ namespace Pkuyo.Wanderer
         private AbstractCreature RainWorldGame_SpawnPlayers(On.RainWorldGame.orig_SpawnPlayers_bool_bool_bool_bool_WorldCoordinate orig, RainWorldGame self, bool player1, bool player2, bool player3, bool player4, WorldCoordinate location)
         {
             //角色生成位置修正
-            if (self.session.characterStats.name.value == "wanderer" && self.world.GetAbstractRoom(location.room).name.ToUpper() == "SB_INTROROOM1")
+            if (self.session.characterStats.name.value == WandererCharacterMod.WandererName && self.world.GetAbstractRoom(location.room).name.ToUpper() == "SB_INTROROOM1")
             {
                 location.x = 8;
                 location.y = 4;
@@ -86,7 +86,7 @@ namespace Pkuyo.Wanderer
                             }
 
                             //计数器
-                            if (line.Contains("wanderer"))
+                            if (line.Contains(WandererCharacterMod.WandererName))
                                 x++;
                         }
                         foreach (var b in a)
@@ -97,7 +97,7 @@ namespace Pkuyo.Wanderer
                         int insertIndex = -1;
                         foreach (var line in mergedlist)
                         {
-                            if (line.Contains("wanderer"))
+                            if (line.Contains(WandererCharacterMod.WandererName))
                             {
                                 text.Remove(line);
                                 y++;

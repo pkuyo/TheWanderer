@@ -13,8 +13,8 @@ namespace Pkuyo.Wanderer
     [BepInPlugin("pkuyo.thevanguard", "The Vanguard", "1.0.0")]
     public class WandererCharacterMod : BaseUnityPlugin
     {
-        static public readonly string  ModID = "pkuyo.thevanguard";
-        
+        static public readonly string ModID = "pkuyo.thevanguard";
+        static public readonly string WandererName = "wanderer";
         public WandererCharacterMod()
         {
             _hooks = new List<HookBase>();

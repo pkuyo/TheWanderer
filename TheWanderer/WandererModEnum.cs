@@ -51,7 +51,7 @@ namespace Pkuyo.Wanderer
 
         static public class WandererWinState
         {
-            static public WinState.EndgameID 
+           // static public WinState.EndgameID 
         }
 
         static public class WandererSSOracle

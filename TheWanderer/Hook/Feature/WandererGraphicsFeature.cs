@@ -53,7 +53,7 @@ namespace Pkuyo.Wanderer.Feature
 				c.Emit(Mono.Cecil.Cil.OpCodes.Ldarg_0);
 				c.EmitDelegate<Func<PlayerGraphics, string>>((self) =>
 				 {
-					 return (self.owner as Player).slugcatStats.name.value == "wanderer" ? "WandererHeadA0" : "HeadA0";
+					 return (self.owner as Player).slugcatStats.name.value == WandererCharacterMod.WandererName ? "WandererHeadA0" : "HeadA0";
 				 });
 			}
         }
@@ -68,7 +68,7 @@ namespace Pkuyo.Wanderer.Feature
 				c.Emit(Mono.Cecil.Cil.OpCodes.Ldarg_0);
 				c.EmitDelegate<Func<PlayerGraphics, string>>((self) =>
 				{
-					return (self.owner as Player).slugcatStats.name.value == "wanderer" ? "WandererHeadA" : "HeadA";
+					return (self.owner as Player).slugcatStats.name.value == WandererCharacterMod.WandererName ? "WandererHeadA" : "HeadA";
 				});
 			}
 		}
@@ -79,7 +79,7 @@ namespace Pkuyo.Wanderer.Feature
         {
 			orig(self, ow);
 
-			if ((self.owner as Player).slugcatStats.name.value != "wanderer")
+			if ((self.owner as Player).slugcatStats.name.value != WandererCharacterMod.WandererName)
 				return;
 
 			WandererGraphics graphics;

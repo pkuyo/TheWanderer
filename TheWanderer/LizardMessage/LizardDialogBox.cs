@@ -34,7 +34,7 @@ namespace Pkuyo.Wanderer.LizardMessage
                return false;
             
             foreach (var player in lizard.room.game.Players)
-                if (player.realizedCreature != null && (player.realizedCreature as Player).slugcatStats.name.value == "wanderer")
+                if (player.realizedCreature != null && (player.realizedCreature as Player).slugcatStats.name.value == WandererCharacterMod.WandererName)
                     canListen = true;
 
             if (!canListen)
@@ -135,7 +135,7 @@ namespace Pkuyo.Wanderer.LizardMessage
                 {
                     foreach (var player in _room.PlayersInRoom)
                     {
-                        if (player.slugcatStats.name.value == "wanderer" && Custom.DistLess(player.mainBodyChunk.pos, target.mainBodyChunk.pos, dis))
+                        if (player.slugcatStats.name.value == WandererCharacterMod.WandererName && Custom.DistLess(player.mainBodyChunk.pos, target.mainBodyChunk.pos, dis))
                         {
                             dis = Custom.Dist(player.mainBodyChunk.pos, target.mainBodyChunk.pos);
                             like = LikeOfPlayer(target, player);
