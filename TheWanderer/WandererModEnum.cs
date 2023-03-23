@@ -33,7 +33,7 @@ namespace Pkuyo.Wanderer
         }
 
 
-        public class PlayerBodyModeIndex
+        static public class PlayerBodyModeIndex
         {
             static public Player.BodyModeIndex ClimbBackWall;
 
@@ -49,9 +49,12 @@ namespace Pkuyo.Wanderer
 
         }
 
-       
+        static public class WandererWinState
+        {
+            static public WinState.EndgameID 
+        }
 
-        public class WandererSSOracle
+        static public class WandererSSOracle
         {
             static public SSOracleBehavior.SubBehavior.SubBehavID Meet_Wanderer;
             static public SSOracleBehavior.SubBehavior.SubBehavID ThrowOut_Wanderer;

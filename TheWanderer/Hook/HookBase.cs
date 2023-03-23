@@ -9,7 +9,7 @@ namespace Pkuyo.Wanderer
 {
     class HookBase
     {
-        public HookBase(ManualLogSource log)
+        protected HookBase(ManualLogSource log)
         {
             _log = log;
         }
@@ -17,7 +17,8 @@ namespace Pkuyo.Wanderer
 
         virtual public void OnModsInit(RainWorld rainWorld)
         {
-
+            
         }
+
     }
 }

@@ -101,6 +101,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Hook\AchievementHook.cs" />
     <Compile Include="Hook\Feature\LizardRelationFeature.cs" />
     <Compile Include="Hook\Feature\LoungeFeature.cs" />
     <Compile Include="Hook\Feature\PlayerBaseFeature.cs" />

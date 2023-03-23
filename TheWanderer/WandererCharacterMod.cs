@@ -13,6 +13,8 @@ namespace Pkuyo.Wanderer
     [BepInPlugin("pkuyo.thevanguard", "The Vanguard", "1.0.0")]
     public class WandererCharacterMod : BaseUnityPlugin
     {
+        static public readonly string  ModID = "pkuyo.thevanguard";
+        
         public WandererCharacterMod()
         {
             _hooks = new List<HookBase>();
@@ -36,13 +38,26 @@ namespace Pkuyo.Wanderer
             WandererOptions = new WandererOptions(Logger);
 
             On.RainWorld.OnModsInit += RainWorld_OnModsInit;
+            On.RainWorld.OnModsDisabled += RainWorld_OnModsDisabled;
+        }
+
+        private void RainWorld_OnModsDisabled(On.RainWorld.orig_OnModsDisabled orig, RainWorld self, ModManager.Mod[] newlyDisabledMods)
+        {
+            foreach(var mod in newlyDisabledMods)
+            {
+                if (mod.id == ModID)
+                {
+                    WandererModEnum.UnRegisterValues();
+                    return;
+                }
+            }
         }
 
         private void RainWorld_OnModsInit(On.RainWorld.orig_OnModsInit orig, RainWorld self)
         {
      
             orig(self);
-            MachineConnector.SetRegisteredOI("pkuyo.thevanguard", WandererOptions);
+            MachineConnector.SetRegisteredOI(ModID, WandererOptions);
             try
             {
                 foreach (var feature in _hooks)
@@ -55,6 +70,8 @@ namespace Pkuyo.Wanderer
             }
             
         }
+
+        
 
         static private List<HookBase> _hooks;
 

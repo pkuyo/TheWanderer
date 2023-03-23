@@ -10,10 +10,23 @@ namespace Pkuyo.Wanderer
 {
     class ShitRegionMergeFix : HookBase
     {
+        int a = 0;
         ShitRegionMergeFix(ManualLogSource log) : base(log)
         {
             On.ModManager.ModMerger.WriteMergedFile += ModMerger_WriteMergedFile;
+            //On.Player.Update += Player_Update;
         }
+
+        //private void Player_Update(On.Player.orig_Update orig, Player self, bool eu)
+        //{
+        //    a++;
+        //    if (a == 60 && self.room != null)
+        //    {
+        //        _log.LogDebug(self.room.GetWorldCoordinate(self.firstChunk.pos).ToString());
+        //        a = 0;
+        //    }
+        //    orig(self, eu);
+        //}
 
         static public ShitRegionMergeFix Instance(ManualLogSource log = null)
         {
@@ -24,12 +37,24 @@ namespace Pkuyo.Wanderer
 
         public override void OnModsInit(RainWorld rainWorld)
         {
-           
+            On.RainWorldGame.SpawnPlayers_bool_bool_bool_bool_WorldCoordinate += RainWorldGame_SpawnPlayers;
+        }
+
+        private AbstractCreature RainWorldGame_SpawnPlayers(On.RainWorldGame.orig_SpawnPlayers_bool_bool_bool_bool_WorldCoordinate orig, RainWorldGame self, bool player1, bool player2, bool player3, bool player4, WorldCoordinate location)
+        {
+            //角色生成位置修正
+            if (self.session.characterStats.name.value == "wanderer" && self.world.GetAbstractRoom(location.room).name.ToUpper() == "SB_INTROROOM1")
+            {
+                location.x = 8;
+                location.y = 4;
+                location.abstractNode = -1;
+            }
+            return orig(self,player1,player2,player3,player4,location);
         }
 
         private void ModMerger_WriteMergedFile(On.ModManager.ModMerger.orig_WriteMergedFile orig, ModManager.Mod sourceMod, string sourcePath, string[] mergeLines)
         {
-            if (sourceMod.id == "pkuyo.thevanguard")
+            if (sourceMod.id == WandererCharacterMod.ModID)
             {
                 List<string> mergedlist = new List<string>(mergeLines);
                 try
@@ -39,10 +64,7 @@ namespace Pkuyo.Wanderer
                     {
                       
                         var path = AssetManager.ResolveDirectory("modify/world") + "/" + fileName.Substring(fileName.LastIndexOf("_") + 1, fileName.LastIndexOf(".") - fileName.LastIndexOf("_") -1) + "/" + fileName;
-                        //if (fileName == "world_sb.txt")
-                        //{
-                        //    path = AssetManager.ResolveDirectory("test/1") + "/" + fileName;
-                        //}
+        
                         var text = new List<string>(File.ReadAllLines(path));
 
                         //清理本地文件

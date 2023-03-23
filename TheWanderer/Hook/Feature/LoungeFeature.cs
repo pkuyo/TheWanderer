@@ -289,7 +289,7 @@ namespace Pkuyo.Wanderer.Feature
                 if(PlayerBaseFeature.Instance().BaseAbilityData.TryGetValue(self,out baseAbility))
                 {
                     baseAbility.rollSpeed = rollSpeed * 1.5f;
-                    baseAbility.slideSpeed = slideSpeed * 1.5f;
+                    //baseAbility.slideSpeed = slideSpeed * 1.5f;
                     baseAbility.jumpBoost = jumpBoost * 1.1f;
                 }
 
