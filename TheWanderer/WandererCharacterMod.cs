@@ -24,6 +24,7 @@ namespace Pkuyo.Wanderer
             _hooks.Add(MessionHook.Instance(Logger));
             _hooks.Add(SSOracleHook.Instance(Logger));
             _hooks.Add(CoolObjectHook.Instance(Logger));
+            _hooks.Add(AchievementHook.Instance(Logger));
 
             _hooks.Add(PlayerBaseFeature.Instance(Logger));
             _hooks.Add(ClimbWallFeature.Instance(Logger));

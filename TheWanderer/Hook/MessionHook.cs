@@ -77,7 +77,7 @@ namespace Pkuyo.Wanderer
             this.owner = owner;
 
             var creature = (owner.owner as Player).abstractCreature;
-            var hudpart = new MissionHud(owner, creature.world.game.session.creatureCommunities.playerOpinions[CreatureCommunities.CommunityID.Lizards.Index - 1, 0, (owner.owner as Player).playerState.playerNumber],null);
+            var hudpart = new MissionHud(owner, creature.world.game.session.creatureCommunities.playerOpinions[CreatureCommunities.CommunityID.Lizards.Index - 1, 0, 0],null);
             _hud = hudpart;
             owner.AddPart(hudpart);
         }
@@ -97,7 +97,7 @@ namespace Pkuyo.Wanderer
                 return;
 
             //爬墙教程
-            if (!ClimbWallTurtorial && room.roomSettings.name == "SB_GOR01")
+            if (!ClimbWallTurtorial && room.roomSettings.name == "SB_INTROROOM1" && (room.GetWorldCoordinate((owner.owner as Player).firstChunk.pos).x>=53))
             {
                 ClimbWallTurtorial = true;
                 room.AddObject(new WandererClimbTurtorial(room));

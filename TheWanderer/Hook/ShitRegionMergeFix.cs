@@ -17,16 +17,16 @@ namespace Pkuyo.Wanderer
             //On.Player.Update += Player_Update;
         }
 
-        //private void Player_Update(On.Player.orig_Update orig, Player self, bool eu)
-        //{
-        //    a++;
-        //    if (a == 60 && self.room != null)
-        //    {
-        //        _log.LogDebug(self.room.GetWorldCoordinate(self.firstChunk.pos).ToString());
-        //        a = 0;
-        //    }
-        //    orig(self, eu);
-        //}
+        private void Player_Update(On.Player.orig_Update orig, Player self, bool eu)
+        {
+            a++;
+            if (a == 60 && self.room != null)
+            {
+                _log.LogDebug(self.room.GetWorldCoordinate(self.firstChunk.pos).ToString());
+                a = 0;
+            }
+            orig(self, eu);
+        }
 
         static public ShitRegionMergeFix Instance(ManualLogSource log = null)
         {

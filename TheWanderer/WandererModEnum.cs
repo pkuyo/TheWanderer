@@ -18,6 +18,7 @@ namespace Pkuyo.Wanderer
                 PlayerBodyModeIndex.RegisterValues();
                 WandererSSOracle.RegisterValues();
                 WandererConversation.RegisterValues();
+                WandererWinState.RegisterValues();
                 isReg = true;
             }
         }
@@ -29,6 +30,8 @@ namespace Pkuyo.Wanderer
                 PlayerBodyModeIndex.UnregisterValues();
                 WandererSSOracle.UnregisterValues();
                 WandererConversation.UnregisterValues();
+                WandererWinState.UnregisterValues();
+                isReg = false;
             }
         }
 
@@ -51,7 +54,17 @@ namespace Pkuyo.Wanderer
 
         static public class WandererWinState
         {
-           // static public WinState.EndgameID 
+            static public WinState.EndgameID Dragonlord;
+            static public int PassageDragonlord = 51;
+
+            public static void RegisterValues()
+            {
+                Dragonlord = new WinState.EndgameID("Dragonlord", true);
+            }
+            public static void UnregisterValues()
+            {
+                if (Dragonlord != null) { Dragonlord.Unregister(); Dragonlord = null; }
+            }
         }
 
         static public class WandererSSOracle
