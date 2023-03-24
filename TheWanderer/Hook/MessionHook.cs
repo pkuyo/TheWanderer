@@ -97,6 +97,11 @@ namespace Pkuyo.Wanderer
                 ClimbWallTurtorial = true;
                 room.AddObject(new WandererClimbTurtorial(room));
             }
+            //冲刺教程
+            else if (room.roomSettings.name == "SB_GOR02VAN")
+            {
+                room.AddObject(new WandererLoungeTurtorial(room));
+            }
             //惊吓蜥蜴教程
             else if (!ScareTurtorial && room.roomSettings.name == "SB_H03")
             {

@@ -53,6 +53,7 @@ namespace Pkuyo.Wanderer
                 self.events.Add(new Conversation.TextEvent(self, 0, self.Translate("Help me reconnect to an important part that is recently rotten, So I may still be able to turn the tide!"), 0));
                 self.events.Add(new Conversation.TextEvent(self, 0, self.Translate("You can achieve your mission with this too, can't you?"), 30));
                 self.events.Add(new Conversation.TextEvent(self, 0, self.Translate("Now hurry up!"), 0));
+                self.events.Add(new Conversation.TextEvent(self, 0, self.Translate("[The Phase Filter Unit is still WIP, so you can directly take the tool to open the gate above Five Pebbles or Moon]"), 0));
             }
         }
 

@@ -48,7 +48,7 @@
     class WandererClimbTurtorial : WandererTurtorial
     {
         public WandererClimbTurtorial(Room room)
-            : base(room, new Message[] { Message.NewMessage("While in the air, tap jump and pick-up together to climb background wall.", 0, 500) })
+            : base(room, new Message[] { Message.NewMessage("While in the air, tap jump and pick-up together to climb background wall.", 0, 300) })
         {
             if (room.game.session.Players[0].pos.room != room.abstractRoom.index)
             {
@@ -74,6 +74,20 @@
         public WandererScareTurtorial(Room room)
             : base(room, new Message[] { Message.NewMessage("hold grab and throw to make a noise to scare lizards.", 120, 160) ,
                                          Message.NewMessage("Avoid hurting the lizards, try to have a good relationship with them!", 120, 160)})
+
+        {
+            if (room.game.session.Players[0].pos.room != room.abstractRoom.index)
+            {
+                Destroy();
+            }
+        }
+    }
+
+    class WandererLoungeTurtorial : WandererTurtorial
+    {
+        public WandererLoungeTurtorial(Room room)
+            : base(room, new Message[] { Message.NewMessage("Press ["+WandererCharacterMod.WandererOptions.LoungeKeys[0].Value.ToString() +"] to enter the sprint state, but it will reduce satiety.",0, 500) ,
+                                         })
 
         {
             if (room.game.session.Players[0].pos.room != room.abstractRoom.index)

@@ -18,7 +18,7 @@ namespace Pkuyo.Wanderer.Options
             LoungeKeys[3] = config.Bind<KeyCode>("loungeKeyCode4", KeyCode.None);
 
             DisableDash = config.Bind<bool>("DisableDashFront", false);
-            MessionReputationBonus = config.Bind<float>("MessionReputationBonus", 2f);
+            MessionReputationBonus = config.Bind<float>("MessionReputationBonus", 4f);
             DisableTamedAIChange = config.Bind<bool>("DisableTamedAIChange", false);
         }
 

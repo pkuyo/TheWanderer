@@ -214,7 +214,7 @@ namespace Pkuyo.Wanderer.Feature
                         if (!WandererCharacterMod.WandererOptions.DisableDash.Value)
                             self.mushroomEffect = Custom.LerpAndTick(self.mushroomEffect, 0f, 0.15f, 0.025f);
 
-                        if (self.mushroomEffect <= 0.2)
+                        if (self.mushroomEffect <= 0.0)
                             reset = false;
                         return;
                     }
@@ -222,7 +222,7 @@ namespace Pkuyo.Wanderer.Feature
                     else
                     {
 
-                        self.mushroomEffect = self.mushroomEffect >= 0.2f ? self.mushroomEffect : 0.2f;
+                        self.mushroomEffect = self.mushroomEffect >= 0.0f ? self.mushroomEffect : 0.0f;
 
                         if (Traverse.Create(self.adrenalineEffect).Field("intensity").GetValue<float>() < 0.5)
                             Traverse.Create(self.adrenalineEffect).Field("intensity").SetValue(0.5f);

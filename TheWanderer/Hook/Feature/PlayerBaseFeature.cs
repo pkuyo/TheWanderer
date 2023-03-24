@@ -14,6 +14,7 @@ namespace Pkuyo.Wanderer.Feature
         static public readonly PlayerFeature<float> slideSpeed = PlayerFloat("wanderer/slide_speed");
         static public readonly PlayerFeature<float> rollSpeed = PlayerFloat("wanderer/roll_speed");
         static public readonly PlayerFeature<float> jumpBoost = PlayerFloat("wanderer/jump_boost");
+        static public readonly PlayerFeature<float> wallJump = PlayerFloat("wanderer/wall_jump");
         static public readonly PlayerFeature<float> slideJumpCD = PlayerFloat("wanderer/slide_jump_cd");
         PlayerBaseFeature(ManualLogSource log) : base(log)
         {
@@ -26,9 +27,12 @@ namespace Pkuyo.Wanderer.Feature
             On.Player.ctor += Player_ctor;
             On.Player.Jump += Player_Jump;
             On.Player.UpdateAnimation += Player_UpdateAnimation;
+            On.Player.WallJump += Player_WallJump;
             IL.Player.UpdateAnimation += Player_UpdateAnimationIL;
             _log.LogDebug("PlayerBaseFeature Init");
         }
+
+
 
         private void Player_UpdateAnimationIL(ILContext il)
         {
@@ -65,6 +69,14 @@ namespace Pkuyo.Wanderer.Feature
 
         }
 
+        private void Player_WallJump(On.Player.orig_WallJump orig, Player self, int direction)
+        {
+            orig(self, direction);
+            PlayerBaseAbility ability = null;
+            if (BaseAbilityData.TryGetValue(self, out ability))
+                ability.WallJump(direction);
+        }
+
         private void Player_UpdateAnimation(On.Player.orig_UpdateAnimation orig, Player self)
         {
             PlayerBaseAbility ability = null;
@@ -87,12 +99,13 @@ namespace Pkuyo.Wanderer.Feature
             float roll = -1;
             float boost = -1;
             float jumpCD = -1;
+            float wall = -1;
 
             PlayerBaseAbility ability = null;
             if (slideSpeed.TryGet(self, out slide) || rollSpeed.TryGet(self, out roll)
-                || jumpBoost.TryGet(self, out boost) || slideJumpCD.TryGet(self, out jumpCD))
+                || jumpBoost.TryGet(self, out boost) || slideJumpCD.TryGet(self, out jumpCD) || wallJump.TryGet(self,out wall))
                 if (!BaseAbilityData.TryGetValue(self, out ability))
-                    BaseAbilityData.Add(self, new PlayerBaseAbility(self, slide, roll, boost, jumpCD));
+                    BaseAbilityData.Add(self, new PlayerBaseAbility(self, slide, roll, boost, jumpCD, wall));
         }
 
         private void Player_Jump(On.Player.orig_Jump orig, Player self)
@@ -124,13 +137,14 @@ namespace Pkuyo.Wanderer.Feature
 
     class PlayerBaseAbility
     {
-        public PlayerBaseAbility(Player owner, float slide, float roll, float boost, float jumpCD)
+        public PlayerBaseAbility(Player owner, float slide, float roll, float boost, float jumpCD, float wall)
         {
             ownerRef = new WeakReference<Player>(owner);
             slideSpeed = slide;
             rollSpeed = roll;
             jumpBoost = boost;
             slideJumpCD = jumpCD;
+            wallJump = wall;
         }
 
         public void BeforeJump()
@@ -146,6 +160,33 @@ namespace Pkuyo.Wanderer.Feature
             lastWhiplashJump = self.whiplashJump;
             lastFlipDirection = self.flipDirection;
             lastBodyMode = self.bodyMode;
+        }
+
+        public void WallJump(int direction)
+        {
+            Player self;
+            if (!ownerRef.TryGetTarget(out self) || wallJump<=0)
+                return;
+            
+            float num = Mathf.Lerp(1f, 1.15f, self.Adrenaline);
+            if (self.exhausted)
+                num *= 1f - 0.5f * self.aerobicLevel;
+            bool flag = self.input[0].x != 0 && self.bodyChunks[0].ContactPoint.x == self.input[0].x && self.IsTileSolid(0, self.input[0].x, 0) && !self.IsTileSolid(0, self.input[0].x, 1);
+            if (self.IsTileSolid(1, 0, -1) || self.IsTileSolid(0, 0, -1) || self.bodyChunks[1].submersion > 0.1f || flag)
+            {
+                if (self.bodyChunks[1].ContactPoint.y > -1 && self.bodyChunks[0].ContactPoint.y > -1 && self.Submersion == 0f)
+                    num *= 0.7f;
+                self.bodyChunks[0].vel.y =  ((9f - 8f)* wallJump + 8) * num;
+                self.bodyChunks[1].vel.y = ((8f - 7f)*wallJump +8f) * num;
+            }
+            else
+            {
+                self.bodyChunks[0].vel.y = ((10f- 8f) * wallJump + 8) * num;
+                self.bodyChunks[1].vel.y = ((9f - 7f) * wallJump + 7) * num;
+                self.bodyChunks[0].vel.x = ((9f - 6f) * wallJump + 6) * num * (float)direction;
+                self.bodyChunks[1].vel.x = ((7f - 5f) * wallJump + 5) * num * (float)direction;
+            }
+            this.jumpBoost = 4 * wallJump;
         }
         public bool Jump()
         {
@@ -258,6 +299,7 @@ namespace Pkuyo.Wanderer.Feature
         public float jumpBoost;
         public float rollSpeed;
         public float slideJumpCD;
+        public float wallJump;
 
         int lastRollDirection;
         int lastSuperLaunchJump;
