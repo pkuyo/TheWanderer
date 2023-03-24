@@ -1,5 +1,6 @@
 ﻿using BepInEx.Logging;
 using HarmonyLib;
+using Pkuyo.Wanderer.Options;
 using RWCustom;
 using SlugBase.Features;
 using System;
@@ -191,8 +192,18 @@ namespace Pkuyo.Wanderer.Feature
                     //进入特效
                     if (IntroCount >= 0)
                     {
-                        self.mushroomEffect = Custom.LerpAndTick(self.mushroomEffect, 3f, 0.15f, 0.025f);
-                        Traverse.Create(self.adrenalineEffect).Field("intensity").SetValue(3 * (Traverse.Create(self.adrenalineEffect).Field("intensity").GetValue<float>()));
+                        if (!WandererCharacterMod.WandererOptions.DisableDash.Value)
+                        {
+                            self.mushroomEffect = Custom.LerpAndTick(self.mushroomEffect, 3f, 0.15f, 0.025f);
+                            Traverse.Create(self.adrenalineEffect).Field("intensity").SetValue(3 * (Traverse.Create(self.adrenalineEffect).Field("intensity").GetValue<float>()));
+                        }
+                        else
+                        {
+                            self.mushroomEffect = Custom.LerpAndTick(self.mushroomEffect, 0.2f, 0.05f, 0.025f);
+                            Traverse.Create(self.adrenalineEffect).Field("intensity").SetValue(3 * (3/0.2f) * (Traverse.Create(self.adrenalineEffect).Field("intensity").GetValue<float>()));
+                        }
+
+ 
                         IntroCount--;
                         reset = true;
                         return;
@@ -200,7 +211,9 @@ namespace Pkuyo.Wanderer.Feature
                     //进入特效后半程
                     else if (reset && self.mushroomEffect > 0)
                     {
-                        self.mushroomEffect = Custom.LerpAndTick(self.mushroomEffect, 0f, 0.15f, 0.025f);
+                        if (!WandererCharacterMod.WandererOptions.DisableDash.Value)
+                            self.mushroomEffect = Custom.LerpAndTick(self.mushroomEffect, 0f, 0.15f, 0.025f);
+
                         if (self.mushroomEffect <= 0.2)
                             reset = false;
                         return;
@@ -208,13 +221,14 @@ namespace Pkuyo.Wanderer.Feature
                     //进行时特效
                     else
                     {
+
                         self.mushroomEffect = self.mushroomEffect >= 0.2f ? self.mushroomEffect : 0.2f;
 
                         if (Traverse.Create(self.adrenalineEffect).Field("intensity").GetValue<float>() < 0.5)
                             Traverse.Create(self.adrenalineEffect).Field("intensity").SetValue(0.5f);
                     }
                 }
-
+                //蘑菇效果会自己停
 
                 //长按判断
                 if (Input.GetKey(keyCode))

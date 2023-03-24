@@ -45,6 +45,9 @@ namespace Pkuyo.Wanderer.Feature
         {
             var relationship = orig(self, dRelation);
 
+            if (WandererCharacterMod.WandererOptions.DisableDash.Value)
+                return relationship;
+
             //漫游者猫猫养的
             if (self.friendTracker.friend != null && (self.friendTracker.friend is Player) && (self.friendTracker.friend as Player).slugcatStats.name.value == WandererCharacterMod.WandererName)
             {
@@ -128,7 +131,7 @@ namespace Pkuyo.Wanderer.Feature
                 if (commID == CreatureCommunities.CommunityID.Lizards)
                 {
                     //区域影响全局乘2
-                    interRegionBleed *= 2f;
+                    interRegionBleed *= WandererCharacterMod.WandererOptions.MessionReputationBonus.Value;
 
                     //在好感度为正时负影响倍率为乘2
                     if (influence < 0 && self.playerOpinions[CreatureCommunities.CommunityID.Lizards.Index - 1, 0, playerNumber] > 0)
