@@ -1,10 +1,6 @@
 ﻿using BepInEx.Logging;
 using MoreSlugcats;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Pkuyo.Wanderer
@@ -30,7 +26,7 @@ namespace Pkuyo.Wanderer
             On.WinState.CreateAndAddTracker += WinState_CreateAndAddTracker;
             On.WinState.PassageAchievementID += WinState_PassageAchievementID;
 
-          //  On.ProcessManager.CueAchievementPlatform += ProcessManager_CueAchievementPlatform;
+            //  On.ProcessManager.CueAchievementPlatform += ProcessManager_CueAchievementPlatform;
         }
         private RainWorld.AchievementID WinState_PassageAchievementID(On.WinState.orig_PassageAchievementID orig, WinState.EndgameID ID)
         {
@@ -43,7 +39,7 @@ namespace Pkuyo.Wanderer
 
         private string WinState_PassageDisplayName(On.WinState.orig_PassageDisplayName orig, WinState.EndgameID ID)
         {
-           var re = orig(ID);
+            var re = orig(ID);
             if (ID == WandererModEnum.WandererWinState.Dragonlord)
                 return "The Dragonlord";
             return re;
@@ -86,13 +82,13 @@ namespace Pkuyo.Wanderer
                 return;
             }
             WinState.FloatTracker floatTracker = null;
-            if (game.session.creatureCommunities.playerOpinions[CreatureCommunities.CommunityID.Lizards.Index - 1, 0, 0]>0 || game.session.characterStats.name.value == WandererCharacterMod.WandererName)
+            if (game.session.creatureCommunities.playerOpinions[CreatureCommunities.CommunityID.Lizards.Index - 1, 0, 0] > 0 || game.session.characterStats.name.value == WandererCharacterMod.WandererName)
                 floatTracker = self.GetTracker(WandererModEnum.WandererWinState.Dragonlord, true) as WinState.FloatTracker;
             else
                 floatTracker = self.GetTracker(WandererModEnum.WandererWinState.Dragonlord, false) as WinState.FloatTracker;
             if (floatTracker != null)
             {
-                floatTracker.SetProgress(Mathf.Max(0.0f,game.session.creatureCommunities.playerOpinions[CreatureCommunities.CommunityID.Lizards.Index - 1, 0, 0]));
+                floatTracker.SetProgress(Mathf.Max(0.0f, game.session.creatureCommunities.playerOpinions[CreatureCommunities.CommunityID.Lizards.Index - 1, 0, 0]));
             }
 
         }

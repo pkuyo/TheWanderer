@@ -10,15 +10,15 @@ using Random = UnityEngine.Random;
 
 namespace Pkuyo.Wanderer.LizardMessage
 {
-    public class WandererLizard 
+    public class WandererLizard
     {
         public WandererLizard(Lizard self)
         {
             lizardRef = new WeakReference<Lizard>(self);
-            speakSpeed = Custom.LerpMap(self.abstractCreature.personality.energy * 4,0,0.5f,1.3f,0.7f);
+            speakSpeed = Custom.LerpMap(self.abstractCreature.personality.energy * 4, 0, 0.5f, 1.3f, 0.7f);
             ConstantCounter = (int)(Random.Range(0, 200) * speakSpeed);
             InstantCounter = (int)(Random.Range(0, 200) * speakSpeed);
-            
+
         }
 
         //false代表程序错误
@@ -30,9 +30,9 @@ namespace Pkuyo.Wanderer.LizardMessage
             if (!lizardRef.TryGetTarget(out lizard))
                 return false;
 
-            if(lizard.room==null)
-               return false;
-            
+            if (lizard.room == null)
+                return false;
+
             foreach (var player in lizard.room.game.Players)
                 if (player.realizedCreature != null && (player.realizedCreature as Player).slugcatStats.name.value == WandererCharacterMod.WandererName)
                     canListen = true;
@@ -70,7 +70,7 @@ namespace Pkuyo.Wanderer.LizardMessage
             if ((InstantCounter == 0 || instantState > lastPriority) && instantState.priority != -1)
             {
                 dialog = LizardDialogBox.CreateLizardDialog(lizard, instantState);
-                InstantCounter = (int)((150 + Random.Range(25, 200))*speakSpeed);
+                InstantCounter = (int)((150 + Random.Range(25, 200)) * speakSpeed);
             }
             else
             {
@@ -78,7 +78,7 @@ namespace Pkuyo.Wanderer.LizardMessage
                 var castate = new StatePriority(lizard.animation, false);
                 var cbstate = new StatePriority(lizard.AI.behavior, false);
                 var constantState = castate > cbstate ? castate : cbstate;
-                if (ConstantCounter == 0 && constantState.priority !=-1)
+                if (ConstantCounter == 0 && constantState.priority != -1)
                 {
                     dialog = LizardDialogBox.CreateLizardDialog(lizard, constantState);
                     ConstantCounter = (int)((250 + Random.Range(50, 250)) * speakSpeed);
@@ -114,11 +114,11 @@ namespace Pkuyo.Wanderer.LizardMessage
 
     class LizardDialogBox : DialogBox
     {
-        LizardDialogBox(HUD.HUD hud, RoomCamera camera , Lizard target, string message, StatePriority pri) : base(hud)
+        LizardDialogBox(HUD.HUD hud, RoomCamera camera, Lizard target, string message, StatePriority pri) : base(hud)
         {
             _camera = camera;
             _room = target.abstractCreature.Room.realizedRoom;
-            _pos = target.mainBodyChunk.pos +new Vector2(Random.Range(-25,25),25.0f + Random.Range(-10, 10));
+            _pos = target.mainBodyChunk.pos + new Vector2(Random.Range(-25, 25), 25.0f + Random.Range(-10, 10));
             Priority = pri;
 
             float dis = 10000f;
@@ -145,11 +145,11 @@ namespace Pkuyo.Wanderer.LizardMessage
                 }
             }
 
-            NewMessage(message,60);
-            
+            NewMessage(message, 60);
+
         }
 
-        public float LikeOfPlayer(Lizard lizard,Player player)
+        public float LikeOfPlayer(Lizard lizard, Player player)
         {
             var ai = lizard.AI;
             if (player == null)
@@ -186,7 +186,7 @@ namespace Pkuyo.Wanderer.LizardMessage
             else if (this.messages.Count > 0)
             {
                 Vector2 vector = this._pos - this._camera.pos;
-                
+
                 this.messages[0].yPos = vector.y;
                 this.messages[0].xOrientation = vector.x / this.hud.rainWorld.screenSize.x;
             }
@@ -243,7 +243,7 @@ namespace Pkuyo.Wanderer.LizardMessage
     //对话框创建时的参数
     public class StatePriority
     {
-  
+
 
         //空置优先级，无实际意义
         public StatePriority()
@@ -306,7 +306,7 @@ namespace Pkuyo.Wanderer.LizardMessage
         }
 
         public int priority { get; protected set; }
-        private int isInstant = 0;
+        private readonly int isInstant = 0;
 
         public string State { get; protected set; }
 
@@ -328,8 +328,8 @@ namespace Pkuyo.Wanderer.LizardMessage
                 var all = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, int>>(Encoding.UTF8.GetString(a));
 
                 foreach (var pri in all)
-                {    
-                       InstantPri.Add(pri.Key, pri.Value); 
+                {
+                    InstantPri.Add(pri.Key, pri.Value);
                 }
                 _log.LogDebug("ShortList loaded");
             }
@@ -376,7 +376,7 @@ namespace Pkuyo.Wanderer.LizardMessage
             return !(a == b);
         }
 
-        
+
         private static Dictionary<string, int> InstantPri;
         private static Dictionary<string, int> ConstantPri;
         private static ManualLogSource _log;

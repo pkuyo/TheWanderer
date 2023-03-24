@@ -1,11 +1,11 @@
 ﻿using BepInEx.Logging;
-using Fisobs.Core;
-using System.Reflection;
-using MonoMod.RuntimeDetour;
-using UnityEngine;
-using RWCustom;
-using MoreSlugcats;
 using CoralBrain;
+using Fisobs.Core;
+using MonoMod.RuntimeDetour;
+using MoreSlugcats;
+using RWCustom;
+using System.Reflection;
+using UnityEngine;
 
 namespace Pkuyo.Wanderer
 {
@@ -85,8 +85,8 @@ namespace Pkuyo.Wanderer
             CoolObject coolObject;
             if (TryGetObject(self.gate, out coolObject) && coolObject.UnlockingGate)
             {
-                if(coolObject.unlockAnim.counter >=100)
-                    return Color.Lerp(self.myDefaultColor, new Color(0f, 0f, 1f), 0.4f + 0.5f * Mathf.Sin((coolObject.unlockAnim.counter-100) / 6f));
+                if (coolObject.unlockAnim.counter >= 100)
+                    return Color.Lerp(self.myDefaultColor, new Color(0f, 0f, 1f), 0.4f + 0.5f * Mathf.Sin((coolObject.unlockAnim.counter - 100) / 6f));
             }
             return color;
         }
@@ -99,7 +99,7 @@ namespace Pkuyo.Wanderer
                 if (num > 0 && num < 3)
                 {
                     CoolObject coolObject;
-                    if (TryGetObject(self,out coolObject) && self.MeetRequirement==false && !coolObject.UnlockingGate)
+                    if (TryGetObject(self, out coolObject) && self.MeetRequirement == false && !coolObject.UnlockingGate)
                     {
                         UnlockGateAnimation unlockGate = new UnlockGateAnimation(coolObject, self);
                         self.room.AddObject(unlockGate);
@@ -109,10 +109,10 @@ namespace Pkuyo.Wanderer
             }
         }
 
-        private static bool TryGetObject(RegionGate self,out CoolObject cool)
+        private static bool TryGetObject(RegionGate self, out CoolObject cool)
         {
             cool = null;
-            if(self.room != null)
+            if (self.room != null)
             {
                 foreach (var player in self.room.PlayersInRoom)
                     if (player.grasps[0] != null && player.grasps[0].grabbed is CoolObject)
@@ -184,7 +184,7 @@ namespace Pkuyo.Wanderer
                 sLeaser.sprites[i].x = pos.x - camPos.x;
                 sLeaser.sprites[i].y = pos.y - camPos.y;
             }
-            if(room != rCam.room)
+            if (room != rCam.room)
             {
                 Destroy();
             }
@@ -280,7 +280,7 @@ namespace Pkuyo.Wanderer
             counter++;
             vel = Vector2.Lerp(vel, vel + origin.firstChunk.vel, 0.2f);
 
-            if(counter>=100)
+            if (counter >= 100)
             {
                 if (randCounter > 0)
                     randCounter--;
@@ -305,7 +305,7 @@ namespace Pkuyo.Wanderer
 
         private void ChangeGate()
         {
-            gate.unlocked=true;
+            gate.unlocked = true;
         }
         public bool CanHostCircle()
         {

@@ -1,53 +1,13 @@
-﻿using BepInEx.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Pkuyo.Wanderer
+﻿namespace Pkuyo.Wanderer
 {
-
-    class WandererClimbTurtorial : UpdatableAndDeletable
+    class WandererTurtorial : UpdatableAndDeletable
     {
-        public WandererClimbTurtorial(Room room)
+        public WandererTurtorial(Room room, Message[] list)
         {
             this.room = room;
             if (room.game.session.Players[0].pos.room != room.abstractRoom.index)
-            {
-                this.Destroy();
-            }
-        }
-
-        public override void Update(bool eu)
-        {
-            base.Update(eu);
-            if(room.game.session.Players[0].realizedCreature != null && room.game.cameras[0].hud != null && 
-                room.game.cameras[0].hud.textPrompt != null && room.game.cameras[0].hud.textPrompt.messages.Count < 1)
-            {
-                if (!isUse)
-                {
-                    this.room.game.cameras[0].hud.textPrompt.AddMessage(this.room.game.manager.rainWorld.inGameTranslator.Translate("While in the air, tap jump and pick-up together to climb background wall."), 120, 500, false, ModManager.MMF);
-                    isUse = true;
-                }
-                else
-                {
-                    this.Destroy();
-                }
-            }
-        }
-        bool isUse = false;
-    }
-
-    class WandererScareTurtorial : UpdatableAndDeletable
-    {
-        public WandererScareTurtorial(Room room)
-        {
-            this.room = room;
-            if (room.game.session.Players[0].pos.room != room.abstractRoom.index)
-            {
-                this.Destroy();
-            }
+                Destroy();
+            messageList = list;
         }
 
         public override void Update(bool eu)
@@ -56,22 +16,70 @@ namespace Pkuyo.Wanderer
             if (room.game.session.Players[0].realizedCreature != null && room.game.cameras[0].hud != null &&
                 room.game.cameras[0].hud.textPrompt != null && room.game.cameras[0].hud.textPrompt.messages.Count < 1)
             {
-                switch(isUse)
+                if (index < messageList.Length)
                 {
-                    case 0:
-                        this.room.game.cameras[0].hud.textPrompt.AddMessage(this.room.game.manager.rainWorld.inGameTranslator.Translate("hold grab and throw to make a noise to scare lizards."), 120, 160, false, ModManager.MMF);
-                        isUse++;
-                        break;
-                    case 1:
-                        this.room.game.cameras[0].hud.textPrompt.AddMessage(this.room.game.manager.rainWorld.inGameTranslator.Translate("Avoid hurting the lizards, try to have a good relationship with them!"), 0, 160, false, ModManager.MMF);
-                        isUse++;
-                        break;
-                    case 2:
-                        this.Destroy();
-                        break;
+                    room.game.cameras[0].hud.textPrompt.AddMessage(room.game.manager.rainWorld.inGameTranslator.Translate(messageList[index].text), messageList[index].wait, messageList[index].time, false, ModManager.MMF);
+                    index++;
                 }
+                else
+                    slatedForDeletetion = true;
             }
         }
-        int isUse = 0;
+        public class Message
+        {
+            public string text;
+            public int wait;
+            public int time;
+            Message(string s, int w, int t)
+            {
+                text = s;
+                wait = w;
+                time = t;
+            }
+            static public Message NewMessage(string s, int w, int t)
+            {
+                return new Message(s, w, t);
+            }
+        }
+        int index = 0;
+        readonly Message[] messageList;
+    }
+
+    class WandererClimbTurtorial : WandererTurtorial
+    {
+        public WandererClimbTurtorial(Room room)
+            : base(room, new Message[] { Message.NewMessage("While in the air, tap jump and pick-up together to climb background wall.", 0, 500) })
+        {
+            if (room.game.session.Players[0].pos.room != room.abstractRoom.index)
+            {
+                Destroy();
+            }
+        }
+    }
+    class WandererToolTurtorial : WandererTurtorial
+    {
+        public WandererToolTurtorial(Room room)
+              : base(room, new Message[] {  Message.NewMessage("Tap jump and pick-up together to active tools.", 120, 160),
+                                            Message.NewMessage("Activating this tool allows you to climb air!", 120, 160)})
+        {
+            if (room.game.session.Players[0].pos.room != room.abstractRoom.index)
+            {
+                Destroy();
+            }
+        }
+    }
+
+    class WandererScareTurtorial : WandererTurtorial
+    {
+        public WandererScareTurtorial(Room room)
+            : base(room, new Message[] { Message.NewMessage("hold grab and throw to make a noise to scare lizards.", 120, 160) ,
+                                         Message.NewMessage("Avoid hurting the lizards, try to have a good relationship with them!", 120, 160)})
+
+        {
+            if (room.game.session.Players[0].pos.room != room.abstractRoom.index)
+            {
+                Destroy();
+            }
+        }
     }
 }

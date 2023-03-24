@@ -3,10 +3,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
 using Random = UnityEngine.Random;
 
 namespace Pkuyo.Wanderer.LizardMessage
@@ -19,9 +16,9 @@ namespace Pkuyo.Wanderer.LizardMessage
             {
                 language = lan;
             }
-            public override string Message => language  + " file load failed";
+            public override string Message => language + " file load failed";
 
-            string language;
+            readonly string language;
         }
 
         public static void InitLizardMessage(ManualLogSource log, RainWorld rainWorld)
@@ -30,14 +27,14 @@ namespace Pkuyo.Wanderer.LizardMessage
             rw = rainWorld;
 
             //消息记录
-            
+
             Messages = new ConcurrentDictionary<InGameTranslator.LanguageID, ConcurrentDictionary<CreatureTemplate.Type, ConcurrentDictionary<string, List<string>>>>();
 
             AddSingleLanguage(InGameTranslator.LanguageID.Chinese);
             AddSingleLanguage(InGameTranslator.LanguageID.English);
 
             _log.LogDebug("Loaded Lizard Messages");
-            
+
         }
 
         private static void AddSingleLanguage(InGameTranslator.LanguageID language)
@@ -69,7 +66,7 @@ namespace Pkuyo.Wanderer.LizardMessage
 
             }
             fileStream.Close();
-            _log.LogDebug("[Message] Load " + all.Count + " lizards with " + all["PinkLizard"].Count + " states.[" + language.value+"]");
+            _log.LogDebug("[Message] Load " + all.Count + " lizards with " + all["PinkLizard"].Count + " states.[" + language.value + "]");
 
             if (all["PinkLizard"].Count == 0)
                 throw new MessageLoadException(language.value);
@@ -78,7 +75,7 @@ namespace Pkuyo.Wanderer.LizardMessage
         }
 
         //对外接口
-        public static string GetRandomMessage(Lizard target,StatePriority priority)
+        public static string GetRandomMessage(Lizard target, StatePriority priority)
         {
             if (target.lizardParams.template == CreatureTemplate.Type.YellowLizard)
             {
@@ -132,10 +129,10 @@ namespace Pkuyo.Wanderer.LizardMessage
                 return messageList[Random.Range(0, messageList.Count - 1)];
         }
 
- 
+
         static private ConcurrentDictionary<InGameTranslator.LanguageID, ConcurrentDictionary<CreatureTemplate.Type, ConcurrentDictionary<string, List<string>>>> Messages;
         static private RainWorld rw;
         static private ManualLogSource _log;
-        static private string YellowLizardText = "!@#$%^&*+-";
+        private static readonly string YellowLizardText = "!@#$%^&*+-";
     }
 }

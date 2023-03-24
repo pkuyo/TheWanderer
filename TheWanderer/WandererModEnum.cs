@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Menu;
 
 namespace Pkuyo.Wanderer
 {
@@ -13,12 +9,13 @@ namespace Pkuyo.Wanderer
 
         static public void RegisterValues()
         {
-            if(!isReg)
+            if (!isReg)
             {
                 PlayerBodyModeIndex.RegisterValues();
                 WandererSSOracle.RegisterValues();
                 WandererConversation.RegisterValues();
                 WandererWinState.RegisterValues();
+                WandererScene.RegisterValues();
                 isReg = true;
             }
         }
@@ -31,6 +28,7 @@ namespace Pkuyo.Wanderer
                 WandererSSOracle.UnregisterValues();
                 WandererConversation.UnregisterValues();
                 WandererWinState.UnregisterValues();
+                WandererScene.UnregisterValues();
                 isReg = false;
             }
         }
@@ -81,7 +79,7 @@ namespace Pkuyo.Wanderer
             public static void RegisterValues()
             {
                 Meet_Wanderer = new SSOracleBehavior.SubBehavior.SubBehavID("Meet_Wanderer", true);
-                ThrowOut_Wanderer = new SSOracleBehavior.SubBehavior.SubBehavID("ThrowOut_Wanderer",true);
+                ThrowOut_Wanderer = new SSOracleBehavior.SubBehavior.SubBehavID("ThrowOut_Wanderer", true);
 
                 MeetWanderer_Tend_Kill = new SSOracleBehavior.Action("MeetWanderer_Tend_Kill", true);
                 MeetWanderer_Talk = new SSOracleBehavior.Action("MeetWanderer_Talk", true);
@@ -100,13 +98,31 @@ namespace Pkuyo.Wanderer
                 if (MeetWanderer_GiveObject != null) { MeetWanderer_GiveObject.Unregister(); MeetWanderer_GiveObject = null; }
 
                 if (ThrowOutWanderer != null) { ThrowOutWanderer.Unregister(); ThrowOutWanderer = null; }
-    
+
 
 
             }
         }
 
-        public class WandererConversation
+        static public class WandererScene
+        {
+            public static SlideShow.SlideShowID WandererIntro;
+            public static MenuScene.SceneID Intro_W1;
+            public static MenuScene.SceneID Intro_W2;
+            public static void RegisterValues()
+            {
+                WandererIntro = new SlideShow.SlideShowID("WandererIntro", true);
+                Intro_W1 = new MenuScene.SceneID("Intro_W1", true);
+                Intro_W2 = new MenuScene.SceneID("Intro_W2", true);
+            }
+            public static void UnregisterValues()
+            {
+                if (WandererIntro != null) { WandererIntro.Unregister(); WandererIntro = null; }
+                if (Intro_W1 != null) { Intro_W1.Unregister(); Intro_W1 = null; }
+                if (Intro_W2 != null) { Intro_W2.Unregister(); Intro_W2 = null; }
+            }
+        }
+        static public class WandererConversation
         {
             public static Conversation.ID Pebbles_Wanderer_FirstMeet_Talk1;
             public static Conversation.ID Pebbles_Wanderer_FirstMeet_Talk2;

@@ -1,10 +1,4 @@
 ﻿using BepInEx.Logging;
-using Pkuyo.Wanderer;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Pkuyo.Wanderer.Cosmetic
@@ -52,7 +46,7 @@ namespace Pkuyo.Wanderer.Cosmetic
             FContainer newContatiner = rCam.ReturnFContainer("Midground");
             sLeaser.sprites[startSprite].RemoveFromContainer();
             newContatiner.AddChild(sLeaser.sprites[startSprite]);
-            
+
         }
         public override void InitiateSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam)
         {
@@ -69,7 +63,7 @@ namespace Pkuyo.Wanderer.Cosmetic
             PlayerGraphics owner;
             if (!iGraphicsRef.TryGetTarget(out owner))
                 return;
-            
+
             sLeaser.sprites[startSprite].x = owner.head.pos.x - camPos.x;
             sLeaser.sprites[startSprite].y = owner.head.pos.y - camPos.y;
             base.DrawSprites(sLeaser, rCam, timeStacker, camPos);

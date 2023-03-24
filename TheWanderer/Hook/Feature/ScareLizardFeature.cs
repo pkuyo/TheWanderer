@@ -1,15 +1,11 @@
 ﻿using BepInEx.Logging;
-using Noise;
 using RWCustom;
 using SlugBase.Features;
-using static SlugBase.Features.FeatureTypes;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
 using System.Runtime.CompilerServices;
+using UnityEngine;
+using static SlugBase.Features.FeatureTypes;
 
 namespace Pkuyo.Wanderer.Feature
 {
@@ -72,7 +68,7 @@ namespace Pkuyo.Wanderer.Feature
 
         }
 
-        ConditionalWeakTable<Player, PlayerScareLizard> _ScareLizardData;
+        readonly ConditionalWeakTable<Player, PlayerScareLizard> _ScareLizardData;
 
         static private ScareLizardFeature _Instance;
 
@@ -96,7 +92,7 @@ namespace Pkuyo.Wanderer.Feature
 
                     ScareLizardCD = 0;
 
-                    
+
 
                     //劳累状态
                     self.lungsExhausted = true;
@@ -115,7 +111,7 @@ namespace Pkuyo.Wanderer.Feature
                         self.room.AddObject(new Spark(self.mainBodyChunk.pos + a * 10f, a.normalized * 10, Color.white, null, 8, 24));
                     }
 
-                self.room.PlaySound(SoundID.Firecracker_Disintegrate, self.mainBodyChunk.pos);
+                    self.room.PlaySound(SoundID.Firecracker_Disintegrate, self.mainBodyChunk.pos);
 
                 }
                 else if (self.input[0].pckp && self.input[0].thrw)
@@ -135,14 +131,14 @@ namespace Pkuyo.Wanderer.Feature
                 Player self = null;
                 if (!PlayerRef.TryGetTarget(out self))
                     return;
-                
-                if (ScareLizardCD > 0 && self.graphicsModule !=null)
+
+                if (ScareLizardCD > 0 && self.graphicsModule != null)
                 {
                     (self.graphicsModule as PlayerGraphics).blink = 5;
                 }
             }
 
-            WeakReference<Player> PlayerRef;
+            readonly WeakReference<Player> PlayerRef;
 
             int ScareLizardCD = 0;
 
@@ -151,7 +147,7 @@ namespace Pkuyo.Wanderer.Feature
 
         class WandererScareObject : UpdatableAndDeletable
         {
-            public WandererScareObject(Vector2 pos) 
+            public WandererScareObject(Vector2 pos)
             {
                 this.pos = pos;
                 this.threatPoints = new List<ThreatTracker.ThreatPoint>();
@@ -182,7 +178,7 @@ namespace Pkuyo.Wanderer.Feature
                 }
                 for (int j = 0; j < this.threatPoints.Count; j++)
                 {
-                    this.threatPoints[j].severity = Mathf.InverseLerp(700f, 500f, (float)this.lifeTime);
+                    this.threatPoints[j].severity = Mathf.InverseLerp(700f, 500f, lifeTime);
                     this.threatPoints[j].pos = worldCoordinate;
                 }
                 if (this.lifeTime > 400)
@@ -229,7 +225,7 @@ namespace Pkuyo.Wanderer.Feature
             public float fearRange;
         }
 
-        
+
 
     }
 }

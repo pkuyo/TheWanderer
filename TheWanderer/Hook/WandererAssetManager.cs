@@ -1,10 +1,6 @@
 ﻿using BepInEx.Logging;
 using Pkuyo.Wanderer.Post;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Pkuyo.Wanderer
@@ -34,7 +30,7 @@ namespace Pkuyo.Wanderer
                 rainWorld.Shaders.Add("ToolHoloGird", FShader.CreateShader("ToolHoloGird", bundle.LoadAsset<Shader>("ToolHoloGird")));
 
 
-                PostShaders.Add("LoungePost",bundle.LoadAsset<Shader>("LoungePost"));
+                PostShaders.Add("LoungePost", bundle.LoadAsset<Shader>("LoungePost"));
 
                 Futile.atlasManager.LoadAtlas("atlases/wandererSprite");
                 Futile.atlasManager.LoadImage("illustrations/fade");

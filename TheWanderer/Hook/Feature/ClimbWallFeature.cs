@@ -13,7 +13,7 @@ namespace Pkuyo.Wanderer.Feature
     class ClimbWallFeature : HookBase
     {
         static public readonly PlayerFeature<float> ClimbWallSpeed = PlayerFloat("wanderer/wall_climb_speed");
-        ClimbWallFeature(ManualLogSource log) :base(log)
+        ClimbWallFeature(ManualLogSource log) : base(log)
         {
             _climbSlugHandGraphics = new ClimbSlugHandGraphics(log);
             ClimbFeatures = new ConditionalWeakTable<Player, PlayerBackClimb>();
@@ -21,7 +21,7 @@ namespace Pkuyo.Wanderer.Feature
 
         static public ClimbWallFeature Instance(ManualLogSource log = null)
         {
-            if (_Instance==null)
+            if (_Instance == null)
                 _Instance = new ClimbWallFeature(log);
             return _Instance;
         }
@@ -40,7 +40,7 @@ namespace Pkuyo.Wanderer.Feature
 
             IL.Player.ThrowObject += Player_ThrowObjectIL;
 
-            
+
 
             _climbSlugHandGraphics.OnModsInit();
 
@@ -51,20 +51,16 @@ namespace Pkuyo.Wanderer.Feature
         {
             ILCursor c = new ILCursor(il);
 
-            if(c.TryGotoNext(MoveType.After,
+            if (c.TryGotoNext(MoveType.After,
                 i => i.MatchCallOrCallvirt<Player>("get_ThrowDirection"),
                 i => i.OpCode == OpCodes.Ldc_I4_0,
                 i => i.MatchCall<IntVector2>(".ctor"),
-                i => i.OpCode==OpCodes.Ldarg_0,
+                i => i.OpCode == OpCodes.Ldarg_0,
                 i => i.MatchCallOrCallvirt<PhysicalObject>("get_firstChunk")))
             {
-                c.GotoPrev(MoveType.After, i => i.OpCode == OpCodes.Ldarg_0);
-                var label = c.DefineLabel();
-                c.MarkLabel(label);
-
+                var label = c.DefineLabel(); //跳过我的修改
                 //插入状态判断
-                c.GotoPrev(MoveType.Before, i => i.OpCode == OpCodes.Ldarg_0);
-                c.Emit(OpCodes.Ldarg_0);
+                c.GotoPrev(MoveType.After, i => i.OpCode == OpCodes.Ldarg_0);
                 c.EmitDelegate<Func<Player, bool>>((player) =>
                  {
                      if (player.bodyMode == WandererModEnum.PlayerBodyModeIndex.ClimbBackWall && (player.input[0].x != 0 || player.input[0].y != 0))
@@ -73,12 +69,15 @@ namespace Pkuyo.Wanderer.Feature
                      }
                      return false;
                  });
-                c.Emit(OpCodes.Brfalse,label);
 
+                c.Emit(OpCodes.Brfalse, label);
                 //如果爬墙状态则修改投矛方向
                 c.Emit(OpCodes.Ldarg_0);
                 c.EmitDelegate<Func<Player, IntVector2>>((player) => new IntVector2(player.input[0].x, player.input[0].y));
                 c.Emit(OpCodes.Stloc_S, (byte)0);
+
+                c.MarkLabel(label);
+                c.Emit(OpCodes.Ldarg_0);
             }
 
         }
@@ -91,9 +90,9 @@ namespace Pkuyo.Wanderer.Feature
             var speed = 0.0f;
 
             PlayerBackClimb tmp = null;
-            if (!ClimbFeatures.TryGetValue(self,out tmp) && ClimbWallSpeed.TryGet(self, out speed))
+            if (!ClimbFeatures.TryGetValue(self, out tmp) && ClimbWallSpeed.TryGet(self, out speed))
                 ClimbFeatures.Add(self, new PlayerBackClimb(_log, self));
-  
+
         }
 
         private void Player_UpdateBodyMode(On.Player.orig_UpdateBodyMode orig, Player self)
@@ -117,7 +116,7 @@ namespace Pkuyo.Wanderer.Feature
 
         private void Player_MovementUpdate(On.Player.orig_MovementUpdate orig, Player self, bool eu)
         {
-            orig(self,eu);
+            orig(self, eu);
             PlayerBackClimb player;
             if (ClimbFeatures.TryGetValue(self, out player))
                 player.MovementUpdate();
@@ -146,8 +145,8 @@ namespace Pkuyo.Wanderer.Feature
             if (ClimbFeatures.TryGetValue(self, out player))
                 player.UpdateInput();
         }
- 
-        private ClimbSlugHandGraphics _climbSlugHandGraphics;
+
+        private readonly ClimbSlugHandGraphics _climbSlugHandGraphics;
 
         public ConditionalWeakTable<Player, PlayerBackClimb> ClimbFeatures;
 
@@ -156,7 +155,7 @@ namespace Pkuyo.Wanderer.Feature
 
     public class PlayerBackClimb
     {
-   
+
         private Player owner
         {
             get
@@ -167,7 +166,7 @@ namespace Pkuyo.Wanderer.Feature
                 return null;
             }
         }
-        private WeakReference<Player> ownerRef;
+        private readonly WeakReference<Player> ownerRef;
 
         private Vector2 BodyVel = new Vector2();
 
@@ -201,16 +200,15 @@ namespace Pkuyo.Wanderer.Feature
 
         public float DefaultSpeed = 3;
         public readonly float BodyWidth = 6;
+        readonly ManualLogSource _log;
 
-        ManualLogSource _log;
-
-        public PlayerBackClimb(ManualLogSource log,Player self) 
+        public PlayerBackClimb(ManualLogSource log, Player self)
         {
             _log = log;
             ownerRef = new WeakReference<Player>(self);
             ClimbWallFeature.ClimbWallSpeed.TryGet(owner, out maxSpeed);
         }
-        
+
         public void Reset()
         {
             BodyVel = owner.mainBodyChunk.vel;
@@ -219,7 +217,7 @@ namespace Pkuyo.Wanderer.Feature
         private int CheckCanClimb(Player self, Vector2 pos, Vector2 bodyVec, float bodyWidth = 0.0f, Vector2 addpos = new Vector2(), bool ex = true)
         {
             if (EnergyCheck(owner))
-                 return 3;
+                return 3;
 
             int[] re = new int[2];
             re[1] = 3;
@@ -325,11 +323,11 @@ namespace Pkuyo.Wanderer.Feature
                 vel.x += player.input[0].x * 5f * MaxSpeed;
                 vel *= (0.8f / MaxSpeed);
                 vel = (vel.magnitude > Mathf.Lerp(0, MaxSpeed * DefaultSpeed,
-                Mathf.Pow((10 - SlowDownCount) / 10.0f,0.5f))) ? vel.normalized * Mathf.Lerp(0, MaxSpeed * DefaultSpeed, Mathf.Pow((10 - SlowDownCount) / 10.0f, 0.5f)) : vel;
+                Mathf.Pow((10 - SlowDownCount) / 10.0f, 0.5f))) ? vel.normalized * Mathf.Lerp(0, MaxSpeed * DefaultSpeed, Mathf.Pow((10 - SlowDownCount) / 10.0f, 0.5f)) : vel;
                 //vel = (vel.magnitude > MaxSpeed * DefaultSpeed )? vel.normalized * MaxSpeed * DefaultSpeed : vel;
 
                 //速度衰减
-               
+
 
                 //计算边界位置 并尝试减速
                 var pos = player.mainBodyChunk.pos;
@@ -374,8 +372,8 @@ namespace Pkuyo.Wanderer.Feature
         private bool EnergyCheck(Player owner)
         {
 
-            return (owner.grasps[0]!=null && owner.grasps[0].grabbed != null && owner.grasps[0].grabbed is CoolObject && (owner.grasps[0].grabbed as CoolObject).IsOpen);
-          
+            return (owner.grasps[0] != null && owner.grasps[0].grabbed != null && owner.grasps[0].grabbed is CoolObject && (owner.grasps[0].grabbed as CoolObject).IsOpen);
+
         }
         public void UpdateInput()
         {
@@ -410,9 +408,9 @@ namespace Pkuyo.Wanderer.Feature
             //爬墙触发
             //计算人物坐标
 
-            if (!IsClimb && pressed && !pressedUsed && 
+            if (!IsClimb && pressed && !pressedUsed &&
                 (player.room.aimap.getAItile(pos).acc == AItile.Accessibility.Wall ||
-                EnergyCheck(player)) )
+                EnergyCheck(player)))
             {
                 StartWallClimb();
             }

@@ -1,18 +1,11 @@
 ﻿using BepInEx.Logging;
-using RWCustom;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
-using SlugBase.Features;
-using static SlugBase.Features.FeatureTypes;
-using Random = UnityEngine.Random;
-using MonoMod.RuntimeDetour;
-using System.Runtime.CompilerServices;
-using System.Reflection;
 using HarmonyLib;
+using RWCustom;
+using SlugBase.Features;
+using System;
+using System.Runtime.CompilerServices;
+using UnityEngine;
+using static SlugBase.Features.FeatureTypes;
 
 namespace Pkuyo.Wanderer.Feature
 {
@@ -22,7 +15,7 @@ namespace Pkuyo.Wanderer.Feature
         LoungeFeature(ManualLogSource log) : base(log)
         {
             LoungeData = new ConditionalWeakTable<Player, PlayerLounge>();
-           
+
         }
 
 
@@ -112,7 +105,7 @@ namespace Pkuyo.Wanderer.Feature
                 LoungeData.Add(self, new PlayerLounge(self));
         }
 
-  
+
 
         private void Player_MovementUpdate(On.Player.orig_MovementUpdate orig, Player self, bool eu)
         {
@@ -134,13 +127,13 @@ namespace Pkuyo.Wanderer.Feature
                 keyCode = WandererCharacterMod.WandererOptions.LoungeKeys[player.playerState.playerNumber].Value;
 
                 runspeedFac = player.slugcatStats.runspeedFac;
-                poleClimbSpeedFac = player.slugcatStats.poleClimbSpeedFac ;
-                corridorClimbSpeedFac = player.slugcatStats.corridorClimbSpeedFac ;
+                poleClimbSpeedFac = player.slugcatStats.poleClimbSpeedFac;
+                corridorClimbSpeedFac = player.slugcatStats.corridorClimbSpeedFac;
                 loudnessFac = player.slugcatStats.loudnessFac;
 
                 PlayerBackClimb climb;
                 if (ClimbWallFeature.Instance().ClimbFeatures.TryGetValue(player, out climb))
-                        climbSpeed = climb.MaxSpeed;
+                    climbSpeed = climb.MaxSpeed;
 
                 PlayerBaseAbility baseAbility;
                 if (PlayerBaseFeature.Instance().BaseAbilityData.TryGetValue(player, out baseAbility))
@@ -158,7 +151,7 @@ namespace Pkuyo.Wanderer.Feature
                     return;
                 StopLounge(self);
                 IntroCount = 0;
-                WandererAssetManager.Instance(null).PostEffect.timeStacker=0;
+                WandererAssetManager.Instance(null).PostEffect.timeStacker = 0;
             }
             public void MovementUpdate()
             {
@@ -181,7 +174,7 @@ namespace Pkuyo.Wanderer.Feature
                 if (!PlayerRef.TryGetTarget(out self))
                     return;
 
-               
+
                 if (IsLounge)
                 {
                     if (++FoodCount == 400)
@@ -235,20 +228,20 @@ namespace Pkuyo.Wanderer.Feature
                 }
 
                 //切换状态
-                if(self.playerState.foodInStomach != 0 && keyDown &&!keyUse && ! IsLounge && self.mushroomCounter==0)
+                if (self.playerState.foodInStomach != 0 && keyDown && !keyUse && !IsLounge && self.mushroomCounter == 0)
                 {
                     StartLounge(self);
                     keyUse = true;
                     return;
                 }
-                else if(keyDown && !keyUse && IsLounge)
+                else if (keyDown && !keyUse && IsLounge)
                 {
                     StopLounge(self);
                     keyUse = true;
                     return;
                 }
 
-                if(IntroCount>=0) IntroCount--;
+                if (IntroCount >= 0) IntroCount--;
 
             }
             public void DrawSprites(RoomCamera.SpriteLeaser leaser)
@@ -258,11 +251,11 @@ namespace Pkuyo.Wanderer.Feature
                 {
                     //多人取最高
                     if (IntroCount >= 0 && post.timeStacker < Mathf.Pow(Mathf.InverseLerp(15, 0, IntroCount), 0.7f))
-                        post.timeStacker = Mathf.Pow(Mathf.InverseLerp(15, 0, IntroCount),0.7f);
+                        post.timeStacker = Mathf.Pow(Mathf.InverseLerp(15, 0, IntroCount), 0.7f);
                     post.blurCenter = leaser.sprites[3].GetPosition() / (Custom.rainWorld.screenSize);
                 }
-                else if(IntroCount >= 0)
-                    post.timeStacker = Mathf.Pow(Mathf.InverseLerp(0, 15, IntroCount),1.5f);
+                else if (IntroCount >= 0)
+                    post.timeStacker = Mathf.Pow(Mathf.InverseLerp(0, 15, IntroCount), 1.5f);
             }
             public void Jump()
             {
@@ -270,15 +263,15 @@ namespace Pkuyo.Wanderer.Feature
                 if (!PlayerRef.TryGetTarget(out self))
                     return;
                 if (self.jumpBoost != 0 && IsLounge)
-                    self.jumpBoost *=1.3f;
+                    self.jumpBoost *= 1.3f;
             }
 
             private void StartLounge(Player self)
             {
-                self.slugcatStats.runspeedFac = runspeedFac*1.5f;
-                self.slugcatStats.poleClimbSpeedFac = poleClimbSpeedFac*1.7f;
-                self.slugcatStats.corridorClimbSpeedFac = corridorClimbSpeedFac*1.7f;
-                self.slugcatStats.loudnessFac = loudnessFac*1.5f;
+                self.slugcatStats.runspeedFac = runspeedFac * 1.5f;
+                self.slugcatStats.poleClimbSpeedFac = poleClimbSpeedFac * 1.7f;
+                self.slugcatStats.corridorClimbSpeedFac = corridorClimbSpeedFac * 1.7f;
+                self.slugcatStats.loudnessFac = loudnessFac * 1.5f;
                 self.slugcatStats.throwingSkill = 2;
 
                 PlayerBackClimb climb;
@@ -286,7 +279,7 @@ namespace Pkuyo.Wanderer.Feature
                     climb.MaxSpeed = climbSpeed * 1.7f;
 
                 PlayerBaseAbility baseAbility;
-                if(PlayerBaseFeature.Instance().BaseAbilityData.TryGetValue(self,out baseAbility))
+                if (PlayerBaseFeature.Instance().BaseAbilityData.TryGetValue(self, out baseAbility))
                 {
                     baseAbility.rollSpeed = rollSpeed * 1.5f;
                     //baseAbility.slideSpeed = slideSpeed * 1.5f;
@@ -329,7 +322,7 @@ namespace Pkuyo.Wanderer.Feature
                 if (self.graphicsModule != null && WandererGraphicsFeature.Instance().WandererGraphics.TryGetValue((self.graphicsModule as PlayerGraphics), out graphics))
                     graphics.IsLounge = false;
 
-      
+
                 IsLounge = false;
             }
 
@@ -337,9 +330,9 @@ namespace Pkuyo.Wanderer.Feature
             {
                 if (IsLounge && IntroCount == -1)
                     rCam.mushroomMode = 3;
-                else if(!IsLounge && IntroCount >= 0)
-                    rCam.mushroomMode = Mathf.Lerp(0, 3, Mathf.InverseLerp(0, 15,IntroCount));
-                
+                else if (!IsLounge && IntroCount >= 0)
+                    rCam.mushroomMode = Mathf.Lerp(0, 3, Mathf.InverseLerp(0, 15, IntroCount));
+
             }
             public bool IsLounge = false;
 
@@ -348,27 +341,22 @@ namespace Pkuyo.Wanderer.Feature
 
             int IntroCount = -1;
             bool reset = false;
-
-            KeyCode keyCode = KeyCode.None;
+            readonly KeyCode keyCode = KeyCode.None;
 
             int FoodCount = 0;
+            readonly float runspeedFac;
+            readonly float poleClimbSpeedFac;
+            readonly float corridorClimbSpeedFac;
+            readonly float loudnessFac;
+            readonly float climbSpeed;
+            readonly float slideSpeed;
+            readonly float jumpBoost;
+            readonly float rollSpeed;
+            readonly WeakReference<Player> PlayerRef;
 
-            float runspeedFac;
-            float poleClimbSpeedFac;
-            float corridorClimbSpeedFac;
-            float loudnessFac;
 
-            float climbSpeed;
-
-            float slideSpeed;
-            float jumpBoost;
-            float rollSpeed;
-
-            WeakReference<Player> PlayerRef;
-
-          
         }
 
-        
+
     }
 }

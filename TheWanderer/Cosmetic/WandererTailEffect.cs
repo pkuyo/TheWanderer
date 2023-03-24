@@ -1,11 +1,4 @@
 ﻿using BepInEx.Logging;
-using HarmonyLib;
-using Pkuyo.Wanderer;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Pkuyo.Wanderer.Cosmetic
@@ -17,7 +10,7 @@ namespace Pkuyo.Wanderer.Cosmetic
         public WandererTailEffect(PlayerGraphics graphics, ManualLogSource log) : base(graphics, log)
         {
             this.numberOfSprites = 0;
-           
+
         }
         public override void InitiateSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam)
         {
@@ -59,7 +52,7 @@ namespace Pkuyo.Wanderer.Cosmetic
             for (int j = triangleMesh.verticeColors.Length - 1; j >= 0; j--)
             {
 
-                float num = (float)(j / 2) / (float)(triangleMesh.verticeColors.Length / 2);
+                float num = j / 2 / (float)(triangleMesh.verticeColors.Length / 2);
                 Vector2 vector;
                 if (j % 2 == 0)
                 {
@@ -90,7 +83,7 @@ namespace Pkuyo.Wanderer.Cosmetic
             //}
 
             for (int i = 0; i < triangleMesh.verticeColors.Length; i++)
-                triangleMesh.verticeColors[i] =  Color.Lerp(GetBodyColor(iGraphics), GetFaceColor(iGraphics),Mathf.InverseLerp(4,triangleMesh.verticeColors.Length-1,i));
+                triangleMesh.verticeColors[i] = Color.Lerp(GetBodyColor(iGraphics), GetFaceColor(iGraphics), Mathf.InverseLerp(4, triangleMesh.verticeColors.Length - 1, i));
             base.ApplyPalette(sLeaser, rCam, palette);
 
         }

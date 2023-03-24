@@ -1,17 +1,11 @@
 ﻿using BepInEx.Logging;
 using Menu.Remix.MixedUI;
-using Pkuyo.Wanderer;
 using RWCustom;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Pkuyo.Wanderer.Options
 {
-    public class WandererOptions : OptionInterface 
+    public class WandererOptions : OptionInterface
     {
         public WandererOptions(ManualLogSource log)
         {
@@ -46,7 +40,7 @@ namespace Pkuyo.Wanderer.Options
             });
             for (int i = 0; i < 4; i++)
             {
-                _LoungeKeys[i] = new OpKeyBinder(LoungeKeys[i], new Vector2(150f, 450f) + new Vector2(0,-30) * i, new Vector2(100f, 20f), false, OpKeyBinder.BindController.AnyController);
+                _LoungeKeys[i] = new OpKeyBinder(LoungeKeys[i], new Vector2(150f, 450f) + new Vector2(0, -30) * i, new Vector2(100f, 20f), false, OpKeyBinder.BindController.AnyController);
                 opTab.AddItems(new UIelement[]
                 {
                      new OpLabel(new Vector2(100f, 450f) + new Vector2(0,-30) * i, new Vector2(200f, 24f), translator.Translate("Player "+(i+1)), FLabelAlignment.Left, false, null),

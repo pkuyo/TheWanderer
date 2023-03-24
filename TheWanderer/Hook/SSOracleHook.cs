@@ -1,11 +1,6 @@
 ﻿using BepInEx.Logging;
 using MoreSlugcats;
 using RWCustom;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -52,7 +47,7 @@ namespace Pkuyo.Wanderer
                 self.events.Add(new Conversation.TextEvent(self, 0, self.Translate("Little creature, take this and go west inside my body."), 20));
                 self.events.Add(new Conversation.TextEvent(self, 0, self.Translate("It can unlock the door to the Phase Filter Unit."), 30));
             }
-            else if(self.id == WandererModEnum.WandererConversation.Pebbles_Wanderer_FirstMeet_Talk2)
+            else if (self.id == WandererModEnum.WandererConversation.Pebbles_Wanderer_FirstMeet_Talk2)
             {
                 self.events.Clear();
                 self.events.Add(new Conversation.TextEvent(self, 0, self.Translate("Help me reconnect to an important part that is recently rotten, So I may still be able to turn the tide!"), 0));
@@ -115,15 +110,15 @@ namespace Pkuyo.Wanderer
         private void SSOracleBehavior_NewAction(On.SSOracleBehavior.orig_NewAction orig, SSOracleBehavior self, SSOracleBehavior.Action nextAction)
         {
             _log.LogDebug(nextAction.value);
-            if (nextAction == WandererModEnum.WandererSSOracle.MeetWanderer_Tend_Kill 
-                || nextAction == WandererModEnum.WandererSSOracle.MeetWanderer_Talk 
+            if (nextAction == WandererModEnum.WandererSSOracle.MeetWanderer_Tend_Kill
+                || nextAction == WandererModEnum.WandererSSOracle.MeetWanderer_Talk
                 || nextAction == WandererModEnum.WandererSSOracle.ThrowOutWanderer
                 || nextAction == WandererModEnum.WandererSSOracle.MeetWanderer_GiveObject)
             {
                 var behaviorID = SSOracleBehavior.SubBehavior.SubBehavID.ThrowOut;
 
-                if (nextAction == WandererModEnum.WandererSSOracle.MeetWanderer_Tend_Kill 
-                    || nextAction == WandererModEnum.WandererSSOracle.MeetWanderer_Talk 
+                if (nextAction == WandererModEnum.WandererSSOracle.MeetWanderer_Tend_Kill
+                    || nextAction == WandererModEnum.WandererSSOracle.MeetWanderer_Talk
                     || nextAction == WandererModEnum.WandererSSOracle.MeetWanderer_GiveObject)
                 {
                     behaviorID = WandererModEnum.WandererSSOracle.Meet_Wanderer;
@@ -183,8 +178,8 @@ namespace Pkuyo.Wanderer
             {
                 base.NewAction(oldAction, newAction);
                 PickUnfortunatelyFpTime();
-              
-                foreach(var a in oracle.room.drawableObjects)
+
+                foreach (var a in oracle.room.drawableObjects)
                 {
                     if (a is CoolObject)
                         coolObject = a as CoolObject;
@@ -212,15 +207,16 @@ namespace Pkuyo.Wanderer
                     owner.getToWorking = 1f;
                     return;
                 }
+                var pow = Custom.LerpMap(Mathf.Clamp(Custom.Dist(coolObject.firstChunk.vel, new Vector2(403, 655)), 10, 200), 10, 200, 0, 3);
                 if (owner.throwOutCounter < 900)
                 {
                     player.mainBodyChunk.vel *= Mathf.Lerp(0.9f, 1f, oracle.room.gravity);
                     player.bodyChunks[1].vel *= Mathf.Lerp(0.9f, 1f, oracle.room.gravity);
-                    player.mainBodyChunk.vel += Custom.DirVec(player.mainBodyChunk.pos, new Vector2(403, 655)) * 0.5f * (1f - oracle.room.gravity);
-                    if(coolObject!=null)
+                    player.mainBodyChunk.vel += pow * Custom.DirVec(player.mainBodyChunk.pos, new Vector2(403, 655)) * 0.5f * (1f - oracle.room.gravity);
+                    if (coolObject != null)
                     {
                         coolObject.firstChunk.vel *= Mathf.Lerp(0.9f, 1f, oracle.room.gravity);
-                        coolObject.firstChunk.vel += Custom.DirVec(coolObject.firstChunk.vel, new Vector2(403, 655)) * 0.5f * (1f - oracle.room.gravity);
+                        coolObject.firstChunk.vel += pow * Custom.DirVec(coolObject.firstChunk.vel, new Vector2(403, 655)) * 0.5f * (1f - oracle.room.gravity);
                     }
                 }
                 else if (owner.throwOutCounter > 1780)
@@ -232,11 +228,11 @@ namespace Pkuyo.Wanderer
 
                     player.mainBodyChunk.vel *= Mathf.Lerp(0.9f, 1f, oracle.room.gravity);
                     player.bodyChunks[1].vel *= Mathf.Lerp(0.9f, 1f, oracle.room.gravity);
-                    player.mainBodyChunk.vel += Custom.DirVec(player.mainBodyChunk.pos, new Vector2(403, 655)) * (1f - oracle.room.gravity);
+                    player.mainBodyChunk.vel += pow * Custom.DirVec(player.mainBodyChunk.pos, new Vector2(403, 655)) * (1f - oracle.room.gravity);
                     if (coolObject != null)
                     {
                         coolObject.firstChunk.vel *= Mathf.Lerp(0.9f, 1f, oracle.room.gravity);
-                        coolObject.firstChunk.vel += Custom.DirVec(coolObject.firstChunk.vel, new Vector2(403, 655)) * 1f * (1f - oracle.room.gravity);
+                        coolObject.firstChunk.vel += pow * Custom.DirVec(coolObject.firstChunk.vel, new Vector2(403, 655)) * 1f * (1f - oracle.room.gravity);
                     }
                 }
                 panicTimer++;
@@ -301,7 +297,7 @@ namespace Pkuyo.Wanderer
                     {
                         if (coolObject.IsVis)
                             coolObject.FlyTarget = owner.player;
-                        if (giveTimer>=300 ||( coolObject.grabbedBy.Count!=0 && coolObject.grabbedBy[0].grabber is Player))
+                        if (giveTimer >= 300 || (coolObject.grabbedBy.Count != 0 && coolObject.grabbedBy[0].grabber is Player))
                         {
                             coolObject.FlyTarget = null;
                             coolObject = null;
@@ -313,13 +309,13 @@ namespace Pkuyo.Wanderer
                         }
                     }
                 }
-                
+
 
                 else if (action == WandererModEnum.WandererSSOracle.MeetWanderer_Tend_Kill)
                 {
                     killDelay--;
 
-                   
+
                     if (panicObject == null && !endPage)
                     {
                         if (owner.oracle.room.game.GetStorySession.saveState.deathPersistentSaveData.theMark)
@@ -331,7 +327,7 @@ namespace Pkuyo.Wanderer
                             owner.afterGiveMarkAction = WandererModEnum.WandererSSOracle.MeetWanderer_Talk;
                             owner.NewAction(SSOracleBehavior.Action.General_GiveMark);
                         }
-                        endPage=true;
+                        endPage = true;
                         return;
 
                     }
@@ -369,9 +365,9 @@ namespace Pkuyo.Wanderer
                             owner.NewAction(WandererModEnum.WandererSSOracle.MeetWanderer_GiveObject);
 
                         if (oracle.room.game.GetStorySession.saveState.miscWorldSaveData.SSaiConversationsHad == 3)
-                             owner.NewAction(WandererModEnum.WandererSSOracle.ThrowOutWanderer);
+                            owner.NewAction(WandererModEnum.WandererSSOracle.ThrowOutWanderer);
                     }
-                    
+
                 }
             }
 
@@ -402,10 +398,10 @@ namespace Pkuyo.Wanderer
 
                     oracle.room.game.GetStorySession.saveState.miscWorldSaveData.SSaiConversationsHad++;
                 }
-                else if(newAction == WandererModEnum.WandererSSOracle.MeetWanderer_GiveObject)
+                else if (newAction == WandererModEnum.WandererSSOracle.MeetWanderer_GiveObject)
                 {
                     giveTimer = 0;
-                    AbstractCoolObject abstractCoolObject = new AbstractCoolObject(oracle.room.game.world, oracle.room.GetWorldCoordinate(new Vector2(base.oracle.room.PixelWidth / 2f, base.oracle.room.PixelHeight / 2f)),oracle.room.game.GetNewID());
+                    AbstractCoolObject abstractCoolObject = new AbstractCoolObject(oracle.room.game.world, oracle.room.GetWorldCoordinate(new Vector2(base.oracle.room.PixelWidth / 2f, base.oracle.room.PixelHeight / 2f)), oracle.room.game.GetNewID());
                     abstractCoolObject.SSRealize();
                     coolObject = abstractCoolObject.realizedObject as CoolObject;
                     coolObject.PlaceInRoom(oracle.room);
@@ -413,7 +409,7 @@ namespace Pkuyo.Wanderer
                     oracle.room.abstractRoom.AddEntity(abstractCoolObject);
                     oracle.room.AddObject(new ShowObjectSprite(coolObject));
                 }
-                endPage=false;
+                endPage = false;
             }
 
             public override void Deactivate()
@@ -466,8 +462,8 @@ namespace Pkuyo.Wanderer
         {
             if (slatedForDeletetion)
                 return;
-            sLeaser.sprites[0].x = Mathf.Lerp(focusObject.firstChunk.lastPos.x,focusObject.firstChunk.pos.x,timeStacker) - camPos.x;
-            sLeaser.sprites[0].y = Mathf.Lerp( focusObject.firstChunk.lastPos.y, focusObject.firstChunk.pos.y,timeStacker) - camPos.y;
+            sLeaser.sprites[0].x = Mathf.Lerp(focusObject.firstChunk.lastPos.x, focusObject.firstChunk.pos.x, timeStacker) - camPos.x;
+            sLeaser.sprites[0].y = Mathf.Lerp(focusObject.firstChunk.lastPos.y, focusObject.firstChunk.pos.y, timeStacker) - camPos.y;
             float f = Mathf.Lerp(lastShowFac, showFac, timeStacker);
 
             sLeaser.sprites[0].scale = Mathf.Lerp(200f, 2f, Mathf.Pow(f, 0.5f));
@@ -478,12 +474,12 @@ namespace Pkuyo.Wanderer
 
         public override void Update(bool eu)
         {
-            if(showFac>=1)
+            if (showFac >= 1)
             {
                 focusObject.AddProjectedCircle();
                 focusObject = null;
                 slatedForDeletetion = true;
-            }    
+            }
             base.Update(eu);
             lastShowFac = showFac;
             showFac += 0.02f;
@@ -532,7 +528,7 @@ namespace Pkuyo.Wanderer
             }
             if (timer < timings[0])
             {
-                float t = (float)timer / (float)timings[0];
+                float t = timer / (float)timings[0];
                 oracle.room.roomSettings.GetEffect(RoomSettings.RoomEffect.Type.DarkenLights).amount = Mathf.Lerp(0f, 1f, t);
                 oracle.room.roomSettings.GetEffect(RoomSettings.RoomEffect.Type.Darkness).amount = Mathf.Lerp(0f, 0.4f, t);
                 oracle.room.roomSettings.GetEffect(RoomSettings.RoomEffect.Type.Contrast).amount = Mathf.Lerp(0f, 0.3f, t);
@@ -573,7 +569,7 @@ namespace Pkuyo.Wanderer
                 {
                     if (Random.value < 0.5f)
                     {
-                        oracle.room.AddObject(new OraclePanicDisplay.PanicIcon(new Vector2((float)Random.Range(230, 740), (float)Random.Range(100, 620))));
+                        oracle.room.AddObject(new OraclePanicDisplay.PanicIcon(new Vector2(Random.Range(230, 740), Random.Range(100, 620))));
                     }
                 }
             }
@@ -589,7 +585,7 @@ namespace Pkuyo.Wanderer
             }
             if (timer > timings[3])
             {
-                float t2 = (float)(timer - timings[3]) / (float)timings[0];
+                float t2 = (timer - timings[3]) / (float)timings[0];
                 oracle.room.roomSettings.GetEffect(RoomSettings.RoomEffect.Type.DarkenLights).amount = Mathf.Lerp(1f, 0f, t2);
                 oracle.room.roomSettings.GetEffect(RoomSettings.RoomEffect.Type.Darkness).amount = Mathf.Lerp(0.4f, 0f, t2);
                 oracle.room.roomSettings.GetEffect(RoomSettings.RoomEffect.Type.Contrast).amount = Mathf.Lerp(0.3f, 0f, t2);
@@ -607,7 +603,7 @@ namespace Pkuyo.Wanderer
 
         public int timer;
 
-        private int[] timings;
+        private readonly int[] timings;
 
         public bool gravOn;
 

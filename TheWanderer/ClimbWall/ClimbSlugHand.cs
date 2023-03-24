@@ -1,13 +1,8 @@
 ﻿using BepInEx.Logging;
-using HarmonyLib;
 using Pkuyo.Wanderer.Feature;
 using RWCustom;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Pkuyo.Wanderer
@@ -18,7 +13,7 @@ namespace Pkuyo.Wanderer
         public ClimbSlugHandGraphics(ManualLogSource log)
         {
             _log = log;
-           
+
         }
         public void OnModsInit()
         {
@@ -34,12 +29,12 @@ namespace Pkuyo.Wanderer
             orig(self, ow);
             var player = self.owner as Player;
             PlayerBackClimb climb;
-            if ( !ClimbWallFeature.Instance(_log).ClimbFeatures.TryGetValue(player, out climb))
+            if (!ClimbWallFeature.Instance(_log).ClimbFeatures.TryGetValue(player, out climb))
                 return;
 
             for (int i = 0; i < 2; i++)
             {
-                if (self.hands[i]!=null && !_HandOwner.TryGetValue(self.hands[i], out player))
+                if (self.hands[i] != null && !_HandOwner.TryGetValue(self.hands[i], out player))
                 {
                     player = self.owner as Player;
                     PlayerBackClimb tmp;
@@ -78,7 +73,7 @@ namespace Pkuyo.Wanderer
                 if (player.bodyMode == WandererModEnum.PlayerBodyModeIndex.ClimbBackWall)
                 {
                     ClimbSlugHand data;
-                    if(!_HandData.TryGetValue(self,out data))
+                    if (!_HandData.TryGetValue(self, out data))
                         return re;
                     var posDir = Custom.DirVec(player.bodyChunks[1].pos, player.bodyChunks[0].pos);
                     var velDir = player.bodyChunks[1].vel.normalized;
@@ -107,7 +102,7 @@ namespace Pkuyo.Wanderer
                         if (data.playerBackClimbRef.TryGetTarget(out backwall))
                         {
                             backwall.SlowDownCount += (int)(4 / maxSpeed);
-                           backwall.SlowDownCount = Mathf.Min(backwall.SlowDownCount, 9);
+                            backwall.SlowDownCount = Mathf.Min(backwall.SlowDownCount, 9);
                         }
                         else
                             throw new Exception();
@@ -121,14 +116,14 @@ namespace Pkuyo.Wanderer
 
         }
 
-        private ManualLogSource _log;
+        private readonly ManualLogSource _log;
         private readonly float StepLength = 30.0f;
         private readonly float HandWidth = 10.0f;
 
-        
 
-        private static ConditionalWeakTable<SlugcatHand, Player> _HandOwner = new ConditionalWeakTable<SlugcatHand, Player>();
-        private static ConditionalWeakTable<SlugcatHand, ClimbSlugHand> _HandData = new ConditionalWeakTable<SlugcatHand, ClimbSlugHand>();
+
+        private static readonly ConditionalWeakTable<SlugcatHand, Player> _HandOwner = new ConditionalWeakTable<SlugcatHand, Player>();
+        private static readonly ConditionalWeakTable<SlugcatHand, ClimbSlugHand> _HandData = new ConditionalWeakTable<SlugcatHand, ClimbSlugHand>();
     }
     public class ClimbSlugHand
     {

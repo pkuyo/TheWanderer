@@ -1,10 +1,5 @@
 ﻿using BepInEx.Logging;
 using RWCustom;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Pkuyo.Wanderer.Feature
@@ -18,7 +13,7 @@ namespace Pkuyo.Wanderer.Feature
         static public LizardRelationFeature Instance(ManualLogSource log = null)
         {
             if (_Instance == null)
-                _Instance = new LizardRelationFeature(log) ;
+                _Instance = new LizardRelationFeature(log);
             return _Instance;
         }
 
@@ -37,9 +32,9 @@ namespace Pkuyo.Wanderer.Feature
         private SharedPhysics.CollisionResult SharedPhysics_TraceProjectileAgainstBodyChunks(On.SharedPhysics.orig_TraceProjectileAgainstBodyChunks orig, SharedPhysics.IProjectileTracer projTracer, Room room, Vector2 lastPos, ref Vector2 pos, float rad, int collisionLayer, PhysicalObject exemptObject, bool hitAppendages)
         {
             //友伤免疫 朋友蜥蜴和好感度为1的地区全部蜥蜴
-            var re = orig(projTracer, room, lastPos,ref pos, rad, collisionLayer, exemptObject, hitAppendages);
+            var re = orig(projTracer, room, lastPos, ref pos, rad, collisionLayer, exemptObject, hitAppendages);
             if (ChangeLizardFriendFire)
-                if (re.obj is Lizard && exemptObject is Player && ((re.obj as Lizard).AI.friendTracker.friend != null || (re.obj as Lizard).abstractCreature.world.game.session.creatureCommunities.LikeOfPlayer(CreatureCommunities.CommunityID.Lizards, (re.obj as Lizard).abstractCreature.world.RegionNumber, (exemptObject as Player).playerState.playerNumber)==1)
+                if (re.obj is Lizard && exemptObject is Player && ((re.obj as Lizard).AI.friendTracker.friend != null || (re.obj as Lizard).abstractCreature.world.game.session.creatureCommunities.LikeOfPlayer(CreatureCommunities.CommunityID.Lizards, (re.obj as Lizard).abstractCreature.world.RegionNumber, (exemptObject as Player).playerState.playerNumber) == 1)
                       && (exemptObject as Player).slugcatStats.name.value == WandererCharacterMod.WandererName)
                     re.obj = null;
             return re;
@@ -89,7 +84,7 @@ namespace Pkuyo.Wanderer.Feature
                 foreach (var player in room.PlayersInRoom)
                 {
                     if (player.slugcatStats.name.value == WandererCharacterMod.WandererName && room.game.session.creatureCommunities.LikeOfPlayer(CreatureCommunities.CommunityID.Lizards, room.game.world.RegionNumber, player.playerState.playerNumber) == 1.0f &&
-                             dRelation.trackerRep.representedCreature.creatureTemplate.dangerousToPlayer > 0f && dRelation.trackerRep.representedCreature.state.alive && dRelation.trackerRep.representedCreature.realizedCreature != null && 
+                             dRelation.trackerRep.representedCreature.creatureTemplate.dangerousToPlayer > 0f && dRelation.trackerRep.representedCreature.state.alive && dRelation.trackerRep.representedCreature.realizedCreature != null &&
                              !(dRelation.trackerRep.representedCreature.realizedCreature is Lizard) && dRelation.trackerRep.representedCreature.abstractAI != null && dRelation.trackerRep.representedCreature.abstractAI.RealAI != null)
                     {
                         float num2 = 0.5f * Mathf.Pow(dRelation.trackerRep.representedCreature.creatureTemplate.dangerousToPlayer * dRelation.trackerRep.representedCreature.abstractAI.RealAI.CurrentPlayerAggression(player.abstractCreature), 0.5f);
@@ -117,7 +112,7 @@ namespace Pkuyo.Wanderer.Feature
         }
 
         ///战役相关///
-        
+
         private void LizardAI_ctor(On.LizardAI.orig_ctor orig, LizardAI self, AbstractCreature creature, World world)
         {
             orig(self, creature, world);
@@ -136,17 +131,17 @@ namespace Pkuyo.Wanderer.Feature
                     interRegionBleed *= 2f;
 
                     //在好感度为正时负影响倍率为乘2
-                    if (influence <0 && self.playerOpinions[CreatureCommunities.CommunityID.Lizards.Index - 1, 0, playerNumber] > 0)
+                    if (influence < 0 && self.playerOpinions[CreatureCommunities.CommunityID.Lizards.Index - 1, 0, playerNumber] > 0)
                         influence *= 2f;
                 }
-            orig(self,commID,region,playerNumber,influence, interRegionBleed, interCommunityBleed);
+            orig(self, commID, region, playerNumber, influence, interRegionBleed, interCommunityBleed);
         }
 
         ///////////////////////////////////////////////////
         //TODO: ui界面
         ///////////////////////////////////////////////////
-        bool ChangeLizardAIOption = true;
-        bool ChangeLizardFriendFire = true;
+        readonly bool ChangeLizardAIOption = true;
+        readonly bool ChangeLizardFriendFire = true;
 
         static private LizardRelationFeature _Instance;
 

@@ -1,10 +1,5 @@
 ﻿using BepInEx.Logging;
 using HUD;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Pkuyo.Wanderer
@@ -13,7 +8,7 @@ namespace Pkuyo.Wanderer
     {
         MessionHook(ManualLogSource log) : base(log)
         {
-           
+
         }
 
         static public MessionHook Instance(ManualLogSource log = null)
@@ -38,12 +33,12 @@ namespace Pkuyo.Wanderer
                 wandererHud.Update();
         }
 
-       
+
 
         private void HUD_InitSinglePlayerHud(On.HUD.HUD.orig_InitSinglePlayerHud orig, HUD.HUD self, RoomCamera cam)
         {
-            orig(self,cam);
-            
+            orig(self, cam);
+
             //判断是否为the wanderer战役
             if (self.owner is Player && (self.owner as Player).abstractCreature.world.game.session.characterStats.name.value == WandererCharacterMod.WandererName)
             {
@@ -77,7 +72,7 @@ namespace Pkuyo.Wanderer
             this.owner = owner;
 
             var creature = (owner.owner as Player).abstractCreature;
-            var hudpart = new MissionHud(owner, creature.world.game.session.creatureCommunities.playerOpinions[CreatureCommunities.CommunityID.Lizards.Index - 1, 0, 0],null);
+            var hudpart = new MissionHud(owner, creature.world.game.session.creatureCommunities.playerOpinions[CreatureCommunities.CommunityID.Lizards.Index - 1, 0, 0], null);
             _hud = hudpart;
             owner.AddPart(hudpart);
         }
@@ -91,19 +86,19 @@ namespace Pkuyo.Wanderer
                 Destroy();
                 return;
             }
-           
+
             var room = (owner.owner as Player).room;
             if (room == null)
                 return;
 
             //爬墙教程
-            if (!ClimbWallTurtorial && room.roomSettings.name == "SB_INTROROOM1" && (room.GetWorldCoordinate((owner.owner as Player).firstChunk.pos).x>=53))
+            if (!ClimbWallTurtorial && room.roomSettings.name == "SB_INTROROOM1" && (room.GetWorldCoordinate((owner.owner as Player).firstChunk.pos).x >= 53))
             {
                 ClimbWallTurtorial = true;
                 room.AddObject(new WandererClimbTurtorial(room));
             }
             //惊吓蜥蜴教程
-            else if (!ScareTurtorial &&  room.roomSettings.name == "SB_H03")
+            else if (!ScareTurtorial && room.roomSettings.name == "SB_H03")
             {
                 bool hasLizard = false;
                 foreach (var creature in room.abstractRoom.creatures)
@@ -114,11 +109,17 @@ namespace Pkuyo.Wanderer
                         break;
                     }
                 }
-                if(hasLizard)
+                if (hasLizard)
                 {
                     room.AddObject(new WandererScareTurtorial(room));
                     ScareTurtorial = true;
                 }
+            }
+            //工具教程
+            else if (room.roomSettings.name == "SS_L01" && room.game.GetStorySession.saveState.miscWorldSaveData.SSaiConversationsHad == 3)
+            {
+                room.AddObject(new WandererToolTurtorial(room));
+                room.game.GetStorySession.saveState.miscWorldSaveData.SSaiConversationsHad++;
             }
         }
 
@@ -143,7 +144,7 @@ namespace Pkuyo.Wanderer
 
     class MissionHud : HudPart
     {
-        public MissionHud(HUD.HUD hud,float aacc, ManualLogSource log) : base(hud)
+        public MissionHud(HUD.HUD hud, float aacc, ManualLogSource log) : base(hud)
         {
             acc[1] = aacc;
             InitiateSprites();
@@ -163,7 +164,7 @@ namespace Pkuyo.Wanderer
                 sprites[i].height = 10f;
             }
 
-            for (int i=0;i<2;i++)
+            for (int i = 0; i < 2; i++)
             {
                 sprites[i].width = 2f;
                 sprites[i].SetPosition(tmppos);
@@ -178,11 +179,11 @@ namespace Pkuyo.Wanderer
             }
             sprites[2].width = 200f;
 
-            sprites[3].width = 200f*acc[1];
+            sprites[3].width = 200f * acc[1];
 
             sprites[2].alpha = 0.2f;
             sprites[3].alpha = 0.5f;
-            for(int i=0;i<4;i++)
+            for (int i = 0; i < 4; i++)
                 this.hud.fContainers[1].AddChild(sprites[i]);
         }
         public override void Draw(float timeStacker)
@@ -208,7 +209,7 @@ namespace Pkuyo.Wanderer
                 fade += 1 / 30f;
             else if (!this.hud.owner.RevealMap && ReputationChanged <= 0 && fade > 0.0f && !isShelter)
                 fade -= 1 / 30f;
-            
+
 
             fade = Mathf.Clamp(fade, 0, 6);
 
@@ -226,12 +227,12 @@ namespace Pkuyo.Wanderer
                 sprites[3].color = Color.Lerp(Color.white, new Color(116 / 255f, 237 / 255f, 130 / 255f), Mathf.Min(ReputationChanged, 1f));
             else
                 sprites[3].color = Color.white;
-            
+
             sprites[0].x = Mathf.Lerp(tmppos.x - 20, tmppos.x, pfade);
             sprites[1].x = Mathf.Lerp(tmppos.x + 130, tmppos.x + 210f, pfade);
 
-            if (ReputationChanged > 0 && pfade <1.0f)
-                acc[1] = Mathf.Lerp(toAcc, lastAcc, Mathf.Pow((2f-Mathf.Clamp(ReputationChanged-1f,0,2f))/2f, 0.4f));
+            if (ReputationChanged > 0 && pfade < 1.0f)
+                acc[1] = Mathf.Lerp(toAcc, lastAcc, Mathf.Pow((2f - Mathf.Clamp(ReputationChanged - 1f, 0, 2f)) / 2f, 0.4f));
 
             for (int i = 2; i < 4; i++)
             {
@@ -263,12 +264,10 @@ namespace Pkuyo.Wanderer
         float fade = 0.0f;
 
         float ReputationChanged = 0.0f;
-
-        float[] acc = new float[2] { 1f, 0.0f };
+        readonly float[] acc = new float[2] { 1f, 0.0f };
         float toAcc = 0.0f;
         float lastAcc = 0.0f;
-
-        ManualLogSource _log;
+        readonly ManualLogSource _log;
 
     }
 }

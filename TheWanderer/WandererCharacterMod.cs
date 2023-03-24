@@ -1,9 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Security.Permissions;
-using BepInEx;
+﻿using BepInEx;
 using Pkuyo.Wanderer.Feature;
 using Pkuyo.Wanderer.Options;
+using System;
+using System.Collections.Generic;
+using System.Security.Permissions;
 
 #pragma warning disable CS0618
 [assembly: SecurityPermission(SecurityAction.RequestMinimum, SkipVerification = true)]
@@ -25,6 +25,7 @@ namespace Pkuyo.Wanderer
             _hooks.Add(SSOracleHook.Instance(Logger));
             _hooks.Add(CoolObjectHook.Instance(Logger));
             _hooks.Add(AchievementHook.Instance(Logger));
+            _hooks.Add(SceneHook.Instance(Logger));
 
             _hooks.Add(PlayerBaseFeature.Instance(Logger));
             _hooks.Add(ClimbWallFeature.Instance(Logger));
@@ -34,7 +35,7 @@ namespace Pkuyo.Wanderer
             _hooks.Add(LizardRelationFeature.Instance(Logger));
             _hooks.Add(WandererGraphicsFeature.Instance(Logger));
 
-            
+
 
             WandererOptions = new WandererOptions(Logger);
 
@@ -42,9 +43,10 @@ namespace Pkuyo.Wanderer
             On.RainWorld.OnModsDisabled += RainWorld_OnModsDisabled;
         }
 
+
         private void RainWorld_OnModsDisabled(On.RainWorld.orig_OnModsDisabled orig, RainWorld self, ModManager.Mod[] newlyDisabledMods)
         {
-            foreach(var mod in newlyDisabledMods)
+            foreach (var mod in newlyDisabledMods)
             {
                 if (mod.id == ModID)
                 {
@@ -56,25 +58,30 @@ namespace Pkuyo.Wanderer
 
         private void RainWorld_OnModsInit(On.RainWorld.orig_OnModsInit orig, RainWorld self)
         {
-     
+
             orig(self);
-            MachineConnector.SetRegisteredOI(ModID, WandererOptions);
+
             try
             {
+                WandererModEnum.RegisterValues();
+                MachineConnector.SetRegisteredOI(ModID, WandererOptions);
+
                 foreach (var feature in _hooks)
                     feature.OnModsInit(self);
-                WandererModEnum.RegisterValues();
+
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Logger.LogError(e.Message + e.StackTrace);
             }
-            
+
         }
 
-        
+
 
         static private List<HookBase> _hooks;
+
+
 
         static public WandererOptions WandererOptions;
     }

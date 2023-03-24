@@ -1,16 +1,11 @@
 ﻿using BepInEx.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Mono.Cecil.Cil;
+using MonoMod.Cil;
 using SlugBase.Features;
-using static SlugBase.Features.FeatureTypes;
-using Random = UnityEngine.Random;
+using System;
 using System.Runtime.CompilerServices;
 using UnityEngine;
-using MonoMod.Cil;
-using Mono.Cecil.Cil;
+using static SlugBase.Features.FeatureTypes;
 
 namespace Pkuyo.Wanderer.Feature
 {
@@ -38,13 +33,14 @@ namespace Pkuyo.Wanderer.Feature
         private void Player_UpdateAnimationIL(ILContext il)
         {
             ILCursor c = new ILCursor(il);
-            if(c.TryGotoNext(MoveType.After,
-                i=>i.MatchStfld<Player>("whiplashJump"),
+            if (c.TryGotoNext(MoveType.After,
+                i => i.MatchStfld<Player>("whiplashJump"),
                 i => i.MatchLdcI4(12),
                 i => i.MatchStloc(26)))
             {
                 c.Emit(OpCodes.Ldarg_0);
-                c.EmitDelegate<Func<Player,int>>((self) =>{
+                c.EmitDelegate<Func<Player, int>>((self) =>
+                {
                     PlayerBaseAbility ability = null;
                     if (Instance().BaseAbilityData.TryGetValue(self, out ability) && ability.slideJumpCD >= 0)
                         return (int)(6 * ability.slideJumpCD);
@@ -57,9 +53,10 @@ namespace Pkuyo.Wanderer.Feature
                 i => i.MatchStloc(26)))
             {
                 c.Emit(OpCodes.Ldarg_0);
-                c.EmitDelegate<Func<Player, int>>((self) => {
+                c.EmitDelegate<Func<Player, int>>((self) =>
+                {
                     PlayerBaseAbility ability = null;
-                    if (Instance().BaseAbilityData.TryGetValue(self, out ability) && ability.slideJumpCD>=0)
+                    if (Instance().BaseAbilityData.TryGetValue(self, out ability) && ability.slideJumpCD >= 0)
                         return (int)(20 * ability.slideJumpCD);
                     return 34;
                 });
@@ -127,7 +124,7 @@ namespace Pkuyo.Wanderer.Feature
 
     class PlayerBaseAbility
     {
-        public PlayerBaseAbility(Player owner,float slide,float roll,float boost,float jumpCD)
+        public PlayerBaseAbility(Player owner, float slide, float roll, float boost, float jumpCD)
         {
             ownerRef = new WeakReference<Player>(owner);
             slideSpeed = slide;
@@ -169,12 +166,12 @@ namespace Pkuyo.Wanderer.Feature
                 else if (lastAnim == Player.AnimationIndex.BellySlide && slideSpeed >= 0)
                 {
                     var num2 = 18 * slideSpeed;
-           
+
                     if (!lastWhiplashJump && self.input[0].x != -lastRollDirection)
                     {
                         var y = 10f * slideY;
-                        self.bodyChunks[1].vel = new Vector2((float)lastRollDirection * num2, y) * num * (self.longBellySlide ? 1.2f : 1f);
-                        self.bodyChunks[0].vel = new Vector2((float)lastRollDirection * num2, y) * num * (self.longBellySlide ? 1.2f : 1f);
+                        self.bodyChunks[1].vel = new Vector2(lastRollDirection * num2, y) * num * (self.longBellySlide ? 1.2f : 1f);
+                        self.bodyChunks[0].vel = new Vector2(lastRollDirection * num2, y) * num * (self.longBellySlide ? 1.2f : 1f);
                         return true;
                     }
                     self.bodyChunks[0].vel = new Vector2(lastRollDirection * -11f * slideSpeed, 12f * slideY);
@@ -216,7 +213,7 @@ namespace Pkuyo.Wanderer.Feature
                     }
                 }
             }
-            else if(jumpBoost>=0)
+            else if (jumpBoost >= 0)
             {
                 self.jumpBoost = 14f * jumpBoost;
             }
@@ -243,19 +240,20 @@ namespace Pkuyo.Wanderer.Feature
             Player self;
             if (!ownerRef.TryGetTarget(out self))
                 return;
-            if (lastAnim == Player.AnimationIndex.BellySlide && slideSpeed>=0)
+            if (lastAnim == Player.AnimationIndex.BellySlide && slideSpeed >= 0)
             {
-                if (lastRollCounter<6)//这里其实可以加个参数控制
+                if (lastRollCounter < 6)//这里其实可以加个参数控制
                 {
                     self.bodyChunks[1].vel.y -= 2.7f;
-                    self.bodyChunks[1].vel.x += 9.1f * (float)lastRollDirection;
+                    self.bodyChunks[1].vel.x += 9.1f * lastRollDirection;
                 }
                 float num7 = (20f * slideSpeed) - 14f;//原有速度
                 float num8 = (25f * slideSpeed) - 18.1f;
                 self.bodyChunks[0].vel.x += self.longBellySlide ? num7 : num8 * lastRollDirection * Mathf.Sin(lastRollCounter / (self.longBellySlide ? 39f : 15f) * 3.1415927f);
             }
         }
-        WeakReference<Player> ownerRef;
+
+        readonly WeakReference<Player> ownerRef;
         public float slideSpeed;
         public float jumpBoost;
         public float rollSpeed;

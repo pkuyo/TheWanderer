@@ -1,12 +1,8 @@
 ﻿using BepInEx.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using SlugBase.DataTypes;
-using UnityEngine;
 using HarmonyLib;
+using SlugBase.DataTypes;
+using System;
+using UnityEngine;
 
 namespace Pkuyo.Wanderer.Cosmetic
 {
@@ -22,7 +18,7 @@ namespace Pkuyo.Wanderer.Cosmetic
             if (IsDirty)
                 if (UpdateDirtyShader(sLeaser, rCam))
                 {
-                    ApplyPalette(sLeaser, rCam,new RoomPalette());
+                    ApplyPalette(sLeaser, rCam, new RoomPalette());
                     IsDirty = false;
                 }
         }
@@ -34,7 +30,7 @@ namespace Pkuyo.Wanderer.Cosmetic
 
         public virtual void ApplyPalette(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, RoomPalette palette)
         {
-           
+
         }
 
         public virtual void Update()
@@ -50,7 +46,7 @@ namespace Pkuyo.Wanderer.Cosmetic
         {
             Color color = PlayerGraphics.SlugcatColor(self.CharacterForColor);
 
-            if (BodyColor.GetColor(self)!=null)
+            if (BodyColor.GetColor(self) != null)
                 color = (Color)BodyColor.GetColor(self);
             return color;
         }
@@ -80,13 +76,13 @@ namespace Pkuyo.Wanderer.Cosmetic
 
             if (LoungeColor.GetColor(self) != null)
                 color = (Color)LoungeColor.GetColor(self);
-            
+
 
             return color;
         }
 
 
-        protected bool TryGetMaterial(FSprite sprite,out Material material)
+        protected bool TryGetMaterial(FSprite sprite, out Material material)
         {
             material = null;
             var layer = Traverse.Create(sprite).Field("_renderLayer").GetValue<FFacetRenderLayer>();
@@ -114,13 +110,13 @@ namespace Pkuyo.Wanderer.Cosmetic
             }
             set
             {
-                if(_IsLounge != value)
+                if (_IsLounge != value)
                     IsDirty = true;
                 _IsLounge = value;
             }
         }
 
-        virtual public void AddToContainer(RoomCamera.SpriteLeaser sLeaser,RoomCamera rCam)
+        virtual public void AddToContainer(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam)
         {
             FContainer newContatiner = rCam.ReturnFContainer("Midground");
             for (int i = startSprite; i < startSprite + numberOfSprites; i++)
@@ -136,8 +132,8 @@ namespace Pkuyo.Wanderer.Cosmetic
 
         public WeakReference<PlayerGraphics> iGraphicsRef;
 
-        static PlayerColor LoungeColor = new PlayerColor("Lounge");
-        static PlayerColor EyeColor = new PlayerColor("Eyes");
-        static PlayerColor BodyColor = new PlayerColor("Body");
+        static readonly PlayerColor LoungeColor = new PlayerColor("Lounge");
+        static readonly PlayerColor EyeColor = new PlayerColor("Eyes");
+        static readonly PlayerColor BodyColor = new PlayerColor("Body");
     }
 }

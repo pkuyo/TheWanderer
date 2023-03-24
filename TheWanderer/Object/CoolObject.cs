@@ -6,11 +6,6 @@ using Fisobs.Sandbox;
 using MoreSlugcats;
 using Noise;
 using RWCustom;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -18,11 +13,11 @@ namespace Pkuyo.Wanderer
 {
     public class CoolObject : PlayerCarryableItem, IDrawable, IOwnProjectedCircles
     {
-        
-        public CoolObject(AbstractPhysicalObject abstractPhysicalObject,bool Vis=true) : base(abstractPhysicalObject)
+
+        public CoolObject(AbstractPhysicalObject abstractPhysicalObject, bool Vis = true) : base(abstractPhysicalObject)
         {
             bodyChunks = new BodyChunk[1];
-            bodyChunks[0] = new BodyChunk(this,0, abstractPhysicalObject.Room.realizedRoom.MiddleOfTile(abstractPhysicalObject.pos.Tile), 10f,0.07f);
+            bodyChunks[0] = new BodyChunk(this, 0, abstractPhysicalObject.Room.realizedRoom.MiddleOfTile(abstractPhysicalObject.pos.Tile), 10f, 0.07f);
             bodyChunkConnections = new BodyChunkConnection[0];
             airFriction = 0.999f;
             gravity = 0.9f;
@@ -46,7 +41,7 @@ namespace Pkuyo.Wanderer
             sLeaser.sprites[1].scale = 20f;
             sLeaser.sprites[1].alpha = 0f;
 
- 
+
             sLeaser.sprites[2] = new FSprite("illustrations/fade", true);
             sLeaser.sprites[2].shader = rCam.room.game.rainWorld.Shaders["ToolHoloGird"];
             sLeaser.sprites[2].scale = 10f;
@@ -59,9 +54,9 @@ namespace Pkuyo.Wanderer
         }
         public void DrawSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
         {
-            if(isDirty)
+            if (isDirty)
             {
-                sLeaser.sprites[0].element = Futile.atlasManager.GetElementWithName("Wanderer_Tool" + (IsOpen ? 1 : ( OpenTimer == 0 ? 0 : 2)));
+                sLeaser.sprites[0].element = Futile.atlasManager.GetElementWithName("Wanderer_Tool" + (IsOpen ? 1 : (OpenTimer == 0 ? 0 : 2)));
                 isDirty = false;
             }
             sLeaser.sprites[0].x = Mathf.Lerp(firstChunk.lastPos.x, firstChunk.pos.x, timeStacker) - camPos.x;
@@ -73,7 +68,7 @@ namespace Pkuyo.Wanderer
                 _isVis = true;
 
             if (sLeaser.sprites[0].isVisible != _isVis)
-                foreach(var sprite in sLeaser.sprites)
+                foreach (var sprite in sLeaser.sprites)
                     sprite.isVisible = _isVis;
 
             for (int i = 1; i < 3; i++)
@@ -94,7 +89,7 @@ namespace Pkuyo.Wanderer
 
         public void ApplyPalette(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, RoomPalette palette)
         {
-           
+
         }
 
         public void AddToContainer(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, FContainer newContatiner)
@@ -106,10 +101,10 @@ namespace Pkuyo.Wanderer
         public override void NewRoom(Room newRoom)
         {
             base.NewRoom(newRoom);
-            
-            if (SmallCircle != null&&!SmallCircle.slatedForDeletetion)
+
+            if (SmallCircle != null && !SmallCircle.slatedForDeletetion)
                 SmallCircle.slatedForDeletetion = true;
-            if(IsOpen)
+            if (IsOpen)
                 AddSmallProjectedCircle();
         }
         public override void Update(bool eu)
@@ -133,15 +128,15 @@ namespace Pkuyo.Wanderer
                 {
                     room.PlaySound(MoreSlugcatsEnums.MSCSoundID.Core_Off, firstChunk.pos, 1f, 1f);
                     gravity = 0.9f;
-                    if((!UnlockingGate ||unlockAnim.counter>=200) && !SmallCircle.slatedForDeletetion  )
+                    if ((!UnlockingGate || unlockAnim.counter >= 200) && !SmallCircle.slatedForDeletetion)
                     {
                         SmallCircle.getToRad = 0;
                     }
                     isDirty = true;
                 }
             }
-            
-            if (FlyTarget!=null)
+
+            if (FlyTarget != null)
             {
                 storyFlyTarget = FlyTarget.mainBodyChunk.pos;
                 StoryMovement();
@@ -165,13 +160,13 @@ namespace Pkuyo.Wanderer
 
         public void AddProjectedCircle()
         {
-            room.AddObject(new ProjectedCircle(room,this,0,0f));
+            room.AddObject(new ProjectedCircle(room, this, 0, 0f));
             _isVis = true;
         }
 
         public void AddSmallProjectedCircle()
         {
-            if(SmallCircle==null || SmallCircle.slatedForDeletetion)
+            if (SmallCircle == null || SmallCircle.slatedForDeletetion)
                 room.AddObject(SmallCircle = new ToolProjectedCircle(room, this, 0, 20f));
         }
 
@@ -190,7 +185,7 @@ namespace Pkuyo.Wanderer
             {
                 if (quickPather == null)
                     quickPather = new QuickPathFinder(room.GetTilePosition(firstChunk.pos), room.GetTilePosition(storyFlyTarget), room.aimap, StaticWorld.GetCreatureTemplate(CreatureTemplate.Type.Fly));
-                
+
                 for (int i = 0; i < 100; i++)
                 {
                     quickPather.Update();
@@ -210,19 +205,19 @@ namespace Pkuyo.Wanderer
                 {
                     if (intVector.x == -1 && intVector.y == -1 && room.VisualContact(firstChunk.pos, room.MiddleOfTile(path.tiles[j])))
                         intVector = path.tiles[j];
-                    
+
                     if (room.VisualContact(storyFlyTarget, room.MiddleOfTile(path.tiles[j])))
                         flag = true;
-                    
+
                     if ((intVector.x != -1 || intVector.y != -1) && flag)
                         break;
-                    
+
                 }
                 if (!flag || (intVector.x == -1 && intVector.y == -1))
                     path = null;
                 else
                     vector = Custom.DirVec(firstChunk.pos, room.MiddleOfTile(intVector));
-                
+
             }
             bool solid = room.GetTile(firstChunk.pos + (firstChunk.pos - firstChunk.lastPos) * 7f + direction * 30f).Solid;
             if (solid)
@@ -241,7 +236,7 @@ namespace Pkuyo.Wanderer
             }
             else if (firstChunk.lastPos != firstChunk.pos)
                 firstChunk.vel = firstChunk.vel * Custom.LerpMap(Vector2.Dot((firstChunk.pos - firstChunk.lastPos).normalized, vector), -1f, 1f, 0.85f, 0.97f);
-            
+
             direction = Vector3.Slerp(direction, vector, (!solid) ? Custom.LerpMap(Vector2.Distance(firstChunk.pos, storyFlyTarget), 20f, 200f, 1f, 0.3f) : 1f);
             if (Vector2.Distance(firstChunk.pos, storyFlyTarget) < 2f)
             {
@@ -265,7 +260,7 @@ namespace Pkuyo.Wanderer
 
         bool _isVis = false;
 
-        QuickPathFinder quickPather= null;
+        QuickPathFinder quickPather = null;
         QuickPath path = null;
         public Player FlyTarget = null;
         Vector2 direction;
@@ -274,7 +269,7 @@ namespace Pkuyo.Wanderer
 
         public ToolProjectedCircle SmallCircle;
 
-  
+
         public UnlockGateAnimation unlockAnim;
         public int OpenTimer = 0;
         public readonly int CdTime = 400;
@@ -295,10 +290,10 @@ namespace Pkuyo.Wanderer
             get => unlockAnim != null && unlockAnim.slatedForDeletetion != true;
         }
 
-        bool isDirty=false;
+        bool isDirty = false;
     }
 
-  
+
 
     public class AbstractCoolObject : AbstractPhysicalObject
     {
@@ -320,7 +315,7 @@ namespace Pkuyo.Wanderer
             base.Realize();
             if (realizedObject == null)
             {
-                realizedObject = new CoolObject(this,false);
+                realizedObject = new CoolObject(this, false);
             }
         }
 
@@ -385,7 +380,7 @@ namespace Pkuyo.Wanderer
                 //TODO 更换图片
                 return "fade";
             }
- 
+
         }
     }
     public class ToolProjectedCircle : ProjectedCircle
