@@ -199,8 +199,8 @@ namespace Pkuyo.Wanderer.Feature
                         }
                         else
                         {
-                            self.mushroomEffect = Custom.LerpAndTick(self.mushroomEffect, 0.2f, 0.05f, 0.025f);
-                            Traverse.Create(self.adrenalineEffect).Field("intensity").SetValue(3 * (3/0.2f) * (Traverse.Create(self.adrenalineEffect).Field("intensity").GetValue<float>()));
+                            self.mushroomEffect = Custom.LerpAndTick(self.mushroomEffect, 0.2f, 0.15f, 0.025f);
+                            
                         }
 
  
@@ -344,6 +344,8 @@ namespace Pkuyo.Wanderer.Feature
             {
                 if (IsLounge && IntroCount == -1)
                     rCam.mushroomMode = 3;
+                else if(IsLounge && IntroCount >=0 && WandererCharacterMod.WandererOptions.DisableDash.Value)
+                    rCam.mushroomMode = Mathf.Lerp(3, 0, Mathf.InverseLerp(0, 15, IntroCount));
                 else if (!IsLounge && IntroCount >= 0)
                     rCam.mushroomMode = Mathf.Lerp(0, 3, Mathf.InverseLerp(0, 15, IntroCount));
 

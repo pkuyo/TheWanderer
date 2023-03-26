@@ -28,7 +28,7 @@ namespace Pkuyo.Wanderer
             buoyancy = 0.4f;
             firstChunk.loudness = 3f;
 
-            _isVis = Vis;
+            _isInit = Vis;
         }
 
         public void InitiateSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam)
@@ -67,9 +67,9 @@ namespace Pkuyo.Wanderer
             else if (!_isVis)
                 _isVis = true;
 
-            if (sLeaser.sprites[0].isVisible != _isVis)
+            if (sLeaser.sprites[0].isVisible != IsVis)
                 foreach (var sprite in sLeaser.sprites)
-                    sprite.isVisible = _isVis;
+                    sprite.isVisible = IsVis;
 
             for (int i = 1; i < 3; i++)
             {
@@ -161,7 +161,7 @@ namespace Pkuyo.Wanderer
         public void AddProjectedCircle()
         {
             room.AddObject(new ProjectedCircle(room, this, 0, 0f));
-            _isVis = true;
+            _isInit = true;
         }
 
         public void AddSmallProjectedCircle()
@@ -260,6 +260,8 @@ namespace Pkuyo.Wanderer
 
         bool _isVis = false;
 
+        bool _isInit = true;
+
         QuickPathFinder quickPather = null;
         QuickPath path = null;
         public Player FlyTarget = null;
@@ -277,7 +279,7 @@ namespace Pkuyo.Wanderer
         public bool IsVis
         {
             get
-            { return _isVis; }
+            { return _isVis && _isInit; }
         }
 
         public bool IsOpen
@@ -372,13 +374,13 @@ namespace Pkuyo.Wanderer
 
             public override Color SpriteColor(int data)
             {
-                return Custom.HSL2RGB(data / 1000f, 0.65f, 0.4f);
+                return Color.white;
             }
 
             public override string SpriteName(int data)
             {
                 //TODO 更换图片
-                return "fade";
+                return "icon_Tool";
             }
 
         }

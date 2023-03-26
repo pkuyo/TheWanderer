@@ -1,4 +1,5 @@
 ﻿using BepInEx.Logging;
+using Menu;
 using MoreSlugcats;
 using System.Collections.Generic;
 using UnityEngine;
@@ -24,17 +25,20 @@ namespace Pkuyo.Wanderer
             On.WinState.CycleCompleted += WinState_CycleCompleted;
             On.WinState.PassageDisplayName += WinState_PassageDisplayName;
             On.WinState.CreateAndAddTracker += WinState_CreateAndAddTracker;
-            On.WinState.PassageAchievementID += WinState_PassageAchievementID;
 
+            On.Menu.CustomEndGameScreen.GetDataFromSleepScreen += CustomEndGameScreen_GetDataFromSleepScreen;
             //  On.ProcessManager.CueAchievementPlatform += ProcessManager_CueAchievementPlatform;
         }
-        private RainWorld.AchievementID WinState_PassageAchievementID(On.WinState.orig_PassageAchievementID orig, WinState.EndgameID ID)
+
+        private void CustomEndGameScreen_GetDataFromSleepScreen(On.Menu.CustomEndGameScreen.orig_GetDataFromSleepScreen orig, Menu.CustomEndGameScreen self, WinState.EndgameID endGameID)
         {
-            var id = orig(ID);
-            if (ID == WandererModEnum.WandererWinState.Dragonlord)
-                return RainWorld.AchievementID.ArtificerEnding;
-            return id;
+            orig(self,endGameID);
+            if (endGameID == WandererModEnum.WandererWinState.Dragonlord)
+                self.scene = new InteractiveMenuScene(self, self.pages[0],  MenuScene.SceneID.Endgame_Survivor);
+
         }
+
+
 
 
         private string WinState_PassageDisplayName(On.WinState.orig_PassageDisplayName orig, WinState.EndgameID ID)

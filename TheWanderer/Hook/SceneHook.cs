@@ -56,12 +56,6 @@ namespace Pkuyo.Wanderer
             self.AddIllustration(new MenuDepthIllustration(self.menu, self, self.sceneFolder,
                 "Intro - Wanderer - 1 - Draw", new Vector2(0f, 0f), 3f, MenuDepthIllustration.MenuShader.Basic));
 
-            if (self is InteractiveMenuScene)
-            {
-                (self as InteractiveMenuScene).idleDepths.Add(3.1f);
-                (self as InteractiveMenuScene).idleDepths.Add(2.8f);
-            }
-
         }
 
         private void BuildWandererScene2(MenuScene self)

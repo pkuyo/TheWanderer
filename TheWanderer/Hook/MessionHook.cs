@@ -23,7 +23,17 @@ namespace Pkuyo.Wanderer
             On.HUD.HUD.InitSinglePlayerHud += HUD_InitSinglePlayerHud;
             On.HUD.HUD.Update += HUD_Update;
             On.CreatureCommunities.InfluenceLikeOfPlayer += CreatureCommunities_InfluenceLikeOfPlayer;
+            On.SaveState.ctor += SaveState_ctor;
             _log.LogDebug("WanderMessionFeature Init");
+        }
+
+        private void SaveState_ctor(On.SaveState.orig_ctor orig, SaveState self, SlugcatStats.Name saveStateNumber, PlayerProgression progression)
+        {
+            orig(self, saveStateNumber, progression);
+            if (saveStateNumber.value == WandererCharacterMod.WandererName)
+            {
+                self.miscWorldSaveData.SLOracleState.neuronsLeft=7;
+            }
         }
 
         private void HUD_Update(On.HUD.HUD.orig_Update orig, HUD.HUD self)
@@ -98,9 +108,10 @@ namespace Pkuyo.Wanderer
                 room.AddObject(new WandererClimbTurtorial(room));
             }
             //冲刺教程
-            else if (room.roomSettings.name == "SB_GOR02VAN")
+            else if (room.roomSettings.name == "SB_GOR02VAN"&&! LoungeTurtorial)
             {
                 room.AddObject(new WandererLoungeTurtorial(room));
+                LoungeTurtorial = true;
             }
             //惊吓蜥蜴教程
             else if (!ScareTurtorial && room.roomSettings.name == "SB_H03")
@@ -143,6 +154,7 @@ namespace Pkuyo.Wanderer
 
         bool ClimbWallTurtorial = false;
         bool ScareTurtorial = false;
+        bool LoungeTurtorial = false;
         MissionHud _hud;
         HUD.HUD owner;
     }

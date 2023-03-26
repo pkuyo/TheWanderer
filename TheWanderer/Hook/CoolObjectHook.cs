@@ -25,6 +25,7 @@ namespace Pkuyo.Wanderer
         public override void OnModsInit(RainWorld rainWorld)
         {
             On.Player.GrabUpdate += Player_GrabUpdate;
+            On.Player.ReleaseGrasp += Player_ReleaseGrasp;
 
             On.RegionGate.Update += RegionGate_Update;
             On.GateKarmaGlyph.DrawSprites += GateKarmaGlyph_DrawSprites;
@@ -37,6 +38,13 @@ namespace Pkuyo.Wanderer
                 typeof(CoolObjectHook).GetMethod("GateKarmaGlyph_GetToColor_get", myMethodFlags)
             );
             Content.Register(new CoolObjectFisob());
+        }
+
+        private void Player_ReleaseGrasp(On.Player.orig_ReleaseGrasp orig, Player self, int grasp)
+        {
+            if (WandererCharacterMod.WandererOptions.PreventToolFalling.Value && self.grasps[grasp] != null && self.grasps[grasp].grabbed != null && self.grasps[grasp].grabbed is CoolObject && self.bodyMode == WandererModEnum.PlayerBodyModeIndex.ClimbBackWall)
+                return;
+            orig(self,grasp);
         }
 
         private int GateKarmaGlyph_ShouldPlayCitizensIDAnimation(On.GateKarmaGlyph.orig_ShouldPlayCitizensIDAnimation orig, GateKarmaGlyph self)
@@ -115,7 +123,7 @@ namespace Pkuyo.Wanderer
             if (self.room != null)
             {
                 foreach (var player in self.room.PlayersInRoom)
-                    if (player.grasps[0] != null && player.grasps[0].grabbed is CoolObject)
+                    if (player != null && player.grasps != null && player.grasps[0] != null  && player.grasps[0].grabbed is CoolObject)
                     {
                         cool = player.grasps[0].grabbed as CoolObject;
                         return true;

@@ -1,4 +1,6 @@
-﻿namespace Pkuyo.Wanderer
+﻿using RWCustom;
+
+namespace Pkuyo.Wanderer
 {
     class WandererTurtorial : UpdatableAndDeletable
     {
@@ -18,7 +20,12 @@
             {
                 if (index < messageList.Length)
                 {
-                    room.game.cameras[0].hud.textPrompt.AddMessage(room.game.manager.rainWorld.inGameTranslator.Translate(messageList[index].text), messageList[index].wait, messageList[index].time, false, ModManager.MMF);
+                    var texts = messageList[index].text.Split('/');
+                    string transTest = "";
+                    foreach(var text in texts)
+                        transTest += Custom.rainWorld.inGameTranslator.Translate(text);
+                    
+                    room.game.cameras[0].hud.textPrompt.AddMessage(transTest, messageList[index].wait, messageList[index].time, false, ModManager.MMF);
                     index++;
                 }
                 else
@@ -86,8 +93,7 @@
     class WandererLoungeTurtorial : WandererTurtorial
     {
         public WandererLoungeTurtorial(Room room)
-            : base(room, new Message[] { Message.NewMessage("Press ["+WandererCharacterMod.WandererOptions.LoungeKeys[0].Value.ToString() +"] to enter the sprint state, but it will reduce satiety.",0, 500) ,
-                                         })
+            : base(room, new Message[] { Message.NewMessage("Press [/"+WandererCharacterMod.WandererOptions.LoungeKeys[0].Value.ToString() +"/] to enter the sprint state, but it will reduce satiety.",0, 500)})
 
         {
             if (room.game.session.Players[0].pos.room != room.abstractRoom.index)

@@ -197,7 +197,18 @@ namespace Pkuyo.Wanderer
 
                 //if
                 //TODO: 一打对话
-
+                if (this.owner.throwOutCounter == 700)
+                {
+                    base.dialogBox.Interrupt(base.Translate("That's all. You'll have to go now."), 0);
+                }
+                else if (this.owner.throwOutCounter == 980)
+                {
+                    base.dialogBox.Interrupt(base.Translate("LEAVE."), 0);
+                }
+                else if (this.owner.throwOutCounter == 1530)
+                {
+                    base.dialogBox.Interrupt(base.Translate("Little creature. This is your last warning."), 0);
+                }
                 if (player.room == oracle.room)
                 {
                     owner.throwOutCounter++;

@@ -18,8 +18,10 @@ namespace Pkuyo.Wanderer.Options
             LoungeKeys[3] = config.Bind<KeyCode>("loungeKeyCode4", KeyCode.None);
 
             DisableDash = config.Bind<bool>("DisableDashFront", false);
-            MessionReputationBonus = config.Bind<float>("MessionReputationBonus", 4f);
             DisableTamedAIChange = config.Bind<bool>("DisableTamedAIChange", false);
+            PreventToolFalling = config.Bind<bool>("PreventToolFalling", true);
+
+            MessionReputationBonus = config.Bind<float>("MessionReputationBonus", 4f);
         }
 
         public override void Initialize()
@@ -67,6 +69,13 @@ namespace Pkuyo.Wanderer.Options
                      _DisableTamedAIChange
                 });
 
+                _PreventToolFalling = new OpCheckBox(PreventToolFalling, new Vector2(300f, 445f) + new Vector2(0, -30) * i);
+                opTab.AddItems(new UIelement[]
+                {
+                     new OpLabel(new Vector2(20f, 450f)+ new Vector2(0,-30) * (i++), new Vector2(200f, 24f), translator.Translate("Prevent Tools from Falling when Climbing Walls"), FLabelAlignment.Left, false, null),
+                     _PreventToolFalling
+                });
+
                 i++;
                 _MessionReputationBonus = new OpFloatSlider(MessionReputationBonus, new Vector2(300f, 445f) + new Vector2(0, -30) * i, 200);
                 _MessionReputationBonus.max = 10;
@@ -95,5 +104,8 @@ namespace Pkuyo.Wanderer.Options
 
         public OpCheckBox _DisableTamedAIChange;
         public readonly Configurable<bool> DisableTamedAIChange;
+
+        public OpCheckBox _PreventToolFalling;
+        public readonly Configurable<bool> PreventToolFalling;
     }
 }
