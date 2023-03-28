@@ -62,6 +62,8 @@ namespace Pkuyo.Wanderer.Cosmetic
                 Vector2 vector4 = (vector2 * 3f + rootPos) / 4f;
                 float HairWidth = 0.2f;
                 float d2 = 6f;
+
+                bool OutLength = false;
                 for (int i = 0; i < 4; i++)
                 {
                     Vector2 vector5 = Vector2.Lerp(Hairs[k * 4 + i].lastPos, Hairs[k * 4 + i].pos, timeStacker);
@@ -72,6 +74,9 @@ namespace Pkuyo.Wanderer.Cosmetic
                     {
                         d3 = 0f;
                     }
+                    
+                    if (i!=0 && !Custom.DistLess((sLeaser.sprites[startSprite + k] as TriangleMesh).vertices[i*4], (sLeaser.sprites[startSprite + k] as TriangleMesh).vertices[i*4-4],35))
+                        OutLength = true;
                     //设置坐标
                     (sLeaser.sprites[startSprite + k] as TriangleMesh).MoveVertice(i * 4, vector4 - widthDir * d2 * HairWidth + normalized * d3 - camPos);
                     (sLeaser.sprites[startSprite + k] as TriangleMesh).MoveVertice(i * 4 + 1, vector4 + widthDir * d2 * HairWidth + normalized * d3 - camPos);
@@ -87,6 +92,11 @@ namespace Pkuyo.Wanderer.Cosmetic
                     d2 = Hairs[k * 4 + i].StretchedRad;
                     vector4 = vector5;
                 }
+
+                if (OutLength && sLeaser.sprites[startSprite + k].isVisible)
+                    sLeaser.sprites[startSprite + k].isVisible = false;
+                else if (!OutLength && !sLeaser.sprites[startSprite + k].isVisible)
+                    sLeaser.sprites[startSprite + k].isVisible = true;
             }
             base.DrawSprites(sLeaser, rCam, timeStacker, camPos);
 
@@ -180,12 +190,6 @@ namespace Pkuyo.Wanderer.Cosmetic
                     TailSegment tailSegment7 = Hairs[k + i * 4];
                     tailSegment7.vel.y = tailSegment7.vel.y - Mathf.Lerp(0.1f, 0.5f, num3) * (1f - iGraphics.owner.bodyChunks[1].submersion) * iGraphics.owner.EffectiveRoomGravity;
                     num3 = (num3 * 10f + 1f) / 11f;
-
-                    //超出长度限位
-                    if (!Custom.DistLess(Hairs[k + i * 4].pos, rootPos, MaxLength * (k + 1)))
-                    {
-                        Hairs[k + i * 4].pos = rootPos + Custom.DirVec(rootPos, Hairs[k + i * 4].pos) * MaxLength * (k + 1);
-                    }
 
                     Hairs[k + i * 4].vel += Custom.DirVec(vector2, Hairs[k + i * 4].pos) * num9 / Vector2.Distance(vector2, Hairs[k + i * 4].pos);
                     num9 *= 0.5f;

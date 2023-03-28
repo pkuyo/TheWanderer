@@ -29,6 +29,7 @@ namespace Pkuyo.Wanderer.Feature
             On.PlayerGraphics.DrawSprites += PlayerGraphics_DrawSprites;
             On.PlayerGraphics.ApplyPalette += PlayerGraphics_ApplyPalette;
             On.PlayerGraphics.Update += PlayerGraphics_Update;
+            On.PlayerGraphics.AddToContainer += PlayerGraphics_AddToContainer;
 
             IL.PlayerGraphics.InitiateSprites += PlayerGraphics_InitiateSpritesIL;
             IL.PlayerGraphics.DrawSprites += PlayerGraphics_DrawSpritesIL;
@@ -36,7 +37,15 @@ namespace Pkuyo.Wanderer.Feature
 
         }
 
+        private void PlayerGraphics_AddToContainer(On.PlayerGraphics.orig_AddToContainer orig, PlayerGraphics self, RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, FContainer newContatiner)
+        {
+            orig(self, sLeaser, rCam, newContatiner);
 
+            WandererGraphics graphics;
+            if (WandererGraphics.TryGetValue(self, out graphics))
+                graphics.AddToContainer(sLeaser, rCam, newContatiner);
+
+        }
 
         private void PlayerGraphics_InitiateSpritesIL(ILContext il)
         {
@@ -152,7 +161,15 @@ namespace Pkuyo.Wanderer.Feature
 
             //AddCosmetic(new WandererShaderTest(self, _log));
         }
-
+        public void AddToContainer(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, FContainer newContatiner)
+        {
+            if (OriginSprites == -1 || EndSprites > sLeaser.sprites.Length)
+                return;
+            foreach (var cosmetic in Cosmetics)
+            {
+                cosmetic.AddToContainer(sLeaser, rCam,newContatiner);
+            }
+        }
         private void AddCosmetic(CosmeticBase cosmetic, bool isBefore = false)
         {
             if (isBefore)
@@ -207,10 +224,7 @@ namespace Pkuyo.Wanderer.Feature
             {
                 cosmetic.InitiateSprites(sLeaser, rCam);
             }
-            foreach (var cosmetic in Cosmetics)
-            {
-                cosmetic.AddToContainer(sLeaser, rCam);
-            }
+            AddToContainer(sLeaser, rCam, null);
         }
 
         public void ApplyPalette(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, RoomPalette palette)
@@ -264,7 +278,7 @@ namespace Pkuyo.Wanderer.Feature
             }
         }
         private bool _IsLounge;
-        public int OriginSprites;
+        public int OriginSprites = -1;
         public int EndSprites;
     }
 

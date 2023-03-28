@@ -82,7 +82,6 @@ namespace Pkuyo.Wanderer
         static private List<HookBase> _hooks;
 
 
-
         static public WandererOptions WandererOptions;
     }
 }

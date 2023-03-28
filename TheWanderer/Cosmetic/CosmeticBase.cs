@@ -116,9 +116,10 @@ namespace Pkuyo.Wanderer.Cosmetic
             }
         }
 
-        virtual public void AddToContainer(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam)
+        virtual public void AddToContainer(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, FContainer newContatiner)
         {
-            FContainer newContatiner = rCam.ReturnFContainer("Midground");
+            if (newContatiner==null)
+                newContatiner = rCam.ReturnFContainer("Midground");
             for (int i = startSprite; i < startSprite + numberOfSprites; i++)
             {
                 sLeaser.sprites[i].RemoveFromContainer();

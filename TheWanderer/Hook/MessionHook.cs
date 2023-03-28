@@ -1,5 +1,6 @@
 ﻿using BepInEx.Logging;
 using HUD;
+using RWCustom;
 using UnityEngine;
 
 namespace Pkuyo.Wanderer
@@ -137,6 +138,14 @@ namespace Pkuyo.Wanderer
                 room.AddObject(new WandererToolTurtorial(room));
                 room.game.GetStorySession.saveState.miscWorldSaveData.SSaiConversationsHad++;
             }
+            //DemoEnding
+            else if (room.roomSettings.name == "IW_DemoEnding" && !DemoEnding)
+            {
+                DemoEnding = true;
+                owner.InitDialogBox();
+                owner.dialogBox.NewMessage(Custom.rainWorld.inGameTranslator.Translate("Thank you for playing this mod!"), 50);
+                owner.dialogBox.NewMessage(Custom.rainWorld.inGameTranslator.Translate("The real ending and new region are in the works, so stay tuned!"), 300);
+            }
         }
 
         public void SetLikeOfPlayer(float like)
@@ -155,6 +164,7 @@ namespace Pkuyo.Wanderer
         bool ClimbWallTurtorial = false;
         bool ScareTurtorial = false;
         bool LoungeTurtorial = false;
+        bool DemoEnding = false;
         MissionHud _hud;
         HUD.HUD owner;
     }

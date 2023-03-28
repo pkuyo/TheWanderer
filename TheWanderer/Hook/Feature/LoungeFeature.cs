@@ -37,9 +37,18 @@ namespace Pkuyo.Wanderer.Feature
             On.Mushroom.BitByPlayer += Mushroom_BitByPlayer;
             On.PlayerGraphics.DrawSprites += PlayerGraphics_DrawSprites;
             On.Player.Die += Player_Die;
+            On.Player.NewRoom += Player_NewRoom;
 
             On.Player.Jump += Player_Jump;
             _log.LogDebug("Lounge Feature Init");
+        }
+
+        private void Player_NewRoom(On.Player.orig_NewRoom orig, Player self, Room newRoom)
+        {
+            PlayerLounge lounge;
+            if (LoungeData.TryGetValue(self, out lounge))
+                lounge.NewRoom();
+            orig(self, newRoom);
         }
 
         private void Player_Die(On.Player.orig_Die orig, Player self)
@@ -258,6 +267,11 @@ namespace Pkuyo.Wanderer.Feature
                 if (IntroCount >= 0) IntroCount--;
 
             }
+
+            public void NewRoom()
+            {
+                RoomLerpCount = 80;
+            }
             public void DrawSprites(RoomCamera.SpriteLeaser leaser)
             {
                 var post = WandererAssetManager.Instance(null).PostEffect;
@@ -266,7 +280,14 @@ namespace Pkuyo.Wanderer.Feature
                     //多人取最高
                     if (IntroCount >= 0 && post.timeStacker < Mathf.Pow(Mathf.InverseLerp(15, 0, IntroCount), 0.7f))
                         post.timeStacker = Mathf.Pow(Mathf.InverseLerp(15, 0, IntroCount), 0.7f);
-                    post.blurCenter = leaser.sprites[3].GetPosition() / (Custom.rainWorld.screenSize);
+
+                    if (RoomLerpCount == -1)
+                        post.blurCenter = OldRoomPos = leaser.sprites[3].GetPosition() / (Custom.rainWorld.screenSize);
+                    else
+                    {
+                        post.blurCenter = Vector2.Lerp((leaser.sprites[3].GetPosition() / (Custom.rainWorld.screenSize)), OldRoomPos, Mathf.Pow(Mathf.InverseLerp(0, 80, RoomLerpCount),3));
+                        RoomLerpCount--;
+                    }
                 }
                 else if (IntroCount >= 0)
                     post.timeStacker = Mathf.Pow(Mathf.InverseLerp(0, 15, IntroCount), 1.5f);
@@ -296,7 +317,7 @@ namespace Pkuyo.Wanderer.Feature
                 if (PlayerBaseFeature.Instance().BaseAbilityData.TryGetValue(self, out baseAbility))
                 {
                     baseAbility.rollSpeed = rollSpeed * 1.5f;
-                    //baseAbility.slideSpeed = slideSpeed * 1.5f;
+                    baseAbility.slideSpeed = slideSpeed * 1.5f;
                     baseAbility.jumpBoost = jumpBoost * 1.1f;
                 }
 
@@ -355,9 +376,13 @@ namespace Pkuyo.Wanderer.Feature
             bool keyDown = false;
             bool keyUse = false;
 
+            Vector2 OldRoomPos;
+            int RoomLerpCount = -1;
+
             int IntroCount = -1;
             bool reset = false;
             readonly KeyCode keyCode = KeyCode.None;
+
 
             int FoodCount = 0;
             readonly float runspeedFac;

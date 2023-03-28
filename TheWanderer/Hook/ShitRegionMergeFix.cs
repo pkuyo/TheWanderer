@@ -1,4 +1,5 @@
 ﻿using BepInEx.Logging;
+using MoreSlugcats;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -17,7 +18,19 @@ namespace Pkuyo.Wanderer
         public override void OnModsInit(RainWorld rainWorld)
         {
             On.RainWorldGame.SpawnPlayers_bool_bool_bool_bool_WorldCoordinate += RainWorldGame_SpawnPlayers;
+            On.RegionGate.customKarmaGateRequirements += RegionGate_customKarmaGateRequirements;
         }
+
+        private void RegionGate_customKarmaGateRequirements(On.RegionGate.orig_customKarmaGateRequirements orig, RegionGate self)
+        {
+            orig(self);
+            if(self.room.abstractRoom.name == "GATE_MS_IW")
+            {
+                self.karmaRequirements[0] = MoreSlugcatsEnums.GateRequirement.OELock;
+                self.karmaRequirements[1] = MoreSlugcatsEnums.GateRequirement.OELock;
+            }
+        }
+
         private void Player_Update(On.Player.orig_Update orig, Player self, bool eu)
         {
             a++;
