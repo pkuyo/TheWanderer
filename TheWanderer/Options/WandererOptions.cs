@@ -21,6 +21,8 @@ namespace Pkuyo.Wanderer.Options
             DisableTamedAIChange = config.Bind<bool>("DisableTamedAIChange", false);
             PreventToolFalling = config.Bind<bool>("PreventToolFalling", true);
 
+
+            RainCycleLengthScale = config.Bind<float>("RainCycleLengthScale",1f);
             MessionReputationBonus = config.Bind<float>("MessionReputationBonus", 4f);
         }
 
@@ -86,7 +88,15 @@ namespace Pkuyo.Wanderer.Options
                      _MessionReputationBonus
                 });
 
-     
+                _RainCycleLengthScale = new OpFloatSlider(RainCycleLengthScale, new Vector2(300f, 445f) + new Vector2(0, -30) * i, 200);
+                _RainCycleLengthScale.max = 3f;
+                _RainCycleLengthScale.min = 0.3f;
+                opTab.AddItems(new UIelement[]
+                {
+                     new OpLabel(new Vector2(20f, 450f)+ new Vector2(0,-30) * (i++), new Vector2(200f, 24f), translator.Translate("Vanguard Campaigns Rain Cycle Length Scale"), FLabelAlignment.Left, false, null),
+                     _RainCycleLengthScale
+                });
+
 
             }
             this.Tabs = tabs.ToArray();
@@ -102,8 +112,12 @@ namespace Pkuyo.Wanderer.Options
         public OpFloatSlider _MessionReputationBonus;
         public readonly Configurable<float> MessionReputationBonus;
 
+        public OpFloatSlider _RainCycleLengthScale;
+        public readonly Configurable<float> RainCycleLengthScale;
+
         public OpCheckBox _DisableTamedAIChange;
         public readonly Configurable<bool> DisableTamedAIChange;
+
 
         public OpCheckBox _PreventToolFalling;
         public readonly Configurable<bool> PreventToolFalling;

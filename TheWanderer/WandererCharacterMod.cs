@@ -26,6 +26,7 @@ namespace Pkuyo.Wanderer
             _hooks.Add(CoolObjectHook.Instance(Logger));
             _hooks.Add(AchievementHook.Instance(Logger));
             _hooks.Add(SceneHook.Instance(Logger));
+            
 
             _hooks.Add(PlayerBaseFeature.Instance(Logger));
             _hooks.Add(ClimbWallFeature.Instance(Logger));
@@ -35,12 +36,14 @@ namespace Pkuyo.Wanderer
             _hooks.Add(LizardRelationFeature.Instance(Logger));
             _hooks.Add(WandererGraphicsFeature.Instance(Logger));
 
-
+            
 
             WandererOptions = new WandererOptions(Logger);
 
             On.RainWorld.OnModsInit += RainWorld_OnModsInit;
             On.RainWorld.OnModsDisabled += RainWorld_OnModsDisabled;
+
+            On.RainWorld.PostModsInit += ModCompatibilityFix.RainWorld_PostModsInit;
         }
 
 

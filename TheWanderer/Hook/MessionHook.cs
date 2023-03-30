@@ -1,6 +1,9 @@
 ﻿using BepInEx.Logging;
 using HUD;
+using Mono.Cecil.Cil;
+using MonoMod.Cil;
 using RWCustom;
+using System;
 using UnityEngine;
 
 namespace Pkuyo.Wanderer
@@ -25,7 +28,27 @@ namespace Pkuyo.Wanderer
             On.HUD.HUD.Update += HUD_Update;
             On.CreatureCommunities.InfluenceLikeOfPlayer += CreatureCommunities_InfluenceLikeOfPlayer;
             On.SaveState.ctor += SaveState_ctor;
+
+            IL.RainCycle.ctor += RainCycle_ctor;
             _log.LogDebug("WanderMessionFeature Init");
+        }
+
+        private void RainCycle_ctor(ILContext il)
+        {
+            ILCursor c = new ILCursor(il);
+            if(c.TryGotoNext(MoveType.After,i => i.OpCode == OpCodes.Conv_I4,
+                i => i.MatchStfld<RainCycle>("cycleLength"),
+                i => i.OpCode == OpCodes.Ldarg_0,
+                i => i.OpCode == OpCodes.Ldarg_0))
+            {
+                c.EmitDelegate<Func<RainCycle, RainCycle>>(self =>
+                {
+                    if(self.world.game.session.characterStats.name.value == WandererCharacterMod.WandererName)
+                        self.cycleLength = Mathf.RoundToInt(self.cycleLength * WandererCharacterMod.WandererOptions.RainCycleLengthScale.Value);
+                    return self;
+                });
+            }
+
         }
 
         private void SaveState_ctor(On.SaveState.orig_ctor orig, SaveState self, SlugcatStats.Name saveStateNumber, PlayerProgression progression)

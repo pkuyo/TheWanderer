@@ -103,8 +103,10 @@ namespace Pkuyo.Wanderer.LizardMessage
         {
             //无状态
             CreatureTemplate.Type type = target.abstractCreature.creatureTemplate.type;
-
-            var message = Messages[rw.inGameTranslator.currentLanguage];
+            var a = rw.inGameTranslator.currentLanguage;
+            if (a != InGameTranslator.LanguageID.English && a != InGameTranslator.LanguageID.Chinese)
+                a = InGameTranslator.LanguageID.English;
+            var message = Messages[a];
 
             //其他种类蜥蜴
             if (!message.ContainsKey(type))

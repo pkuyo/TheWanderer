@@ -71,6 +71,7 @@ namespace Pkuyo.Wanderer
             }
             if (seePeople && self.oracle.room.game.session.characterStats.name.value == WandererCharacterMod.WandererName)
             {
+                _log.LogDebug("Conversation " + self.oracle.room.game.GetStorySession.saveState.miscWorldSaveData.SSaiConversationsHad);
                 //我们已经讨论过了（
                 if (self.oracle.room.game.GetStorySession.saveState.miscWorldSaveData.SSaiConversationsHad >= 3)
                 {
@@ -195,20 +196,16 @@ namespace Pkuyo.Wanderer
                 if (panicObject != null && panicObject.slatedForDeletetion)
                     panicObject = null;
 
+                
                 //if
                 //TODO: 一打对话
-                if (this.owner.throwOutCounter == 700)
-                {
-                    base.dialogBox.Interrupt(base.Translate("That's all. You'll have to go now."), 0);
-                }
-                else if (this.owner.throwOutCounter == 980)
-                {
-                    base.dialogBox.Interrupt(base.Translate("LEAVE."), 0);
-                }
-                else if (this.owner.throwOutCounter == 1530)
-                {
-                    base.dialogBox.Interrupt(base.Translate("Little creature. This is your last warning."), 0);
-                }
+                if (owner.throwOutCounter == 700)
+                    dialogBox.Interrupt(Translate("That's all. You'll have to go now."), 0);
+                else if (owner.throwOutCounter == 980)
+                    dialogBox.Interrupt(Translate("LEAVE."), 0);        
+                else if (owner.throwOutCounter == 1530)
+                    dialogBox.Interrupt(Translate("Little creature. This is your last warning."), 0);
+                
                 if (player.room == oracle.room)
                 {
                     owner.throwOutCounter++;
@@ -219,34 +216,21 @@ namespace Pkuyo.Wanderer
                     owner.getToWorking = 1f;
                     return;
                 }
-                var pow = Custom.LerpMap(Mathf.Clamp(Custom.Dist(coolObject.firstChunk.vel, new Vector2(403, 655)), 10, 200), 10, 200, 0, 3);
-                if (owner.throwOutCounter < 900)
-                {
-                    player.mainBodyChunk.vel *= Mathf.Lerp(0.9f, 1f, oracle.room.gravity);
-                    player.bodyChunks[1].vel *= Mathf.Lerp(0.9f, 1f, oracle.room.gravity);
-                    player.mainBodyChunk.vel += pow * Custom.DirVec(player.mainBodyChunk.pos, new Vector2(403, 655)) * 0.5f * (1f - oracle.room.gravity);
-                    if (coolObject != null)
-                    {
-                        coolObject.firstChunk.vel *= Mathf.Lerp(0.9f, 1f, oracle.room.gravity);
-                        coolObject.firstChunk.vel += pow * Custom.DirVec(coolObject.firstChunk.vel, new Vector2(403, 655)) * 0.5f * (1f - oracle.room.gravity);
-                    }
-                }
-                else if (owner.throwOutCounter > 1780)
+
+
+
+                Vector2 vector = new Vector2(403, 655);
+
+                player.mainBodyChunk.vel += Custom.DirVec(player.mainBodyChunk.pos, vector) * 0.2f * (1f - oracle.room.gravity) * Mathf.InverseLerp(140f, 200f, inActionCounter);
+                if (coolObject != null)
+                    coolObject.firstChunk.vel += Custom.DirVec(coolObject.firstChunk.pos, vector) * 0.2f * (1f - oracle.room.gravity) * Mathf.InverseLerp(140f, 200f, inActionCounter);
+
+
+
+                if (owner.throwOutCounter > 1780)
                 {
                     owner.NewAction(SSOracleBehavior.Action.ThrowOut_KillOnSight);
-                }
-                else//使劲fp！
-                {
-
-                    player.mainBodyChunk.vel *= Mathf.Lerp(0.9f, 1f, oracle.room.gravity);
-                    player.bodyChunks[1].vel *= Mathf.Lerp(0.9f, 1f, oracle.room.gravity);
-                    player.mainBodyChunk.vel += pow * Custom.DirVec(player.mainBodyChunk.pos, new Vector2(403, 655)) * (1f - oracle.room.gravity);
-                    if (coolObject != null)
-                    {
-                        coolObject.firstChunk.vel *= Mathf.Lerp(0.9f, 1f, oracle.room.gravity);
-                        coolObject.firstChunk.vel += pow * Custom.DirVec(coolObject.firstChunk.vel, new Vector2(403, 655)) * 1f * (1f - oracle.room.gravity);
-                    }
-                }
+                }  
                 panicTimer++;
                 if (panicObject == null)
                 {
@@ -273,7 +257,7 @@ namespace Pkuyo.Wanderer
             public void PickUnfortunatelyFpTime()
             {
                 timeUntilNextPanic = Random.Range(800, 2400);
-            }
+            } 
             private int timeUntilNextPanic = 0;
             private int panicTimer = 0;
             private FpPanicDisplay panicObject;
@@ -286,15 +270,10 @@ namespace Pkuyo.Wanderer
             {
             }
 
-            public void PickUnfortunatelyFpTime()
-            {
-                timeUntilNextPanic = Random.Range(800, 2400);
-            }
 
 
             public override void Update()
             {
-                owner.LockShortcuts();
                 if (player == null) return;
 
                 if (panicObject != null && panicObject.slatedForDeletetion)
@@ -304,6 +283,7 @@ namespace Pkuyo.Wanderer
                 //功能判断
                 if (action == WandererModEnum.WandererSSOracle.MeetWanderer_GiveObject)
                 {
+                    owner.LockShortcuts();
                     giveTimer++;
                     if (coolObject != null)
                     {
@@ -327,7 +307,7 @@ namespace Pkuyo.Wanderer
                 {
                     killDelay--;
 
-
+                    owner.LockShortcuts();
                     if (panicObject == null && !endPage)
                     {
                         if (owner.oracle.room.game.GetStorySession.saveState.deathPersistentSaveData.theMark)
@@ -350,25 +330,6 @@ namespace Pkuyo.Wanderer
                 //谈话 三段对话公用
                 else if (action == WandererModEnum.WandererSSOracle.MeetWanderer_Talk)
                 {
-                    panicTimer++;
-                    if (panicObject == null)
-                    {
-                        //缺少fp痛苦呻吟.jpg
-                        if (panicTimer >= timeUntilNextPanic)
-                        {
-                            PickUnfortunatelyFpTime();
-                            panicTimer = 0;
-                            panicObject = new FpPanicDisplay(oracle);
-                            oracle.room.AddObject(panicObject);
-                            if (owner.conversation != null)
-                            {
-                                owner.conversation.Interrupt("...", 600);
-                                owner.conversation.paused = true;
-                            }
-                        }
-                        else if (owner.conversation != null && owner.conversation.paused) owner.conversation.paused = false;
-                    }
-
 
                     //说完话后根据对话次数判断下一事件
                     if (owner.conversation == null || owner.conversation.slatedForDeletion == true)
@@ -377,7 +338,10 @@ namespace Pkuyo.Wanderer
                             owner.NewAction(WandererModEnum.WandererSSOracle.MeetWanderer_GiveObject);
 
                         if (oracle.room.game.GetStorySession.saveState.miscWorldSaveData.SSaiConversationsHad == 3)
+                        {
+                            owner.UnlockShortcuts();
                             owner.NewAction(WandererModEnum.WandererSSOracle.ThrowOutWanderer);
+                        }
                     }
 
                 }
@@ -395,9 +359,8 @@ namespace Pkuyo.Wanderer
                     oracle.room.AddObject(panicObject);
                     oracle.room.game.GetStorySession.saveState.miscWorldSaveData.SSaiConversationsHad = 1;
                 }
-                else if (newAction == WandererModEnum.WandererSSOracle.MeetWanderer_Talk && (owner.conversation == null || owner.conversation.slatedForDeletion))
+                else if (newAction == WandererModEnum.WandererSSOracle.MeetWanderer_Talk)
                 {
-                    PickUnfortunatelyFpTime();
                     owner.movementBehavior = SSOracleBehavior.MovementBehavior.KeepDistance;
                     if (oracle.room.game.GetStorySession.saveState.miscWorldSaveData.SSaiConversationsHad == 1)
                         owner.InitateConversation(WandererModEnum.WandererConversation.Pebbles_Wanderer_FirstMeet_Talk1, this);
@@ -430,15 +393,11 @@ namespace Pkuyo.Wanderer
                 owner.UnlockShortcuts();
                 if (panicObject != null)
                     panicObject = null;
-                panicTimer = 0;
                 giveTimer = 0;
 
-                timeUntilNextPanic = 0;
                 killDelay = 65;
 
             }
-            private int timeUntilNextPanic = 0;
-            private int panicTimer = 0;
             private FpPanicDisplay panicObject;
 
             private int giveTimer = 0;
