@@ -8,6 +8,29 @@ namespace Pkuyo.Wanderer.Options
 {
     public class WandererOptions : OptionInterface
     {
+        class CarrayAbiliyConfigAcceptable : ConfigAcceptableBase
+        {
+            static public string[] AcceptList = { "One Hand", "Two Hands" };
+
+            public CarrayAbiliyConfigAcceptable() : base(typeof(string))
+            {
+            }
+
+            public override object Clamp(object value) => value;
+
+            public override bool IsValid(object value)
+            {
+                if (value is string)
+                {
+                    foreach (var key in AcceptList)
+                        if ((value as string) == key)
+                            return true;
+                }
+                return false;
+            }
+
+            public override string ToDescriptionString() => "Player carry ability.";
+        }
         public WandererOptions(ManualLogSource log)
         {
             LoungeKeys = new Configurable<KeyCode>[4];
@@ -24,6 +47,8 @@ namespace Pkuyo.Wanderer.Options
 
             RainCycleLengthScale = config.Bind<float>("RainCycleLengthScale",1f);
             MessionReputationBonus = config.Bind<float>("MessionReputationBonus", 4f);
+            
+            CarryToolHands = config.Bind<string>("CarryToolHands", "One Hand",new CarrayAbiliyConfigAcceptable());
         }
 
         public override void Initialize()
@@ -97,6 +122,12 @@ namespace Pkuyo.Wanderer.Options
                      _RainCycleLengthScale
                 });
 
+                _CarryToolHands = new OpComboBox(CarryToolHands, new Vector2(300f, 445f) + new Vector2(0, -30) * i, 200, CarrayAbiliyConfigAcceptable.AcceptList);
+                opTab.AddItems(new UIelement[]
+                {
+                     new OpLabel(new Vector2(20f, 450f)+ new Vector2(0,-30) * (i++), new Vector2(200f, 24f), translator.Translate("The number of hands required to carry the tool"), FLabelAlignment.Left, false, null),
+                     _CarryToolHands
+                });
 
             }
             this.Tabs = tabs.ToArray();
@@ -121,5 +152,8 @@ namespace Pkuyo.Wanderer.Options
 
         public OpCheckBox _PreventToolFalling;
         public readonly Configurable<bool> PreventToolFalling;
+
+        public OpComboBox _CarryToolHands;
+        public readonly Configurable<string> CarryToolHands;
     }
 }

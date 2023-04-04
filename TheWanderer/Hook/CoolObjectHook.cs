@@ -30,6 +30,9 @@ namespace Pkuyo.Wanderer
             On.RegionGate.Update += RegionGate_Update;
             On.GateKarmaGlyph.DrawSprites += GateKarmaGlyph_DrawSprites;
             On.GateKarmaGlyph.ShouldPlayCitizensIDAnimation += GateKarmaGlyph_ShouldPlayCitizensIDAnimation;
+
+            On.AbstractPhysicalObject.UsesAPersistantTracker += AbstractPhysicalObject_UsesAPersistantTracker;
+
             BindingFlags propFlags = BindingFlags.Instance | BindingFlags.Public;
             BindingFlags myMethodFlags = BindingFlags.Static | BindingFlags.Public;
 
@@ -38,6 +41,14 @@ namespace Pkuyo.Wanderer
                 typeof(CoolObjectHook).GetMethod("GateKarmaGlyph_GetToColor_get", myMethodFlags)
             );
             Content.Register(new CoolObjectFisob());
+        }
+
+        private bool AbstractPhysicalObject_UsesAPersistantTracker(On.AbstractPhysicalObject.orig_UsesAPersistantTracker orig, AbstractPhysicalObject abs)
+        {
+            var re = orig(abs);
+            if (abs.type == CoolObjectFisob.CoolObject)
+                return true;
+            return re;
         }
 
         private void Player_ReleaseGrasp(On.Player.orig_ReleaseGrasp orig, Player self, int grasp)

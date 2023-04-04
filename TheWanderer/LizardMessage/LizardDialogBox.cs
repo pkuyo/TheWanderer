@@ -141,7 +141,8 @@ namespace Pkuyo.Wanderer.LizardMessage
                             like = LikeOfPlayer(target, player);
                         }
                     }
-                    currentColor = Color.Lerp(Color.red, Color.green, like);
+                    var HSLColor = Vector3.Lerp(Custom.RGB2HSL(Color.red), Custom.RGB2HSL(Color.green), like);
+                    currentColor =  Custom.HSL2RGB(HSLColor.x, HSLColor.y, HSLColor.z);
                 }
             }
 
@@ -195,11 +196,13 @@ namespace Pkuyo.Wanderer.LizardMessage
 
         public void DeleteDialogBox()
         {
-            this.slatedForDeletion = true;
-            this._room = null;
-            this._camera = null;
-            this.messages.Clear();
-            this.label.RemoveFromContainer();
+            slatedForDeletion = true;
+            _room = null;
+            _camera = null;
+            messages.Clear();
+            label.RemoveFromContainer();
+            if(hud.dialogBox==this)
+                hud.dialogBox = null;
         }
 
 

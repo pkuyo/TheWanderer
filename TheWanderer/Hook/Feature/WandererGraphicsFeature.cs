@@ -30,12 +30,11 @@ namespace Pkuyo.Wanderer.Feature
             On.PlayerGraphics.ApplyPalette += PlayerGraphics_ApplyPalette;
             On.PlayerGraphics.Update += PlayerGraphics_Update;
             On.PlayerGraphics.AddToContainer += PlayerGraphics_AddToContainer;
-
-            IL.PlayerGraphics.InitiateSprites += PlayerGraphics_InitiateSpritesIL;
-            IL.PlayerGraphics.DrawSprites += PlayerGraphics_DrawSpritesIL;
+            
             _log.LogDebug("WandererGraphics Init");
 
         }
+
 
         private void PlayerGraphics_AddToContainer(On.PlayerGraphics.orig_AddToContainer orig, PlayerGraphics self, RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, FContainer newContatiner)
         {
@@ -46,37 +45,6 @@ namespace Pkuyo.Wanderer.Feature
                 graphics.AddToContainer(sLeaser, rCam, newContatiner);
 
         }
-
-        private void PlayerGraphics_InitiateSpritesIL(ILContext il)
-        {
-            //毛绒绒毛茸茸
-            var c = new ILCursor(il);
-            if (c.TryGotoNext(i => i.MatchLdstr("HeadA0")))
-            {
-                c.Remove();
-                c.Emit(Mono.Cecil.Cil.OpCodes.Ldarg_0);
-                c.EmitDelegate<Func<PlayerGraphics, string>>((self) =>
-                 {
-                     return (self.owner as Player).slugcatStats.name.value == WandererCharacterMod.WandererName ? "WandererHeadA0" : "HeadA0";
-                 });
-            }
-        }
-
-        private void PlayerGraphics_DrawSpritesIL(ILContext il)
-        {
-            //毛绒绒毛茸茸
-            var c = new ILCursor(il);
-            if (c.TryGotoNext(i => i.MatchLdstr("HeadA")))
-            {
-                c.Remove();
-                c.Emit(Mono.Cecil.Cil.OpCodes.Ldarg_0);
-                c.EmitDelegate<Func<PlayerGraphics, string>>((self) =>
-                {
-                    return (self.owner as Player).slugcatStats.name.value == WandererCharacterMod.WandererName ? "WandererHeadA" : "HeadA";
-                });
-            }
-        }
-
 
 
         private void PlayerGraphics_ctor(On.PlayerGraphics.orig_ctor orig, PlayerGraphics self, PhysicalObject ow)
@@ -99,9 +67,6 @@ namespace Pkuyo.Wanderer.Feature
             WandererGraphics graphics;
             if (WandererGraphics.TryGetValue(self, out graphics))
                 graphics.DrawSprites(sLeaser, rCam, timeStacker, camPos);
-
-
-
         }
 
         private void PlayerGraphics_InitiateSprites(On.PlayerGraphics.orig_InitiateSprites orig, PlayerGraphics self, RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam)

@@ -187,9 +187,10 @@ namespace Pkuyo.Wanderer.Feature
 
                 if (IsLounge)
                 {
-                    if (++FoodCount == 400)
+                    if (++FoodCount == 400 && !self.room.game.IsArenaSession)
                     {
-                        self.AddFood(-1);
+                            self.AddFood(-1);
+
                         FoodCount -= 400;
                         if (self.playerState.foodInStomach == 0)
                         {
@@ -251,7 +252,7 @@ namespace Pkuyo.Wanderer.Feature
                 }
 
                 //切换状态
-                if (self.playerState.foodInStomach != 0 && keyDown && !keyUse && !IsLounge && self.mushroomCounter == 0)
+                if ((self.playerState.foodInStomach != 0 || self.room.game.IsArenaSession) && keyDown && !keyUse && !IsLounge && self.mushroomCounter == 0)
                 {
                     StartLounge(self);
                     keyUse = true;

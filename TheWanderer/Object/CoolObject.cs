@@ -6,6 +6,7 @@ using Fisobs.Sandbox;
 using MoreSlugcats;
 using Noise;
 using RWCustom;
+using System.Globalization;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -16,8 +17,10 @@ namespace Pkuyo.Wanderer
 
         public CoolObject(AbstractPhysicalObject abstractPhysicalObject, bool Vis = true) : base(abstractPhysicalObject)
         {
+            
             bodyChunks = new BodyChunk[1];
-            bodyChunks[0] = new BodyChunk(this, 0, abstractPhysicalObject.Room.realizedRoom.MiddleOfTile(abstractPhysicalObject.pos.Tile), 10f, 0.07f);
+            if (abstractPhysicalObject.Room != null && abstractPhysicalObject.Room.realizedRoom != null)
+                bodyChunks[0] = new BodyChunk(this, 0, abstractPhysicalObject.Room.realizedRoom.MiddleOfTile(abstractPhysicalObject.pos.Tile), 10f, 0.07f);
             bodyChunkConnections = new BodyChunkConnection[0];
             airFriction = 0.999f;
             gravity = 0.9f;
@@ -111,7 +114,15 @@ namespace Pkuyo.Wanderer
         {
             base.Update(eu);
 
-            if (SmallCircle != null && !SmallCircle.slatedForDeletetion && SmallCircle.rad == 0)
+            if (grabbedBy.Count > 0)
+            {
+                if (ModManager.MMF && MMF.cfgKeyItemTracking.Value && room.game.session is StoryGameSession && AbstractPhysicalObject.UsesAPersistantTracker(abstractPhysicalObject))
+                {
+                    (room.game.session as StoryGameSession).AddNewPersistentTracker(abstractPhysicalObject as AbstractCoolObject);
+                }
+           
+            }
+                if (SmallCircle != null && !SmallCircle.slatedForDeletetion && SmallCircle.rad == 0)
             {
                 SmallCircle.slatedForDeletetion = true;
                 SmallCircle = null;
@@ -312,6 +323,19 @@ namespace Pkuyo.Wanderer
             }
         }
 
+        public override string ToString()
+        {
+            string text = string.Format(CultureInfo.InvariantCulture, "{0}<oA>{1}<oA>{2}", new object[]
+            {
+                ID.ToString(),
+                type.ToString(),
+                pos.SaveToString()
+            });
+
+            text = SaveState.SetCustomData(this, text);
+            return SaveUtils.AppendUnrecognizedStringAttrs(text, "<oA>", this.unrecognizedAttributes);
+        }
+
         public void SSRealize()
         {
             base.Realize();
@@ -360,7 +384,7 @@ namespace Pkuyo.Wanderer
 
             public override void Grabability(Player player, ref Player.ObjectGrabability grabability)
             {
-                grabability = Player.ObjectGrabability.TwoHands;
+                grabability = (WandererCharacterMod.WandererOptions.CarryToolHands.Value == "One Hand") ? Player.ObjectGrabability.OneHand : Player.ObjectGrabability.TwoHands;
 
             }
         }

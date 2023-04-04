@@ -16,6 +16,14 @@ namespace Pkuyo.Wanderer.Cosmetic
             base.InitiateSprites(sLeaser, rCam);
         }
 
+        public override void DrawSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
+        {
+            if (sLeaser.sprites[3].element.name.StartsWith("HeadA"))
+            {
+                sLeaser.sprites[3].element = Futile.atlasManager.GetElementWithName(sLeaser.sprites[3].element.name.Replace("HeadA", "WandererHeadA"));
+            }
+            base.DrawSprites(sLeaser, rCam, timeStacker, camPos);
+        }
 
 
         public override bool UpdateDirtyShader(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam)

@@ -3,6 +3,7 @@ using MoreSlugcats;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace Pkuyo.Wanderer
 {
@@ -75,63 +76,101 @@ namespace Pkuyo.Wanderer
                     {
 
                         var path = AssetManager.ResolveDirectory("modify/world") + "/" + fileName.Substring(fileName.LastIndexOf("_") + 1, fileName.LastIndexOf(".") - fileName.LastIndexOf("_") - 1) + "/" + fileName;
-
                         var text = new List<string>(File.ReadAllLines(path));
 
-                        //清理本地文件
-                        bool isCreature = false;
-                        int x = 0;
-                        List<string> a = new List<string>();
-                        foreach (var line in text)
-                        {
-                            if (!isCreature)
-                                a.Add(line);
+						_log.LogMessage("[Merger Fix] World Creature Spawn Fixing (" + fileName + ")");
+                        ModManager.ModMerger.WorldFile worldFile = new ModManager.ModMerger.WorldFile(File.ReadAllLines(path));
+                        ModManager.ModMerger.WorldFile worldFile2 = new ModManager.ModMerger.WorldFile(mergeLines);
 
-                            //截断除了生物生成的东西
-                            if (!isCreature && line.Contains("CREATURES"))
-                                isCreature = true;
-                            if (isCreature && line.Contains("END CREATURES"))
-                            {
-                                a.Add(line);
-                                isCreature = false;
-                            }
-
-                            //计数器
-                            if (line.Contains(WandererCharacterMod.WandererName))
-                                x++;
-                        }
-                        foreach (var b in a)
-                            text.Remove(b);
-
-                        //清理重复项
-                        int y = 0;
-                        int insertIndex = -1;
-                        foreach (var line in mergedlist)
-                        {
-                            if (line.Contains(WandererCharacterMod.WandererName))
-                            {
-                                text.Remove(line);
-                                y++;
-                            }
-                            if (line.Contains("END CREATURES"))
-                            {
-                                insertIndex = mergedlist.IndexOf(line);
-                            }
-                        }
-                        if (x > y && insertIndex != -1)
-                        {
-                            foreach (var line in text)
-                                mergedlist.Insert(insertIndex, line);
-                            _log.LogDebug("[Merger] FileName :" + fileName);
-                            _log.LogDebug("[Merger] different : Modded-" + x.ToString() + ", Origin-" + y.ToString());
-                            mergeLines = mergedlist.ToArray();
-                        }
-
-                    }
-                }
+						List<ModManager.ModMerger.WorldRoomSpawn> list2 = new List<ModManager.ModMerger.WorldRoomSpawn>();
+						List<ModManager.ModMerger.WorldRoomSpawn> list3 = new List<ModManager.ModMerger.WorldRoomSpawn>();
+						for (int num9 = 0; num9 < worldFile2.creatures.Count; num9++)
+						{
+							if (worldFile2.creatures[num9].excludeMode)
+							{
+								list2.Add(worldFile2.creatures[num9]);
+							}
+							else
+							{
+								list3.Add(worldFile2.creatures[num9]);
+							}
+						}
+						for (int num10 = 0; num10 < list2.Count; num10++)
+						{
+							ModManager.ModMerger.WorldRoomSpawn worldRoomSpawn = list2[num10];
+							bool flag5 = false;
+							string[] source = worldRoomSpawn.character.Split(new char[]{','});
+							for (int num11 = worldFile.creatures.Count - 1; num11 >= 0; num11--)
+							{
+								if (worldFile.creatures[num11].roomName == worldRoomSpawn.roomName && worldFile.creatures[num11].lineageDen == worldRoomSpawn.lineageDen)
+								{
+									if (worldFile.creatures[num11].excludeMode)
+									{
+										flag5 = true;
+										worldFile.creatures[num11] = worldRoomSpawn;
+									}
+									else if (worldFile.creatures[num11].character == "" || !source.Contains(worldFile.creatures[num11].character))
+									{
+										worldFile.creatures.RemoveAt(num11);
+									}
+								}
+							}
+							if (!flag5)
+							{
+								worldFile.creatures.Add(worldRoomSpawn);
+							}
+						}
+						for (int num12 = 0; num12 < list3.Count; num12++)
+						{
+							ModManager.ModMerger.WorldRoomSpawn worldRoomSpawn2 = list3[num12];
+							if (worldRoomSpawn2.lineageDen >= 0 && worldRoomSpawn2.roomName == "OFFSCREEN")
+							{
+								worldFile.creatures.Add(worldRoomSpawn2);
+							}
+							else
+							{
+								bool flag6 = false;
+								for (int num13 = worldFile.creatures.Count - 1; num13 >= 0; num13--)
+								{
+									if (worldFile.creatures[num13].roomName == worldRoomSpawn2.roomName && worldFile.creatures[num13].lineageDen == worldRoomSpawn2.lineageDen)
+									{
+										if (!worldFile.creatures[num13].excludeMode && worldFile.creatures[num13].character == worldRoomSpawn2.character)
+										{
+											worldFile.creatures[num13] = worldRoomSpawn2;
+											flag6 = true;
+										}
+										if (worldFile.creatures[num13].excludeMode && worldRoomSpawn2.character != "" && !worldFile.creatures[num13].character.Split(new char[]{','}).Contains(worldRoomSpawn2.character))
+										{
+											ModManager.ModMerger.WorldRoomSpawn worldRoomSpawn3 = worldFile.creatures[num13];
+											worldRoomSpawn3.character = worldRoomSpawn3.character + "," + worldRoomSpawn2.character;
+										}
+									}
+								}
+								if (!flag6)
+								{
+									worldFile.creatures.Add(worldRoomSpawn2);
+								}
+							}
+						}
+						foreach (string item in worldFile2.migrationBlockages)
+						{
+							if (!worldFile.migrationBlockages.Contains(item))
+							{
+								worldFile.migrationBlockages.Add(item);
+							}
+						}
+						foreach (string item2 in worldFile2.unknownContextLines)
+						{
+							if (!worldFile.unknownContextLines.Contains(item2))
+							{
+								worldFile.unknownContextLines.Add(item2);
+							}
+						}
+					}
+				}
                 catch (Exception e)
                 {
-                    _log.LogError("[Merger] Error" + e.Message + "\n" + e.StackTrace);
+                    _log.LogError("[Merger Fix] Error" + e.Message + "\n" + e.StackTrace);
                 }
             }
             orig(sourceMod, sourcePath, mergeLines);

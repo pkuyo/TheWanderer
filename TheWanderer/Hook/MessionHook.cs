@@ -57,6 +57,7 @@ namespace Pkuyo.Wanderer
             if (saveStateNumber.value == WandererCharacterMod.WandererName)
             {
                 self.miscWorldSaveData.SLOracleState.neuronsLeft=7;
+                self.miscWorldSaveData.moonGivenRobe = true;
             }
         }
 
@@ -156,7 +157,7 @@ namespace Pkuyo.Wanderer
                 }
             }
             //工具教程
-            else if (room.roomSettings.name == "SS_L01" && room.game.GetStorySession.saveState.miscWorldSaveData.SSaiConversationsHad == 3)
+            else if ((room.roomSettings.name == "SS_L01" || room.roomSettings.name == "SS_D07") && room.game.GetStorySession.saveState.miscWorldSaveData.SSaiConversationsHad == 3)
             {
                 room.AddObject(new WandererToolTurtorial(room));
                 room.game.GetStorySession.saveState.miscWorldSaveData.SSaiConversationsHad++;
