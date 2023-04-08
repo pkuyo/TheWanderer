@@ -77,9 +77,9 @@ namespace Pkuyo.Wanderer
 
                     CampaignHook.AddSpawnPos(WandererName, 8, 4, -1, "SB_INTROROOM1");
 
-                    SceneHook.AddSlideShowArg(WandererName, "RW_Intro_Theme", WandererModEnum.WandererScene.WandererIntro, DreamSceneHook.BuildSlideShow);
-                    SceneHook.AddSceneArg(WandererModEnum.WandererScene.Intro_W1, DreamSceneHook.BuildWandererScene1);
-                    SceneHook.AddSceneArg(WandererModEnum.WandererScene.Intro_W2, DreamSceneHook.BuildWandererScene2);
+                    SceneHook.AddIntroSlideShow(WandererName, "RW_Intro_Theme", WandererModEnum.WandererScene.WandererIntro, DreamSceneHook.BuildSlideShow);
+                    SceneHook.AddScene(WandererModEnum.WandererScene.Intro_W1, DreamSceneHook.BuildWandererScene1);
+                    SceneHook.AddScene(WandererModEnum.WandererScene.Intro_W2, DreamSceneHook.BuildWandererScene2);
 
                     foreach (var feature in _hooks)
                         feature.OnModsInit(self);

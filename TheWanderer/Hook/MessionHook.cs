@@ -175,9 +175,10 @@ namespace Pkuyo.Wanderer
                 room.game.GetStorySession.saveState.miscWorldSaveData.SSaiConversationsHad++;
             }
             //DemoEnding
-            else if (room.roomSettings.name == "IW_DemoEnding" && !DemoEnding)
+            else if (room.roomSettings.name == "GATE_MS_IW" && !DemoEnding)
             {
                 DemoEnding = true;
+                owner.dialogBox = null;
                 owner.InitDialogBox();
                 owner.dialogBox.NewMessage(Custom.rainWorld.inGameTranslator.Translate("Thank you for playing this mod!"), 50);
                 owner.dialogBox.NewMessage(Custom.rainWorld.inGameTranslator.Translate("The real ending and new region are in the works, so stay tuned!"), 300);
