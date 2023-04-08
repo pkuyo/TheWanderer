@@ -68,6 +68,10 @@
     <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.13.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
+    <Reference Include="Nutils, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\SteamLibrary\steamapps\common\Rain World\RainWorld_Data\StreamingAssets\mods\Nutils\plugins\Nutils.dll</HintPath>
+    </Reference>
     <Reference Include="PUBLIC-Assembly-CSharp">
       <HintPath>..\..\..\SteamLibrary\steamapps\common\Rain World\BepInEx\utils\PUBLIC-Assembly-CSharp.dll</HintPath>
     </Reference>
@@ -101,15 +105,14 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Creature\BabyLizardAI.cs" />
+    <Compile Include="Creatures\BabyLizard.cs" />
+    <Compile Include="Creatures\BabyLizardAI.cs" />
     <Compile Include="Hook\AchievementHook.cs" />
     <Compile Include="Hook\Feature\LizardRelationFeature.cs" />
     <Compile Include="Hook\Feature\LoungeFeature.cs" />
-    <Compile Include="Hook\Feature\PlayerBaseFeature.cs" />
     <Compile Include="Hook\CoolObjectHook.cs" />
     <Compile Include="Hook\ModCompatibilityFix.cs" />
-    <Compile Include="Hook\SceneHook.cs" />
-    <Compile Include="Hook\ShitRegionMergeFix.cs" />
+    <Compile Include="Hook\DreamSceneHook.cs" />
     <Compile Include="Hook\SSOracleHook.cs" />
     <Compile Include="Hook\WandererAssetManager.cs" />
     <Compile Include="Object\CoolObject.cs" />
@@ -126,7 +129,6 @@
     <Compile Include="Cosmetic\WandererBodyFront.cs" />
     <Compile Include="Cosmetic\WandererHead.cs" />
     <Compile Include="Cosmetic\WandererLongHair.cs" />
-    <Compile Include="Cosmetic\test\WandererShaderTest.cs" />
     <Compile Include="Cosmetic\WandererSpineSpikes.cs" />
     <Compile Include="Cosmetic\WandererTailEffect.cs" />
     <Compile Include="Cosmetic\WandererTailFin.cs" />

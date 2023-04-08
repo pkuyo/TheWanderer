@@ -1,4 +1,5 @@
 ﻿using BepInEx;
+using Nutils.Hook;
 using Pkuyo.Wanderer.Feature;
 using Pkuyo.Wanderer.Options;
 using System;
@@ -20,15 +21,12 @@ namespace Pkuyo.Wanderer
             _hooks = new List<HookBase>();
 
             _hooks.Add(WandererAssetManager.Instance(Logger));
-            _hooks.Add(ShitRegionMergeFix.Instance(Logger));
             _hooks.Add(MessionHook.Instance(Logger));
             _hooks.Add(SSOracleHook.Instance(Logger));
             _hooks.Add(CoolObjectHook.Instance(Logger));
             _hooks.Add(AchievementHook.Instance(Logger));
-            _hooks.Add(SceneHook.Instance(Logger));
+            _hooks.Add(DreamSceneHook.Instance(Logger));
             
-
-            _hooks.Add(PlayerBaseFeature.Instance(Logger));
             _hooks.Add(ClimbWallFeature.Instance(Logger));
             _hooks.Add(ListenLizardFeature.Instance(Logger));
             _hooks.Add(LoungeFeature.Instance(Logger));
@@ -61,21 +59,38 @@ namespace Pkuyo.Wanderer
 
         private void RainWorld_OnModsInit(On.RainWorld.orig_OnModsInit orig, RainWorld self)
         {
-
-            orig(self);
-
             try
             {
-                WandererModEnum.RegisterValues();
-                MachineConnector.SetRegisteredOI(ModID, WandererOptions);
+                orig(self);
+            }
+            catch(Exception e)
+            {
+                Logger.LogError("Other Mod Init Failed!");
+                Logger.LogError(e);
+            }
+            try
+            {
+                if (!isLoad)
+                {
+                    WandererModEnum.RegisterValues();
+                    MachineConnector.SetRegisteredOI(ModID, WandererOptions);
 
-                foreach (var feature in _hooks)
-                    feature.OnModsInit(self);
+                    CampaignHook.AddSpawnPos(WandererName, 8, 4, -1, "SB_INTROROOM1");
 
+                    SceneHook.AddSlideShowArg(WandererName, "RW_Intro_Theme", WandererModEnum.WandererScene.WandererIntro, DreamSceneHook.BuildSlideShow);
+                    SceneHook.AddSceneArg(WandererModEnum.WandererScene.Intro_W1, DreamSceneHook.BuildWandererScene1);
+                    SceneHook.AddSceneArg(WandererModEnum.WandererScene.Intro_W2, DreamSceneHook.BuildWandererScene2);
+
+                    foreach (var feature in _hooks)
+                        feature.OnModsInit(self);
+
+                    isLoad = true;
+                }
             }
             catch (Exception e)
             {
-                Logger.LogError(e.Message + e.StackTrace);
+                Logger.LogError("Wanderer Init Failed!");
+                Logger.LogError(e);
             }
 
         }
@@ -84,7 +99,7 @@ namespace Pkuyo.Wanderer
 
         static private List<HookBase> _hooks;
 
-
+        private bool isLoad=false;
         static public WandererOptions WandererOptions;
     }
 }

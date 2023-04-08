@@ -88,7 +88,6 @@ namespace Pkuyo.Wanderer.Feature
                 if (self.input[0].pckp && self.input[0].thrw && !self.lungsExhausted && ScareLizardCD >= 20 && self.dangerGrasp == null)
                 {
                     self.input[0].thrw = false;
-                    self.input[0].pckp = false;
 
                     ScareLizardCD = 0;
 

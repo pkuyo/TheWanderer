@@ -113,7 +113,7 @@ namespace Pkuyo.Wanderer.LizardMessage
                 type = CreatureTemplate.Type.PinkLizard;
 
             if (!message[type].ContainsKey(value))
-            {
+            {   
                 _log.LogError("[Message] Can't get message use " + value);
                 return "Message load failed!";
             }
@@ -129,6 +129,7 @@ namespace Pkuyo.Wanderer.LizardMessage
                 return null;
             else
                 return messageList[Random.Range(0, messageList.Count - 1)];
+           
         }
 
 

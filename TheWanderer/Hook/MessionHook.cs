@@ -2,6 +2,7 @@
 using HUD;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
+using MoreSlugcats;
 using RWCustom;
 using System;
 using UnityEngine;
@@ -28,9 +29,19 @@ namespace Pkuyo.Wanderer
             On.HUD.HUD.Update += HUD_Update;
             On.CreatureCommunities.InfluenceLikeOfPlayer += CreatureCommunities_InfluenceLikeOfPlayer;
             On.SaveState.ctor += SaveState_ctor;
+            On.RegionGate.customKarmaGateRequirements += RegionGate_customKarmaGateRequirements;
 
             IL.RainCycle.ctor += RainCycle_ctor;
             _log.LogDebug("WanderMessionFeature Init");
+        }
+        private void RegionGate_customKarmaGateRequirements(On.RegionGate.orig_customKarmaGateRequirements orig, RegionGate self)
+        {
+            orig(self);
+            if (self.room.abstractRoom.name == "GATE_MS_IW")
+            {
+                self.karmaRequirements[0] = MoreSlugcatsEnums.GateRequirement.OELock;
+                self.karmaRequirements[1] = MoreSlugcatsEnums.GateRequirement.OELock;
+            }
         }
 
         private void RainCycle_ctor(ILContext il)
@@ -137,6 +148,7 @@ namespace Pkuyo.Wanderer
             {
                 room.AddObject(new WandererLoungeTurtorial(room));
                 LoungeTurtorial = true;
+
             }
             //惊吓蜥蜴教程
             else if (!ScareTurtorial && room.roomSettings.name == "SB_H03")

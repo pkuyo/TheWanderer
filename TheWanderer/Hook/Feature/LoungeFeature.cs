@@ -1,5 +1,6 @@
 ﻿using BepInEx.Logging;
 using HarmonyLib;
+using Nutils.Hook;
 using Pkuyo.Wanderer.Options;
 using RWCustom;
 using SlugBase.Features;
@@ -146,7 +147,7 @@ namespace Pkuyo.Wanderer.Feature
                     climbSpeed = climb.MaxSpeed;
 
                 PlayerBaseAbility baseAbility;
-                if (PlayerBaseFeature.Instance().BaseAbilityData.TryGetValue(player, out baseAbility))
+                if (PlayerBaseHook.BaseAbilityData.TryGetValue(player, out baseAbility))
                 {
                     rollSpeed = baseAbility.rollSpeed;
                     slideSpeed = baseAbility.slideSpeed;
@@ -315,7 +316,7 @@ namespace Pkuyo.Wanderer.Feature
                     climb.MaxSpeed = climbSpeed * 1.7f;
 
                 PlayerBaseAbility baseAbility;
-                if (PlayerBaseFeature.Instance().BaseAbilityData.TryGetValue(self, out baseAbility))
+                if (PlayerBaseHook.BaseAbilityData.TryGetValue(self, out baseAbility))
                 {
                     baseAbility.rollSpeed = rollSpeed * 1.5f;
                     baseAbility.slideSpeed = slideSpeed * 1.5f;
@@ -345,7 +346,7 @@ namespace Pkuyo.Wanderer.Feature
                     climb.MaxSpeed = climbSpeed;
 
                 PlayerBaseAbility baseAbility;
-                if (PlayerBaseFeature.Instance().BaseAbilityData.TryGetValue(self, out baseAbility))
+                if (PlayerBaseHook.BaseAbilityData.TryGetValue(self, out baseAbility))
                 {
                     baseAbility.rollSpeed = rollSpeed;
                     baseAbility.slideSpeed = slideSpeed;

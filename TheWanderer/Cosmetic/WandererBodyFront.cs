@@ -100,4 +100,5 @@ namespace Pkuyo.Wanderer.Cosmetic
         private readonly float SideHeight = 0.1f;
         private readonly float StartHeight = -0.35f;
     }
+
 }
