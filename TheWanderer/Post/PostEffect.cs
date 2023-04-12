@@ -1,8 +1,41 @@
-﻿using System;
+﻿using RWCustom;
+using System;
+using System.Security.Cryptography;
 using UnityEngine;
 
 namespace Pkuyo.Wanderer.Post
 {
+    public class PostData
+    {
+        public PostData(PlayerGraphics self)
+        {
+            graphicsRef = new WeakReference<PlayerGraphics>(self);
+        }
+
+        public bool IsVaild
+        {
+            get => graphicsRef.TryGetTarget(out var a) && a !=null;
+        }
+
+        public void NewRoom()
+        {
+            roomLerpCount = 80;
+        }
+        public void DrawSprite(RoomCamera.SpriteLeaser leaser)
+        {
+            if (roomLerpCount == -1)
+                center = oldRoomPos = leaser.sprites[3].GetPosition() / (Custom.rainWorld.screenSize);
+            else
+            {
+                center = Vector2.Lerp((leaser.sprites[3].GetPosition() / (Custom.rainWorld.screenSize)), oldRoomPos, Mathf.Pow(Mathf.InverseLerp(0, 80, roomLerpCount), 3));
+                roomLerpCount--;
+            }
+        }
+        WeakReference<PlayerGraphics> graphicsRef;
+        public Vector2 center;
+        Vector2 oldRoomPos;
+        int roomLerpCount = -1;
+    }
     public class PostEffect : MonoBehaviour
     {
 
@@ -10,15 +43,62 @@ namespace Pkuyo.Wanderer.Post
         private readonly float lerpFactor = 0.8f;
         private readonly float spit = 0.05f;
         private readonly float scale = 0.025f;
-        private readonly int downSampleFactor = 2;
+        private readonly int downSampleFactor = 1;
+        private readonly float vignetteSoftness = 0.4f;
 
-        public float timeStacker = 0;
-        public Vector2 blurCenter = new Vector2(0.5f, 0.5f);
+
+        public int LoungeCounter
+        {
+            get => loungeCounter;
+            set
+            {
+                //为了--
+                if (loungeCounter < value+2 && loungeMat)
+                {
+                    loungeCounter = value;
+                    loungeTimer = Mathf.Pow(Mathf.InverseLerp(0, 15, loungeCounter), 0.7f);
+                    loungeMat.SetFloat("_LerpFactor", Mathf.Lerp(0, lerpFactor, loungeTimer));
+                    loungeMat.SetFloat("_Spit", Mathf.Lerp(0, spit, loungeTimer));
+                    loungeMat.SetFloat("_Scale", Mathf.Lerp(0, scale, loungeTimer));
+                    loungeMat.SetFloat("_BlurFactor", Mathf.Lerp(0, blurFactor, loungeTimer));
+                }
+            }
+        }
+
+        public int VignetteCounter
+        {
+            get => vignetteCounter;
+            set 
+            {
+                //为了--
+                if(vignetteCounter < value+2 && loungeMat)
+                {
+                    vignetteCounter = value;
+                    loungeMat.SetFloat("_VRadius", Mathf.Lerp(0.2f,1.2f,Mathf.Pow(Mathf.InverseLerp(40,0,vignetteCounter),0.7f)));
+                }
+            }
+        }
+
+        int loungeCounter = 0;
+        int vignetteCounter = 0;
+
+        float loungeTimer = 0;
+
+        public Color[] vignetteCenters = new Color[2] { new Color(0.5f, 0.5f, 0.5f, 0.5f), new Color(0.5f, 0.5f, 0.5f, 0.5f) };
+
+        Material loungeMat;
+            
+        bool IsSupported = true;
+
+        float timeStacker = 0.0f;
+
         public void Start()
         {
             try
             {
-                LoungeMat = new Material(WandererAssetManager.Instance(null).PostShaders["LoungePost"]);
+                loungeMat = new Material(WandererAssetManager.Instance().PostShaders["LoungePost"]);
+                loungeMat.SetFloat("_VSoft", vignetteSoftness);
+                loungeMat.SetFloat("_VRadius", 1.2f);
             }
             catch (Exception e)
             {
@@ -30,37 +110,76 @@ namespace Pkuyo.Wanderer.Post
 
         protected virtual void OnRenderImage(RenderTexture source, RenderTexture destination)
         {
-            if (IsSupported && LoungeMat)
+            timeStacker += Time.deltaTime;
+            if (timeStacker > 1 / 40f)
             {
+                if (VignetteCounter != 0)
+                    VignetteCounter--;
 
+                if (LoungeCounter != 0)
+                    LoungeCounter--;
+                timeStacker -= 1/40f;
+            }
+
+            if (IsSupported && LoungeCounter != 0 && loungeMat)
+            {
                 RenderTexture rt1 = RenderTexture.GetTemporary(source.width >> downSampleFactor, source.height >> downSampleFactor, 0, source.format);
                 RenderTexture rt2 = RenderTexture.GetTemporary(source.width >> downSampleFactor, source.height >> downSampleFactor, 0, source.format);
                 Graphics.Blit(source, rt1);
 
-
-                LoungeMat.SetFloat("_BlurFactor", Mathf.Lerp(0, blurFactor * (IsOutSide ? 1 : 1.5f), timeStacker));
-                LoungeMat.SetVector("_BlurCenter", blurCenter);
-                Graphics.Blit(rt1, rt2, LoungeMat, 0);
-
-                LoungeMat.SetTexture("_BlurTex", rt2);
-                LoungeMat.SetFloat("_LerpFactor", Mathf.Lerp(0, lerpFactor * (IsOutSide ? 1 : 1.5f), timeStacker));
-                LoungeMat.SetFloat("_Spit", Mathf.Lerp(0, spit, timeStacker));
-                LoungeMat.SetFloat("_Scale", Mathf.Lerp(0, scale, timeStacker));
-                Graphics.Blit(source, destination, LoungeMat, 1);
+                Vector2 last = new Vector2(0.5f,0.5f);
+                for (int i = 0; i < 4;i++)
+                {
+                    if (i < WandererAssetManager.Instance().postData.Count)
+                        last = WandererAssetManager.Instance().postData[i].center;
+                    if(i%2==0)
+                    {
+                        vignetteCenters[i / 2].r = last.x;
+                        vignetteCenters[i / 2].g = last.y;
+                    }
+                    else
+                    {
+                        vignetteCenters[i / 2].b = last.x;
+                        vignetteCenters[i / 2].a = last.y;
+                    }
+                }
+                loungeMat.SetColor("_BlurCenter", vignetteCenters[0]);
+                loungeMat.SetColor("_BlurCenter2", vignetteCenters[1]);
+                Graphics.Blit(rt1, rt2, loungeMat, 0);
+                loungeMat.SetTexture("_BlurTex", rt2);
+                Graphics.Blit(source, destination, loungeMat, 1);
 
                 RenderTexture.ReleaseTemporary(rt1);
                 RenderTexture.ReleaseTemporary(rt2);
             }
-            else
+            else if(IsSupported && VignetteCounter != 0 && loungeMat)
             {
-                Graphics.Blit(source, destination);
+                Vector2 last = new Vector2(0.5f, 0.5f);
+                for (int i = 0; i < 4; i++)
+                {
+                    if (i < WandererAssetManager.Instance().postData.Count)
+                        last = WandererAssetManager.Instance().postData[i].center;
+                    if (i % 2 == 0)
+                    {
+                        vignetteCenters[i / 2].r = last.x;
+                        vignetteCenters[i / 2].g = last.y;
+                    }
+                    else
+                    {
+                        vignetteCenters[i / 2].b = last.x;
+                        vignetteCenters[i / 2].a = last.y;
+                    }
+                }
+                loungeMat.SetColor("_BlurCenter", vignetteCenters[0]);
+                loungeMat.SetColor("_BlurCenter2", vignetteCenters[1]);
+                Graphics.Blit(source, destination, loungeMat, 2);
             }
+            else
+                Graphics.Blit(source, destination);
+
+
 
         }
-        Material LoungeMat;
 
-        public bool IsOutSide = true;
-
-        bool IsSupported = true;
     }
 }

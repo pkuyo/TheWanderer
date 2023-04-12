@@ -33,7 +33,7 @@ namespace Pkuyo.Wanderer
         private void CustomEndGameScreen_GetDataFromSleepScreen(On.Menu.CustomEndGameScreen.orig_GetDataFromSleepScreen orig, Menu.CustomEndGameScreen self, WinState.EndgameID endGameID)
         {
             orig(self,endGameID);
-            if (endGameID == WandererModEnum.WandererWinState.Dragonlord)
+            if (endGameID == WandererModEnum.WinState.Dragonlord)
                 self.scene = new InteractiveMenuScene(self, self.pages[0],  MenuScene.SceneID.Endgame_Survivor);
 
         }
@@ -44,7 +44,7 @@ namespace Pkuyo.Wanderer
         private string WinState_PassageDisplayName(On.WinState.orig_PassageDisplayName orig, WinState.EndgameID ID)
         {
             var re = orig(ID);
-            if (ID == WandererModEnum.WandererWinState.Dragonlord)
+            if (ID == WandererModEnum.WinState.Dragonlord)
                 return "The Dragonlord";
             return re;
         }
@@ -52,7 +52,7 @@ namespace Pkuyo.Wanderer
         private WinState.EndgameTracker WinState_CreateAndAddTracker(On.WinState.orig_CreateAndAddTracker orig, WinState.EndgameID ID, List<WinState.EndgameTracker> endgameTrackers)
         {
             var re = orig(ID, endgameTrackers);
-            if (ID == WandererModEnum.WandererWinState.Dragonlord)
+            if (ID == WandererModEnum.WinState.Dragonlord)
             {
                 re = new WinState.FloatTracker(ID, 0f, 0f, 0f, 1f);
                 if (re != null && endgameTrackers != null)
@@ -87,9 +87,9 @@ namespace Pkuyo.Wanderer
             }
             WinState.FloatTracker floatTracker = null;
             if (game.session.creatureCommunities.playerOpinions[CreatureCommunities.CommunityID.Lizards.Index - 1, 0, 0] > 0 || game.session.characterStats.name.value == WandererCharacterMod.WandererName)
-                floatTracker = self.GetTracker(WandererModEnum.WandererWinState.Dragonlord, true) as WinState.FloatTracker;
+                floatTracker = self.GetTracker(WandererModEnum.WinState.Dragonlord, true) as WinState.FloatTracker;
             else
-                floatTracker = self.GetTracker(WandererModEnum.WandererWinState.Dragonlord, false) as WinState.FloatTracker;
+                floatTracker = self.GetTracker(WandererModEnum.WinState.Dragonlord, false) as WinState.FloatTracker;
             if (floatTracker != null)
             {
                 floatTracker.SetProgress(Mathf.Max(0.0f, game.session.creatureCommunities.playerOpinions[CreatureCommunities.CommunityID.Lizards.Index - 1, 0, 0]));

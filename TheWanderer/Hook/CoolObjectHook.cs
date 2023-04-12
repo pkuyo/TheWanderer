@@ -40,13 +40,12 @@ namespace Pkuyo.Wanderer
                 typeof(GateKarmaGlyph).GetProperty("GetToColor", propFlags).GetGetMethod(),
                 typeof(CoolObjectHook).GetMethod("GateKarmaGlyph_GetToColor_get", myMethodFlags)
             );
-            Content.Register(new CoolObjectFisob());
         }
 
         private bool AbstractPhysicalObject_UsesAPersistantTracker(On.AbstractPhysicalObject.orig_UsesAPersistantTracker orig, AbstractPhysicalObject abs)
         {
             var re = orig(abs);
-            if (abs.type == CoolObjectFisob.CoolObject)
+            if (abs.type == WandererModEnum.Objects.CoolObject)
                 return true;
             return re;
         }
@@ -61,8 +60,7 @@ namespace Pkuyo.Wanderer
         private int GateKarmaGlyph_ShouldPlayCitizensIDAnimation(On.GateKarmaGlyph.orig_ShouldPlayCitizensIDAnimation orig, GateKarmaGlyph self)
         {
             var re = orig(self);
-            CoolObject coolObject;
-            if (TryGetObject(self.gate, out coolObject))
+            if (TryGetObject(self.gate, out _))
             {
                 return 0;
             }

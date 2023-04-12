@@ -1,4 +1,5 @@
 ﻿using Menu;
+using static MultiplayerUnlocks;
 
 namespace Pkuyo.Wanderer
 {
@@ -12,10 +13,13 @@ namespace Pkuyo.Wanderer
             if (!isReg)
             {
                 PlayerBodyModeIndex.RegisterValues();
-                WandererSSOracle.RegisterValues();
-                WandererConversation.RegisterValues();
-                WandererWinState.RegisterValues();
-                WandererScene.RegisterValues();
+                SSOracle.RegisterValues();
+                Conversation.RegisterValues();
+                WinState.RegisterValues();
+                Creatures.RegisterValues();
+                Scene.RegisterValues();
+                Objects.RegisterValues();
+                Sandbox.RegisterValues();   
                 isReg = true;
             }
         }
@@ -25,10 +29,13 @@ namespace Pkuyo.Wanderer
             if (isReg)
             {
                 PlayerBodyModeIndex.UnregisterValues();
-                WandererSSOracle.UnregisterValues();
-                WandererConversation.UnregisterValues();
-                WandererWinState.UnregisterValues();
-                WandererScene.UnregisterValues();
+                SSOracle.UnregisterValues();
+                Conversation.UnregisterValues();
+                WinState.UnregisterValues();
+                Creatures.UnregisterValues();
+                Scene.UnregisterValues();
+                Objects.UnregisterValues();
+                Sandbox.UnregisterValues();
                 isReg = false;
             }
         }
@@ -50,14 +57,14 @@ namespace Pkuyo.Wanderer
 
         }
 
-        static public class WandererWinState
+        static public class WinState
         {
-            static public WinState.EndgameID Dragonlord;
+            static public global::WinState.EndgameID Dragonlord;
             static public int PassageDragonlord = 51;
 
             public static void RegisterValues()
             {
-                Dragonlord = new WinState.EndgameID("Dragonlord", true);
+                Dragonlord = new global::WinState.EndgameID("Dragonlord", true);
             }
             public static void UnregisterValues()
             {
@@ -65,7 +72,7 @@ namespace Pkuyo.Wanderer
             }
         }
 
-        static public class WandererSSOracle
+        static public class SSOracle
         {
             static public SSOracleBehavior.SubBehavior.SubBehavID Meet_Wanderer;
             static public SSOracleBehavior.SubBehavior.SubBehavID ThrowOut_Wanderer;
@@ -104,7 +111,7 @@ namespace Pkuyo.Wanderer
             }
         }
 
-        static public class WandererScene
+        static public class Scene
         {
             public static SlideShow.SlideShowID WandererIntro;
             public static MenuScene.SceneID Intro_W1;
@@ -122,17 +129,17 @@ namespace Pkuyo.Wanderer
                 if (Intro_W2 != null) { Intro_W2.Unregister(); Intro_W2 = null; }
             }
         }
-        static public class WandererConversation
+        static public class Conversation
         {
-            public static Conversation.ID Pebbles_Wanderer_FirstMeet_Talk1;
-            public static Conversation.ID Pebbles_Wanderer_FirstMeet_Talk2;
-            public static Conversation.ID Pebbles_Wanderer_AfterWorkMet;
+            public static global::Conversation.ID Pebbles_Wanderer_FirstMeet_Talk1;
+            public static global::Conversation.ID Pebbles_Wanderer_FirstMeet_Talk2;
+            public static global::Conversation.ID Pebbles_Wanderer_AfterWorkMet;
 
             public static void RegisterValues()
             {
-                Pebbles_Wanderer_FirstMeet_Talk1 = new Conversation.ID("Pebbles_Wanderer_FirstMeet_Talk1", true);
-                Pebbles_Wanderer_FirstMeet_Talk2 = new Conversation.ID("Pebbles_Wanderer_FirstMeet_Talk2", true);
-                Pebbles_Wanderer_AfterWorkMet = new Conversation.ID("Pebbles_Wanderer_AfterWorkMet", true);
+                Pebbles_Wanderer_FirstMeet_Talk1 = new global::Conversation.ID("Pebbles_Wanderer_FirstMeet_Talk1", true);
+                Pebbles_Wanderer_FirstMeet_Talk2 = new global::Conversation.ID("Pebbles_Wanderer_FirstMeet_Talk2", true);
+                Pebbles_Wanderer_AfterWorkMet = new global::Conversation.ID("Pebbles_Wanderer_AfterWorkMet", true);
 
             }
 
@@ -143,6 +150,52 @@ namespace Pkuyo.Wanderer
                 if (Pebbles_Wanderer_FirstMeet_Talk2 != null) { Pebbles_Wanderer_FirstMeet_Talk2.Unregister(); Pebbles_Wanderer_FirstMeet_Talk2 = null; }
 
                 if (Pebbles_Wanderer_AfterWorkMet != null) { Pebbles_Wanderer_AfterWorkMet.Unregister(); Pebbles_Wanderer_AfterWorkMet = null; }
+            }
+        }
+
+        static public class Creatures
+        {
+            public static CreatureTemplate.Type ToxicSpider;
+            public static void RegisterValues()
+            {
+                ToxicSpider = new CreatureTemplate.Type("ToxicSpider",true);
+
+            }
+            public static void UnregisterValues()
+            {
+                if(ToxicSpider!=null) { ToxicSpider.Unregister(); ToxicSpider = null; }
+            }
+        }
+        static public class Objects
+        {
+            static public AbstractPhysicalObject.AbstractObjectType CoolObject;
+            static public AbstractPhysicalObject.AbstractObjectType PoisonNeedle;
+            static public void RegisterValues()
+            {
+                CoolObject = new AbstractPhysicalObject.AbstractObjectType("CoolObject", true);
+                PoisonNeedle = new AbstractPhysicalObject.AbstractObjectType("PoisonNeedle", true);
+            }
+
+            static public void UnregisterValues()
+            {
+                if (CoolObject != null) { CoolObject.Unregister(); CoolObject = null; }
+                if (PoisonNeedle != null) { PoisonNeedle.Unregister(); PoisonNeedle = null; }
+            }
+        }
+
+        static public class Sandbox
+        {
+            static public SandboxUnlockID ToxicSpider;
+            static public SandboxUnlockID CoolObject;
+            static public void RegisterValues()
+            {
+                ToxicSpider = new SandboxUnlockID("ToxicSpider", true);
+                CoolObject = new SandboxUnlockID("CoolObject", true);
+            }
+            static public void UnregisterValues()
+            {
+                if (ToxicSpider != null) { ToxicSpider.Unregister(); ToxicSpider = null; }
+                if(CoolObject != null) { CoolObject.Unregister(); CoolObject = null; }
             }
         }
     }

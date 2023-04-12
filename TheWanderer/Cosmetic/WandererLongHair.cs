@@ -13,7 +13,7 @@ namespace Pkuyo.Wanderer.Cosmetic
             if (graphics.RenderAsPup)
             {
                 HairSpacing = 4.5f;
-                MaxLength = 5f;
+                //MaxLength = 5f;
             }
             for (int i = 0; i < 2; i++)
             {
@@ -201,7 +201,7 @@ namespace Pkuyo.Wanderer.Cosmetic
 
         readonly TailSegment[] Hairs;
         readonly float HairSpacing = 6f;
-        readonly float MaxLength = 9f;
+        //readonly float MaxLength = 9f;
     }
 
 }

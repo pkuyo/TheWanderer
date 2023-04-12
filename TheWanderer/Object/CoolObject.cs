@@ -310,7 +310,7 @@ namespace Pkuyo.Wanderer
 
     public class AbstractCoolObject : AbstractPhysicalObject
     {
-        public AbstractCoolObject(World world, WorldCoordinate pos, EntityID ID) : base(world, CoolObjectFisob.CoolObject, null, pos, ID)
+        public AbstractCoolObject(World world, WorldCoordinate pos, EntityID ID) : base(world, WandererModEnum.Objects.CoolObject, null, pos, ID)
         {
         }
 
@@ -349,10 +349,11 @@ namespace Pkuyo.Wanderer
 
     sealed class CoolObjectFisob : Fisob
     {
-        static public readonly AbstractPhysicalObject.AbstractObjectType CoolObject = new AbstractPhysicalObject.AbstractObjectType("CoolObject", true);
-        public CoolObjectFisob() : base(CoolObject)
+       
+        public CoolObjectFisob() : base(WandererModEnum.Objects.CoolObject)
         {
             Icon = new CoolObjectIcon();
+            RegisterUnlock(WandererModEnum.Sandbox.CoolObject, MoreSlugcatsEnums.SandboxUnlockID.EnergyCell, 0);
         }
 
         public override AbstractPhysicalObject Parse(World world, EntitySaveData saveData, SandboxUnlock unlock)

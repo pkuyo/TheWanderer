@@ -36,43 +36,28 @@ namespace Pkuyo.Wanderer.Feature
             On.Player.Update += Player_Update;
             On.RoomCamera.ApplyFade += RoomCamera_ApplyFade;
             On.Mushroom.BitByPlayer += Mushroom_BitByPlayer;
-            On.PlayerGraphics.DrawSprites += PlayerGraphics_DrawSprites;
             On.Player.Die += Player_Die;
-            On.Player.NewRoom += Player_NewRoom;
+          
 
             On.Player.Jump += Player_Jump;
             _log.LogDebug("Lounge Feature Init");
         }
 
-        private void Player_NewRoom(On.Player.orig_NewRoom orig, Player self, Room newRoom)
-        {
-            PlayerLounge lounge;
-            if (LoungeData.TryGetValue(self, out lounge))
-                lounge.NewRoom();
-            orig(self, newRoom);
-        }
+ 
 
         private void Player_Die(On.Player.orig_Die orig, Player self)
         {
-            PlayerLounge lounge;
-            if (LoungeData.TryGetValue(self, out lounge))
+            if (LoungeData.TryGetValue(self, out var lounge))
                 lounge.Die();
             orig(self);
         }
 
-        private void PlayerGraphics_DrawSprites(On.PlayerGraphics.orig_DrawSprites orig, PlayerGraphics self, RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
-        {
-            orig(self, sLeaser, rCam, timeStacker, camPos);
-            PlayerLounge lounge;
-            if (LoungeData.TryGetValue(self.owner as Player, out lounge))
-                lounge.DrawSprites(sLeaser);
-        }
+
 
         private void Player_Jump(On.Player.orig_Jump orig, Player self)
         {
             orig(self);
-            PlayerLounge lounge;
-            if (LoungeData.TryGetValue(self, out lounge))
+            if (LoungeData.TryGetValue(self, out var lounge))
                 lounge.Jump();
         }
 
@@ -85,11 +70,10 @@ namespace Pkuyo.Wanderer.Feature
 
         private void RoomCamera_ApplyFade(On.RoomCamera.orig_ApplyFade orig, RoomCamera self)
         {
-            PlayerLounge lounge;
             Creature creature = (self.followAbstractCreature != null) ? self.followAbstractCreature.realizedCreature : null;
             if (creature != null && creature is Player)
             {
-                if (LoungeData.TryGetValue(creature as Player, out lounge))
+                if (LoungeData.TryGetValue(creature as Player, out var lounge))
                     lounge.SetMushroomEffect(self);
             }
             orig(self);
@@ -97,8 +81,7 @@ namespace Pkuyo.Wanderer.Feature
 
         private void Player_Update(On.Player.orig_Update orig, Player self, bool eu)
         {
-            PlayerLounge lounge;
-            if (LoungeData.TryGetValue(self, out lounge))
+            if (LoungeData.TryGetValue(self, out var lounge))
                 lounge.Update();
             orig(self, eu);
         }
@@ -107,12 +90,10 @@ namespace Pkuyo.Wanderer.Feature
         {
             orig(self, abstractCreature, world);
 
-            bool canLounge = false;
-            if (!CanLounge.TryGet(self, out canLounge) || !canLounge)
+            if (!CanLounge.TryGet(self, out var canLounge) || !canLounge)
                 return;
 
-            PlayerLounge lounge;
-            if (!LoungeData.TryGetValue(self, out lounge))
+            if (!LoungeData.TryGetValue(self, out _))
                 LoungeData.Add(self, new PlayerLounge(self));
         }
 
@@ -121,8 +102,7 @@ namespace Pkuyo.Wanderer.Feature
         private void Player_MovementUpdate(On.Player.orig_MovementUpdate orig, Player self, bool eu)
         {
             orig(self, eu);
-            PlayerLounge lounge;
-            if (LoungeData.TryGetValue(self, out lounge))
+            if (LoungeData.TryGetValue(self, out var lounge))
                 lounge.MovementUpdate();
         }
 
@@ -162,7 +142,6 @@ namespace Pkuyo.Wanderer.Feature
                     return;
                 StopLounge(self);
                 IntroCount = 0;
-                WandererAssetManager.Instance(null).PostEffect.timeStacker = 0;
             }
             public void MovementUpdate()
             {
@@ -185,6 +164,11 @@ namespace Pkuyo.Wanderer.Feature
                 if (!PlayerRef.TryGetTarget(out self))
                     return;
 
+                var post = WandererAssetManager.Instance().PostEffect;
+                if (IsLounge && post.LoungeCounter<=15)
+                    post.LoungeCounter +=2;
+                else if(IsLounge)
+                     post.LoungeCounter=15;
 
                 if (IsLounge)
                 {
@@ -270,30 +254,6 @@ namespace Pkuyo.Wanderer.Feature
 
             }
 
-            public void NewRoom()
-            {
-                RoomLerpCount = 80;
-            }
-            public void DrawSprites(RoomCamera.SpriteLeaser leaser)
-            {
-                var post = WandererAssetManager.Instance(null).PostEffect;
-                if (IsLounge)
-                {
-                    //多人取最高
-                    if (IntroCount >= 0 && post.timeStacker < Mathf.Pow(Mathf.InverseLerp(15, 0, IntroCount), 0.7f))
-                        post.timeStacker = Mathf.Pow(Mathf.InverseLerp(15, 0, IntroCount), 0.7f);
-
-                    if (RoomLerpCount == -1)
-                        post.blurCenter = OldRoomPos = leaser.sprites[3].GetPosition() / (Custom.rainWorld.screenSize);
-                    else
-                    {
-                        post.blurCenter = Vector2.Lerp((leaser.sprites[3].GetPosition() / (Custom.rainWorld.screenSize)), OldRoomPos, Mathf.Pow(Mathf.InverseLerp(0, 80, RoomLerpCount),3));
-                        RoomLerpCount--;
-                    }
-                }
-                else if (IntroCount >= 0)
-                    post.timeStacker = Mathf.Pow(Mathf.InverseLerp(0, 15, IntroCount), 1.5f);
-            }
             public void Jump()
             {
                 Player self;
@@ -378,8 +338,6 @@ namespace Pkuyo.Wanderer.Feature
             bool keyDown = false;
             bool keyUse = false;
 
-            Vector2 OldRoomPos;
-            int RoomLerpCount = -1;
 
             int IntroCount = -1;
             bool reset = false;

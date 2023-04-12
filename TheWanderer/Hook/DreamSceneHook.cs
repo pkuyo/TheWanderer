@@ -35,9 +35,9 @@ namespace Pkuyo.Wanderer
         static public void BuildSlideShow(SlideShow self)
         {
             self.playList.Add(new SlideShow.Scene(MenuScene.SceneID.Empty, 0f, 0f, 0f));
-            self.playList.Add(new SlideShow.Scene(WandererModEnum.WandererScene.Intro_W1,
+            self.playList.Add(new SlideShow.Scene(WandererModEnum.Scene.Intro_W1,
                 self.ConvertTime(0, 0, 20), self.ConvertTime(0, 3, 26), self.ConvertTime(0, 6, 26)));
-            self.playList.Add(new SlideShow.Scene(WandererModEnum.WandererScene.Intro_W2,
+            self.playList.Add(new SlideShow.Scene(WandererModEnum.Scene.Intro_W2,
                 self.ConvertTime(0, 7, 26), self.ConvertTime(0, 10, 26), self.ConvertTime(0, 13, 26)));
             for (int n = 1; n < self.playList.Count; n++)
             {

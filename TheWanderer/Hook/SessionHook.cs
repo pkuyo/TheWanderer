@@ -9,17 +9,17 @@ using UnityEngine;
 
 namespace Pkuyo.Wanderer
 {
-    class MessionHook : HookBase
+    class SessionHook : HookBase
     {
-        MessionHook(ManualLogSource log) : base(log)
+        SessionHook(ManualLogSource log) : base(log)
         {
 
         }
 
-        static public MessionHook Instance(ManualLogSource log = null)
+        static public SessionHook Instance(ManualLogSource log = null)
         {
             if (_Instance == null)
-                _Instance = new MessionHook(log);
+                _Instance = new SessionHook(log);
             return _Instance;
         }
 
@@ -34,6 +34,7 @@ namespace Pkuyo.Wanderer
             IL.RainCycle.ctor += RainCycle_ctor;
             _log.LogDebug("WanderMessionFeature Init");
         }
+
         private void RegionGate_customKarmaGateRequirements(On.RegionGate.orig_customKarmaGateRequirements orig, RegionGate self)
         {
             orig(self);
@@ -106,7 +107,7 @@ namespace Pkuyo.Wanderer
             }
         }
 
-        static private MessionHook _Instance;
+        static private SessionHook _Instance;
 
         WandererMessionHud wandererHud;
     }
