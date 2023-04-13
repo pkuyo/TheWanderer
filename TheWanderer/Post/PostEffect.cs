@@ -1,5 +1,6 @@
 ﻿using RWCustom;
 using System;
+using System.Collections.Generic;
 using System.Security.Cryptography;
 using UnityEngine;
 
@@ -127,24 +128,14 @@ namespace Pkuyo.Wanderer.Post
                 RenderTexture rt2 = RenderTexture.GetTemporary(source.width >> downSampleFactor, source.height >> downSampleFactor, 0, source.format);
                 Graphics.Blit(source, rt1);
 
-                Vector2 last = new Vector2(0.5f,0.5f);
-                for (int i = 0; i < 4;i++)
-                {
-                    if (i < WandererAssetManager.Instance().postData.Count)
-                        last = WandererAssetManager.Instance().postData[i].center;
-                    if(i%2==0)
-                    {
-                        vignetteCenters[i / 2].r = last.x;
-                        vignetteCenters[i / 2].g = last.y;
-                    }
-                    else
-                    {
-                        vignetteCenters[i / 2].b = last.x;
-                        vignetteCenters[i / 2].a = last.y;
-                    }
-                }
-                loungeMat.SetColor("_BlurCenter", vignetteCenters[0]);
-                loungeMat.SetColor("_BlurCenter2", vignetteCenters[1]);
+
+                List<Vector4> centers = new List<Vector4>();
+                foreach (var i in WandererAssetManager.Instance().postData)
+                    if (i.IsVaild)
+                        centers.Add(new Vector4(i.center.x,i.center.y));
+                loungeMat.SetVectorArray("_BlurCenter", centers);
+                loungeMat.SetFloat("_BlurCenterLength", centers.Count);
+
                 Graphics.Blit(rt1, rt2, loungeMat, 0);
                 loungeMat.SetTexture("_BlurTex", rt2);
                 Graphics.Blit(source, destination, loungeMat, 1);
@@ -154,24 +145,14 @@ namespace Pkuyo.Wanderer.Post
             }
             else if(IsSupported && VignetteCounter != 0 && loungeMat)
             {
-                Vector2 last = new Vector2(0.5f, 0.5f);
-                for (int i = 0; i < 4; i++)
-                {
-                    if (i < WandererAssetManager.Instance().postData.Count)
-                        last = WandererAssetManager.Instance().postData[i].center;
-                    if (i % 2 == 0)
-                    {
-                        vignetteCenters[i / 2].r = last.x;
-                        vignetteCenters[i / 2].g = last.y;
-                    }
-                    else
-                    {
-                        vignetteCenters[i / 2].b = last.x;
-                        vignetteCenters[i / 2].a = last.y;
-                    }
-                }
-                loungeMat.SetColor("_BlurCenter", vignetteCenters[0]);
-                loungeMat.SetColor("_BlurCenter2", vignetteCenters[1]);
+                List<Vector4> centers = new List<Vector4>();
+                foreach (var i in WandererAssetManager.Instance().postData)
+                    if (i.IsVaild)
+                        centers.Add(new Vector4(i.center.x, i.center.y));
+                loungeMat.SetVectorArray("_BlurCenter", centers);
+                loungeMat.SetFloat("_BlurCenterLength", centers.Count); 
+         
+         
                 Graphics.Blit(source, destination, loungeMat, 2);
             }
             else

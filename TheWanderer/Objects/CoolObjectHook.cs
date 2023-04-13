@@ -7,7 +7,7 @@ using RWCustom;
 using System.Reflection;
 using UnityEngine;
 
-namespace Pkuyo.Wanderer
+namespace Pkuyo.Wanderer.Objects
 {
     class CoolObjectHook : HookBase
     {

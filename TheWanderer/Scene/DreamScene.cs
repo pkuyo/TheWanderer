@@ -9,28 +9,9 @@ using UnityEngine;
 
 namespace Pkuyo.Wanderer
 {
-    class DreamSceneHook : HookBase
+    class DreamScene
     {
 
-        static bool loaded = false;
-        DreamSceneHook(ManualLogSource log) : base(log)
-        {
-
-        }
-
-        static public DreamSceneHook Instance(ManualLogSource log = null)
-        {
-            if (_instance == null)
-                _instance = new DreamSceneHook(log);
-            return _instance;
-        }
-
-        public override void OnModsInit(RainWorld rainWorld)
-        {
-            On.DreamsState.StaticEndOfCycleProgress += DreamsState_StaticEndOfCycleProgress;
-        }
-
-   
 
         static public void BuildSlideShow(SlideShow self)
         {
@@ -80,15 +61,5 @@ namespace Pkuyo.Wanderer
             self.AddIllustration(new MenuDepthIllustration(self.menu, self, self.sceneFolder,
                 "Intro - Wanderer - 2 - Draw", new Vector2(0f, 0f), 3f, MenuDepthIllustration.MenuShader.Basic));
         } 
-
-
-        private void DreamsState_StaticEndOfCycleProgress(On.DreamsState.orig_StaticEndOfCycleProgress orig, SaveState saveState, string currentRegion, string denPosition, ref int cyclesSinceLastDream, ref int cyclesSinceLastFamilyDream, ref int cyclesSinceLastGuideDream, ref int inGWOrSHCounter, ref DreamsState.DreamID upcomingDream, ref DreamsState.DreamID eventDream, ref bool everSleptInSB, ref bool everSleptInSB_S01, ref bool guideHasShownHimselfToPlayer, ref int guideThread, ref bool guideHasShownMoonThisRound, ref int familyThread)
-        {
-            orig(saveState,currentRegion, denPosition, ref cyclesSinceLastDream, ref cyclesSinceLastFamilyDream, ref cyclesSinceLastGuideDream, ref inGWOrSHCounter, ref upcomingDream, ref eventDream, ref everSleptInSB, ref everSleptInSB_S01, ref guideHasShownHimselfToPlayer, ref guideThread, ref guideHasShownMoonThisRound, ref familyThread);
-        }
-
-
-      
-        static DreamSceneHook _instance;
     }
 }

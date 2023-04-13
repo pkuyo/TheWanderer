@@ -5,6 +5,7 @@ using Newtonsoft.Json.Serialization;
 using Nutils.Hook;
 using Pkuyo.Wanderer.Creatures;
 using Pkuyo.Wanderer.Feature;
+using Pkuyo.Wanderer.Objects;
 using Pkuyo.Wanderer.Options;
 using RWCustom;
 using System;
@@ -52,12 +53,13 @@ namespace Pkuyo.Wanderer
                 WandererModEnum.RegisterValues();
 
                 _hooks.Add(WandererAssetManager.Instance(Logger));
-                _hooks.Add(MessionHook.Instance(Logger));
-                _hooks.Add(SSOracleHook.Instance(Logger));
-                _hooks.Add(CoolObjectHook.Instance(Logger));
-                _hooks.Add(AchievementHook.Instance(Logger));
-                _hooks.Add(DreamSceneHook.Instance(Logger));
 
+                _hooks.Add(SessionHook.Instance(Logger));
+                _hooks.Add(SSOracleHook.Instance(Logger));
+                _hooks.Add(AchievementHook.Instance(Logger));
+                _hooks.Add(ParasiteHook.Instance(Logger));
+
+                _hooks.Add(CoolObjectHook.Instance(Logger));
                 _hooks.Add(ToxicSpiderHook.Instance(Logger));
 
                 _hooks.Add(ClimbWallFeature.Instance(Logger));
@@ -114,9 +116,9 @@ namespace Pkuyo.Wanderer
 
                     CampaignHook.AddSpawnPos(WandererName, 8, 4, -1, "SB_INTROROOM1");
 
-                    SceneHook.AddIntroSlideShow(WandererName, "RW_Intro_Theme", WandererModEnum.Scene.WandererIntro, DreamSceneHook.BuildSlideShow);
-                    SceneHook.AddScene(WandererModEnum.Scene.Intro_W1, DreamSceneHook.BuildWandererScene1);
-                    SceneHook.AddScene(WandererModEnum.Scene.Intro_W2, DreamSceneHook.BuildWandererScene2);
+                    SceneHook.AddIntroSlideShow(WandererName, "RW_Intro_Theme", WandererModEnum.Scene.WandererIntro, DreamScene.BuildSlideShow);
+                    SceneHook.AddScene(WandererModEnum.Scene.Intro_W1, DreamScene.BuildWandererScene1);
+                    SceneHook.AddScene(WandererModEnum.Scene.Intro_W2, DreamScene.BuildWandererScene2);
 
                     foreach (var feature in _hooks)
                         feature.OnModsInit(self);

@@ -10,7 +10,7 @@ using System.Globalization;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-namespace Pkuyo.Wanderer
+namespace Pkuyo.Wanderer.Objects
 {
     public class CoolObject : PlayerCarryableItem, IDrawable, IOwnProjectedCircles
     {

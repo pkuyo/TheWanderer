@@ -5,7 +5,7 @@ using UnityEngine;
 using Random = UnityEngine.Random;
 using Vector2 = UnityEngine.Vector2;
 
-namespace Pkuyo.Wanderer.Object
+namespace Pkuyo.Wanderer.Objects
 {
     class AbstractPoisonNeedle : AbstractPhysicalObject
     {
