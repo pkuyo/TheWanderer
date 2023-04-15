@@ -310,7 +310,7 @@ namespace Pkuyo.Wanderer.Objects
 
     public class AbstractCoolObject : AbstractPhysicalObject
     {
-        public AbstractCoolObject(World world, WorldCoordinate pos, EntityID ID) : base(world, WandererModEnum.Objects.CoolObject, null, pos, ID)
+        public AbstractCoolObject(World world, WorldCoordinate pos, EntityID ID) : base(world, WandererEnum.Objects.CoolObject, null, pos, ID)
         {
         }
 
@@ -350,10 +350,10 @@ namespace Pkuyo.Wanderer.Objects
     sealed class CoolObjectFisob : Fisob
     {
        
-        public CoolObjectFisob() : base(WandererModEnum.Objects.CoolObject)
+        public CoolObjectFisob() : base(WandererEnum.Objects.CoolObject)
         {
             Icon = new CoolObjectIcon();
-            RegisterUnlock(WandererModEnum.Sandbox.CoolObject, MoreSlugcatsEnums.SandboxUnlockID.EnergyCell, 0);
+            RegisterUnlock(WandererEnum.Sandbox.CoolObject, MoreSlugcatsEnums.SandboxUnlockID.EnergyCell, 0);
         }
 
         public override AbstractPhysicalObject Parse(World world, EntitySaveData saveData, SandboxUnlock unlock)
@@ -385,7 +385,7 @@ namespace Pkuyo.Wanderer.Objects
 
             public override void Grabability(Player player, ref Player.ObjectGrabability grabability)
             {
-                grabability = (WandererCharacterMod.WandererOptions.CarryToolHands.Value == "One Hand") ? Player.ObjectGrabability.OneHand : Player.ObjectGrabability.TwoHands;
+                grabability = (WandererMod.WandererOptions.CarryToolHands.Value == "One Hand") ? Player.ObjectGrabability.OneHand : Player.ObjectGrabability.TwoHands;
 
             }
         }

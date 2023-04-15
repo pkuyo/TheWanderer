@@ -3,7 +3,7 @@ using static MultiplayerUnlocks;
 
 namespace Pkuyo.Wanderer
 {
-    static class WandererModEnum
+    static class WandererEnum
     {
 
         static private bool isReg = false;
@@ -156,14 +156,22 @@ namespace Pkuyo.Wanderer
         static public class Creatures
         {
             public static CreatureTemplate.Type ToxicSpider;
+            public static CreatureTemplate.Type MaleParasite;
+            public static CreatureTemplate.Type FemaleParasite;
+            public static CreatureTemplate.Type ChildParasite;
             public static void RegisterValues()
             {
                 ToxicSpider = new CreatureTemplate.Type("ToxicSpider",true);
-
+                MaleParasite = new CreatureTemplate.Type("MaleParasite", true);
+                FemaleParasite = new CreatureTemplate.Type("FemaleParasite", true);
+                ChildParasite = new CreatureTemplate.Type("ChildParasite", true);
             }
             public static void UnregisterValues()
             {
                 if(ToxicSpider!=null) { ToxicSpider.Unregister(); ToxicSpider = null; }
+                if(MaleParasite!= null) { MaleParasite.Unregister(); MaleParasite = null; }
+                if (FemaleParasite != null) { FemaleParasite.Unregister(); FemaleParasite = null; }
+                if(ChildParasite != null) { ChildParasite.Unregister(); ChildParasite = null; }
             }
         }
         static public class Objects
@@ -187,15 +195,24 @@ namespace Pkuyo.Wanderer
         {
             static public SandboxUnlockID ToxicSpider;
             static public SandboxUnlockID CoolObject;
+            public static SandboxUnlockID MaleParasite;
+            public static SandboxUnlockID FemaleParasite;
+            public static SandboxUnlockID ChildParasite;
             static public void RegisterValues()
             {
                 ToxicSpider = new SandboxUnlockID("ToxicSpider", true);
                 CoolObject = new SandboxUnlockID("CoolObject", true);
+                MaleParasite = new SandboxUnlockID("MaleParasite", true);
+                FemaleParasite = new SandboxUnlockID("FemaleParasite", true);
+                ChildParasite = new SandboxUnlockID("ChildParasite", true);
             }
             static public void UnregisterValues()
             {
                 if (ToxicSpider != null) { ToxicSpider.Unregister(); ToxicSpider = null; }
-                if(CoolObject != null) { CoolObject.Unregister(); CoolObject = null; }
+                if (CoolObject != null) { CoolObject.Unregister(); CoolObject = null; }
+                if (MaleParasite != null) { MaleParasite.Unregister(); MaleParasite = null; }
+                if (FemaleParasite != null) { FemaleParasite.Unregister(); FemaleParasite = null; }
+                if (ChildParasite != null) { ChildParasite.Unregister(); ChildParasite = null; }
             }
         }
     }

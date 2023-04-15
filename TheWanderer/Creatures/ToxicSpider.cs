@@ -4,11 +4,10 @@ using Fisobs.Core;
 using Fisobs.Creatures;
 using Fisobs.Properties;
 using Fisobs.Sandbox;
-using JetBrains.Annotations;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using MoreSlugcats;
-using Pkuyo.Wanderer.Object;
+using Pkuyo.Wanderer.Objects;
 using RWCustom;
 using System;
 using System.Collections.Generic;
@@ -53,7 +52,7 @@ namespace Pkuyo.Wanderer.Creatures
         {
             orig(self, abstractCreature, world);
 
-            if (abstractCreature.creatureTemplate.type == WandererModEnum.Creatures.ToxicSpider)
+            if (abstractCreature.creatureTemplate.type == WandererEnum.Creatures.ToxicSpider)
             {
 
                 self.bodyChunks[0] = new BodyChunk(self, 0, new Vector2(0f, 0f), 5f, 0.33333334f);
@@ -67,7 +66,7 @@ namespace Pkuyo.Wanderer.Creatures
 
         private void BigSpider_Spit(On.BigSpider.orig_Spit orig, BigSpider self)
         {
-            if (self.abstractCreature.creatureTemplate.type == WandererModEnum.Creatures.ToxicSpider)
+            if (self.abstractCreature.creatureTemplate.type == WandererEnum.Creatures.ToxicSpider)
             {
                 Vector2 vector = self.AI.spitModule.aimDir;
                 if (self.safariControlled)
@@ -121,7 +120,7 @@ namespace Pkuyo.Wanderer.Creatures
         private void SpiderSpitModule_SpiderHasSpit(On.BigSpiderAI.SpiderSpitModule.orig_SpiderHasSpit orig, BigSpiderAI.SpiderSpitModule self)
         {
             orig(self);
-            if (self.bug.abstractCreature.creatureTemplate.type == WandererModEnum.Creatures.ToxicSpider)
+            if (self.bug.abstractCreature.creatureTemplate.type == WandererEnum.Creatures.ToxicSpider)
             {
                 if (self.ammo < 1)
                     self.bugAI.stayAway = false;
@@ -133,7 +132,7 @@ namespace Pkuyo.Wanderer.Creatures
 
         private bool BigSpiderAI_TrackerToDiscardDeadCreature(On.BigSpiderAI.orig_TrackerToDiscardDeadCreature orig, BigSpiderAI self, AbstractCreature crit)
         {
-            return orig(self, crit) && !(crit.creatureTemplate.type == WandererModEnum.Creatures.ToxicSpider);
+            return orig(self, crit) && !(crit.creatureTemplate.type == WandererEnum.Creatures.ToxicSpider);
         }
 
 
@@ -142,7 +141,7 @@ namespace Pkuyo.Wanderer.Creatures
             var re = orig(self, test);
             for (int i = 0; i < self.AI.tracker.CreaturesCount; i++)
             {
-                if (self.AI.tracker.GetRep(i).representedCreature.creatureTemplate.type == WandererModEnum.Creatures.ToxicSpider && self.AI.tracker.GetRep(i).representedCreature.personality.dominance > self.AI.creature.personality.dominance && self.AI.tracker.GetRep(i).representedCreature.abstractAI.RealAI != null)
+                if (self.AI.tracker.GetRep(i).representedCreature.creatureTemplate.type == WandererEnum.Creatures.ToxicSpider && self.AI.tracker.GetRep(i).representedCreature.personality.dominance > self.AI.creature.personality.dominance && self.AI.tracker.GetRep(i).representedCreature.abstractAI.RealAI != null)
                 {
                     re -= Mathf.Min(20f, test.Tile.FloatDist((self.AI.tracker.GetRep(i).representedCreature.abstractAI.RealAI as BigSpiderAI).spitModule.spitPos.Tile)) * 5f;
                 }
@@ -154,7 +153,7 @@ namespace Pkuyo.Wanderer.Creatures
         private void SpiderSpitModule_Update(On.BigSpiderAI.SpiderSpitModule.orig_Update orig, BigSpiderAI.SpiderSpitModule self)
         {
             orig(self);
-            if (self.bug.abstractCreature.creatureTemplate.type == WandererModEnum.Creatures.ToxicSpider)
+            if (self.bug.abstractCreature.creatureTemplate.type == WandererEnum.Creatures.ToxicSpider)
             {
                 //增加毒针数量
                 if (self.ammo < 6)
@@ -190,7 +189,7 @@ namespace Pkuyo.Wanderer.Creatures
                 c.Emit(OpCodes.Ldarg_0);
                 c.EmitDelegate<Func<bool, IntVector2, BigSpider, bool>>((re, vec, self) =>
                 {
-                    if (self.abstractCreature.creatureTemplate.type == WandererModEnum.Creatures.ToxicSpider
+                    if (self.abstractCreature.creatureTemplate.type == WandererEnum.Creatures.ToxicSpider
                         && self.grabChunks[vec.x, vec.y] != null && (self.grabChunks[vec.x, vec.y].owner is Creature) && (self.grabChunks[vec.x, vec.y].owner as Creature).blind > 10)
                     {
                         re = false;
@@ -210,7 +209,7 @@ namespace Pkuyo.Wanderer.Creatures
                 c.Emit(OpCodes.Ldarg_1);
                 c.EmitDelegate<Func<bool, BigSpiderAI, RelationshipTracker.DynamicRelationship, bool>>((re, self, dRelation) =>
                 {
-                    if (self.bug.abstractCreature.creatureTemplate.type == WandererModEnum.Creatures.ToxicSpider && dRelation.trackerRep.representedCreature.realizedCreature.blind > 5)
+                    if (self.bug.abstractCreature.creatureTemplate.type == WandererEnum.Creatures.ToxicSpider && dRelation.trackerRep.representedCreature.realizedCreature.blind > 5)
                     {
                         re = false;
                     }
@@ -223,13 +222,14 @@ namespace Pkuyo.Wanderer.Creatures
 
     sealed class ToxicSpiderCritob : Critob
     {
-        public ToxicSpiderCritob() : base(WandererModEnum.Creatures.ToxicSpider)
+        public ToxicSpiderCritob() : base(WandererEnum.Creatures.ToxicSpider)
         {
+            WandererMod.Log.LogDebug("[ToxicSpiderCritob] CTOR");
             Icon = new SimpleIcon("Kill_BigSpider", new Color(0.1f, 0.1f, 1f));
             CreatureName = "Toxic Spider";
             LoadedPerformanceCost = 50f;
             SandboxPerformanceCost = new SandboxPerformanceCost(0.5f, 0.5f);
-            RegisterUnlock(KillScore.Configurable(5), WandererModEnum.Sandbox.ToxicSpider, MultiplayerUnlocks.SandboxUnlockID.SpitterSpider, 0);
+            RegisterUnlock(KillScore.Configurable(5), WandererEnum.Sandbox.ToxicSpider, MultiplayerUnlocks.SandboxUnlockID.SpitterSpider, 0);
         }
         public override int ExpeditionScore()
         {
@@ -251,6 +251,7 @@ namespace Pkuyo.Wanderer.Creatures
 
         public override CreatureTemplate CreateTemplate()
         {
+            WandererMod.Log.LogDebug("[ToxicSpiderCritob] Create Template ");
             CreatureTemplate t = new CreatureFormula(this)
             {
                 DefaultRelationship = new(CreatureTemplate.Relationship.Type.Ignores, 0.0f),
@@ -316,6 +317,7 @@ namespace Pkuyo.Wanderer.Creatures
             t.pickupAction = "Grab";
             t.throwAction = "Release";
             return t;
+            
         }
         public override string DevtoolsMapName(AbstractCreature acrit)
         {
@@ -340,52 +342,58 @@ namespace Pkuyo.Wanderer.Creatures
         }
         public override void EstablishRelationships()
         {
-            StaticWorld.EstablishRelationship(WandererModEnum.Creatures.ToxicSpider, WandererModEnum.Creatures.ToxicSpider, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Ignores, 0.0f));
-            StaticWorld.EstablishRelationship(WandererModEnum.Creatures.ToxicSpider, CreatureTemplate.Type.SpitterSpider, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Ignores, 0.0f));
-            StaticWorld.EstablishRelationship(WandererModEnum.Creatures.ToxicSpider, CreatureTemplate.Type.BigSpider, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Ignores, 0.0f));
-            StaticWorld.EstablishRelationship(WandererModEnum.Creatures.ToxicSpider, CreatureTemplate.Type.Slugcat, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Eats, 0.6f));
-            StaticWorld.EstablishRelationship(WandererModEnum.Creatures.ToxicSpider, CreatureTemplate.Type.LizardTemplate, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Eats, 0.3f));
-            StaticWorld.EstablishRelationship(WandererModEnum.Creatures.ToxicSpider, CreatureTemplate.Type.BlueLizard, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Eats, 0.4f));
-            StaticWorld.EstablishRelationship(WandererModEnum.Creatures.ToxicSpider, CreatureTemplate.Type.GreenLizard, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Afraid, 0.4f));
-            StaticWorld.EstablishRelationship(WandererModEnum.Creatures.ToxicSpider, CreatureTemplate.Type.RedLizard, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Afraid, 0.4f));
-            StaticWorld.EstablishRelationship(WandererModEnum.Creatures.ToxicSpider, CreatureTemplate.Type.Vulture, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Afraid, 1f));
-            StaticWorld.EstablishRelationship(WandererModEnum.Creatures.ToxicSpider, CreatureTemplate.Type.LanternMouse, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Eats, 0.8f));
-            StaticWorld.EstablishRelationship(WandererModEnum.Creatures.ToxicSpider, CreatureTemplate.Type.Centipede, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Eats, 0.11f));
-            StaticWorld.EstablishRelationship(WandererModEnum.Creatures.ToxicSpider, CreatureTemplate.Type.SmallCentipede, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Eats, 0.2f));
-            StaticWorld.EstablishRelationship(WandererModEnum.Creatures.ToxicSpider, CreatureTemplate.Type.VultureGrub, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Eats, 0.1f));
-            StaticWorld.EstablishRelationship(WandererModEnum.Creatures.ToxicSpider, CreatureTemplate.Type.Scavenger, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Eats, 0.45f));
-            StaticWorld.EstablishRelationship(WandererModEnum.Creatures.ToxicSpider, CreatureTemplate.Type.TentaclePlant, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Afraid, 0.8f));
-            StaticWorld.EstablishRelationship(WandererModEnum.Creatures.ToxicSpider, CreatureTemplate.Type.PoleMimic, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Afraid, 0.3f));
-            StaticWorld.EstablishRelationship(WandererModEnum.Creatures.ToxicSpider, CreatureTemplate.Type.Centiwing, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Eats, 0.4f));
-            StaticWorld.EstablishRelationship(WandererModEnum.Creatures.ToxicSpider, CreatureTemplate.Type.CicadaA, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Eats, 0.3f));
-            StaticWorld.EstablishRelationship(WandererModEnum.Creatures.ToxicSpider, CreatureTemplate.Type.CicadaB, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Eats, 0.3f));
-            StaticWorld.EstablishRelationship(WandererModEnum.Creatures.ToxicSpider, CreatureTemplate.Type.BigEel, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Afraid, 1f));
-            StaticWorld.EstablishRelationship(WandererModEnum.Creatures.ToxicSpider, CreatureTemplate.Type.BigNeedleWorm, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Eats, 0.4f));
-            StaticWorld.EstablishRelationship(WandererModEnum.Creatures.ToxicSpider, CreatureTemplate.Type.SmallNeedleWorm, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Eats, 0.3f));
-            StaticWorld.EstablishRelationship(WandererModEnum.Creatures.ToxicSpider, CreatureTemplate.Type.DropBug, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Eats, 0.25f));
-            StaticWorld.EstablishRelationship(WandererModEnum.Creatures.ToxicSpider, CreatureTemplate.Type.MirosBird, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Afraid, 0.9f));
-            StaticWorld.EstablishRelationship(WandererModEnum.Creatures.ToxicSpider, CreatureTemplate.Type.RedCentipede, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Afraid, 0.8f));
-            StaticWorld.EstablishRelationship(WandererModEnum.Creatures.ToxicSpider, MoreSlugcatsEnums.CreatureTemplateType.SlugNPC, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Eats, 0.6f));
-            StaticWorld.EstablishRelationship(WandererModEnum.Creatures.ToxicSpider, MoreSlugcatsEnums.CreatureTemplateType.SpitLizard, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Afraid, 0.4f));
-            StaticWorld.EstablishRelationship(WandererModEnum.Creatures.ToxicSpider, MoreSlugcatsEnums.CreatureTemplateType.MirosVulture, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Afraid, 1f));
+            try
+            {
+                StaticWorld.EstablishRelationship(WandererEnum.Creatures.ToxicSpider, WandererEnum.Creatures.ToxicSpider, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Ignores, 0.0f));
+                StaticWorld.EstablishRelationship(WandererEnum.Creatures.ToxicSpider, CreatureTemplate.Type.SpitterSpider, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Ignores, 0.0f));
+                StaticWorld.EstablishRelationship(WandererEnum.Creatures.ToxicSpider, CreatureTemplate.Type.BigSpider, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Ignores, 0.0f));
+                StaticWorld.EstablishRelationship(WandererEnum.Creatures.ToxicSpider, CreatureTemplate.Type.Slugcat, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Eats, 0.6f));
+                StaticWorld.EstablishRelationship(WandererEnum.Creatures.ToxicSpider, CreatureTemplate.Type.LizardTemplate, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Eats, 0.3f));
+                StaticWorld.EstablishRelationship(WandererEnum.Creatures.ToxicSpider, CreatureTemplate.Type.BlueLizard, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Eats, 0.4f));
+                StaticWorld.EstablishRelationship(WandererEnum.Creatures.ToxicSpider, CreatureTemplate.Type.GreenLizard, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Afraid, 0.4f));
+                StaticWorld.EstablishRelationship(WandererEnum.Creatures.ToxicSpider, CreatureTemplate.Type.RedLizard, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Afraid, 0.4f));
+                StaticWorld.EstablishRelationship(WandererEnum.Creatures.ToxicSpider, CreatureTemplate.Type.Vulture, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Afraid, 1f));
+                StaticWorld.EstablishRelationship(WandererEnum.Creatures.ToxicSpider, CreatureTemplate.Type.LanternMouse, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Eats, 0.8f));
+                StaticWorld.EstablishRelationship(WandererEnum.Creatures.ToxicSpider, CreatureTemplate.Type.Centipede, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Eats, 0.11f));
+                StaticWorld.EstablishRelationship(WandererEnum.Creatures.ToxicSpider, CreatureTemplate.Type.SmallCentipede, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Eats, 0.2f));
+                StaticWorld.EstablishRelationship(WandererEnum.Creatures.ToxicSpider, CreatureTemplate.Type.VultureGrub, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Eats, 0.1f));
+                StaticWorld.EstablishRelationship(WandererEnum.Creatures.ToxicSpider, CreatureTemplate.Type.Scavenger, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Eats, 0.45f));
+                StaticWorld.EstablishRelationship(WandererEnum.Creatures.ToxicSpider, CreatureTemplate.Type.TentaclePlant, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Afraid, 0.8f));
+                StaticWorld.EstablishRelationship(WandererEnum.Creatures.ToxicSpider, CreatureTemplate.Type.PoleMimic, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Afraid, 0.3f));
+                StaticWorld.EstablishRelationship(WandererEnum.Creatures.ToxicSpider, CreatureTemplate.Type.Centiwing, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Eats, 0.4f));
+                StaticWorld.EstablishRelationship(WandererEnum.Creatures.ToxicSpider, CreatureTemplate.Type.CicadaA, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Eats, 0.3f));
+                StaticWorld.EstablishRelationship(WandererEnum.Creatures.ToxicSpider, CreatureTemplate.Type.CicadaB, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Eats, 0.3f));
+                StaticWorld.EstablishRelationship(WandererEnum.Creatures.ToxicSpider, CreatureTemplate.Type.BigEel, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Afraid, 1f));
+                StaticWorld.EstablishRelationship(WandererEnum.Creatures.ToxicSpider, CreatureTemplate.Type.BigNeedleWorm, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Eats, 0.4f));
+                StaticWorld.EstablishRelationship(WandererEnum.Creatures.ToxicSpider, CreatureTemplate.Type.SmallNeedleWorm, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Eats, 0.3f));
+                StaticWorld.EstablishRelationship(WandererEnum.Creatures.ToxicSpider, CreatureTemplate.Type.DropBug, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Eats, 0.25f));
+                StaticWorld.EstablishRelationship(WandererEnum.Creatures.ToxicSpider, CreatureTemplate.Type.MirosBird, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Afraid, 0.9f));
+                StaticWorld.EstablishRelationship(WandererEnum.Creatures.ToxicSpider, CreatureTemplate.Type.RedCentipede, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Afraid, 0.8f));
+                StaticWorld.EstablishRelationship(WandererEnum.Creatures.ToxicSpider, MoreSlugcatsEnums.CreatureTemplateType.SlugNPC, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Eats, 0.6f));
+                StaticWorld.EstablishRelationship(WandererEnum.Creatures.ToxicSpider, MoreSlugcatsEnums.CreatureTemplateType.SpitLizard, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Afraid, 0.4f));
+                StaticWorld.EstablishRelationship(WandererEnum.Creatures.ToxicSpider, MoreSlugcatsEnums.CreatureTemplateType.MirosVulture, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Afraid, 1f));
 
-            StaticWorld.EstablishRelationship(CreatureTemplate.Type.SpitterSpider, WandererModEnum.Creatures.ToxicSpider, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Ignores, 0.0f));
-            StaticWorld.EstablishRelationship(CreatureTemplate.Type.BigSpider, WandererModEnum.Creatures.ToxicSpider, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Ignores, 0.0f));
-            StaticWorld.EstablishRelationship(CreatureTemplate.Type.LizardTemplate, WandererModEnum.Creatures.ToxicSpider, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Eats, 0.35f));
-            StaticWorld.EstablishRelationship(CreatureTemplate.Type.GreenLizard, WandererModEnum.Creatures.ToxicSpider, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Eats, 0.6f));
-            StaticWorld.EstablishRelationship(CreatureTemplate.Type.BlueLizard, WandererModEnum.Creatures.ToxicSpider, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Afraid, 0.5f));
-            StaticWorld.EstablishRelationship(CreatureTemplate.Type.LanternMouse, WandererModEnum.Creatures.ToxicSpider, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Afraid, 0.6f));
-            StaticWorld.EstablishRelationship(CreatureTemplate.Type.Vulture, WandererModEnum.Creatures.ToxicSpider, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Eats, 0.5f));
-            StaticWorld.EstablishRelationship(CreatureTemplate.Type.CicadaA, WandererModEnum.Creatures.ToxicSpider, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Afraid, 0.5f));
-            StaticWorld.EstablishRelationship(CreatureTemplate.Type.Leech, WandererModEnum.Creatures.ToxicSpider, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Eats, 0.3f));
-            StaticWorld.EstablishRelationship(CreatureTemplate.Type.Spider, WandererModEnum.Creatures.ToxicSpider, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Ignores, 0f));
-            StaticWorld.EstablishRelationship(CreatureTemplate.Type.Slugcat, WandererModEnum.Creatures.ToxicSpider, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Afraid, 0.5f));
-            StaticWorld.EstablishRelationship(CreatureTemplate.Type.MirosBird, WandererModEnum.Creatures.ToxicSpider, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Eats, 0.5f));
-            StaticWorld.EstablishRelationship(CreatureTemplate.Type.Scavenger, WandererModEnum.Creatures.ToxicSpider, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Afraid, 0.45f));
-            StaticWorld.EstablishRelationship(MoreSlugcatsEnums.CreatureTemplateType.SpitLizard, WandererModEnum.Creatures.ToxicSpider, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Eats, 0.6f));
-            StaticWorld.EstablishRelationship(MoreSlugcatsEnums.CreatureTemplateType.SlugNPC, WandererModEnum.Creatures.ToxicSpider, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Afraid, 0.5f));
-            StaticWorld.EstablishRelationship(MoreSlugcatsEnums.CreatureTemplateType.MirosVulture, WandererModEnum.Creatures.ToxicSpider, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Eats, 0.5f));
+                StaticWorld.EstablishRelationship(CreatureTemplate.Type.SpitterSpider, WandererEnum.Creatures.ToxicSpider, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Ignores, 0.0f));
+                StaticWorld.EstablishRelationship(CreatureTemplate.Type.BigSpider, WandererEnum.Creatures.ToxicSpider, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Ignores, 0.0f));
+                StaticWorld.EstablishRelationship(CreatureTemplate.Type.LizardTemplate, WandererEnum.Creatures.ToxicSpider, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Eats, 0.35f));
+                StaticWorld.EstablishRelationship(CreatureTemplate.Type.GreenLizard, WandererEnum.Creatures.ToxicSpider, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Eats, 0.6f));
+                StaticWorld.EstablishRelationship(CreatureTemplate.Type.BlueLizard, WandererEnum.Creatures.ToxicSpider, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Afraid, 0.5f));
+                StaticWorld.EstablishRelationship(CreatureTemplate.Type.LanternMouse, WandererEnum.Creatures.ToxicSpider, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Afraid, 0.6f));
+                StaticWorld.EstablishRelationship(CreatureTemplate.Type.Vulture, WandererEnum.Creatures.ToxicSpider, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Eats, 0.5f));
+                StaticWorld.EstablishRelationship(CreatureTemplate.Type.CicadaA, WandererEnum.Creatures.ToxicSpider, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Afraid, 0.5f));
+                StaticWorld.EstablishRelationship(CreatureTemplate.Type.Leech, WandererEnum.Creatures.ToxicSpider, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Eats, 0.3f));
+                StaticWorld.EstablishRelationship(CreatureTemplate.Type.Spider, WandererEnum.Creatures.ToxicSpider, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Ignores, 0f));
+                StaticWorld.EstablishRelationship(CreatureTemplate.Type.Slugcat, WandererEnum.Creatures.ToxicSpider, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Afraid, 0.5f));
+                StaticWorld.EstablishRelationship(CreatureTemplate.Type.MirosBird, WandererEnum.Creatures.ToxicSpider, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Eats, 0.5f));
+                StaticWorld.EstablishRelationship(CreatureTemplate.Type.Scavenger, WandererEnum.Creatures.ToxicSpider, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Afraid, 0.45f));
+                StaticWorld.EstablishRelationship(MoreSlugcatsEnums.CreatureTemplateType.SpitLizard, WandererEnum.Creatures.ToxicSpider, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Eats, 0.6f));
+                StaticWorld.EstablishRelationship(MoreSlugcatsEnums.CreatureTemplateType.SlugNPC, WandererEnum.Creatures.ToxicSpider, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Afraid, 0.5f));
+                StaticWorld.EstablishRelationship(MoreSlugcatsEnums.CreatureTemplateType.MirosVulture, WandererEnum.Creatures.ToxicSpider, new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Eats, 0.5f));
+            }
+            catch
+            {
 
+            }
         }
         public override IEnumerable<string> WorldFileAliases()
         {

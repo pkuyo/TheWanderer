@@ -64,7 +64,7 @@ namespace Pkuyo.Wanderer.Feature
         private void Mushroom_BitByPlayer(On.Mushroom.orig_BitByPlayer orig, Mushroom self, Creature.Grasp grasp, bool eu)
         {
             orig(self, grasp, eu);
-            if ((grasp.grabber as Player).slugcatStats.name.value == WandererCharacterMod.WandererName)
+            if ((grasp.grabber as Player).slugcatStats.name.value == WandererMod.WandererName)
                 (grasp.grabber as Player).mushroomCounter -= 320;
         }
 
@@ -115,7 +115,7 @@ namespace Pkuyo.Wanderer.Feature
             public PlayerLounge(Player player)
             {
                 PlayerRef = new WeakReference<Player>(player);
-                keyCode = WandererCharacterMod.WandererOptions.LoungeKeys[player.playerState.playerNumber].Value;
+                keyCode = WandererMod.WandererOptions.LoungeKeys[player.playerState.playerNumber].Value;
 
                 runspeedFac = player.slugcatStats.runspeedFac;
                 poleClimbSpeedFac = player.slugcatStats.poleClimbSpeedFac;
@@ -187,7 +187,7 @@ namespace Pkuyo.Wanderer.Feature
                     //进入特效
                     if (IntroCount >= 0)
                     {
-                        if (!WandererCharacterMod.WandererOptions.DisableDash.Value)
+                        if (!WandererMod.WandererOptions.DisableDash.Value)
                         {
                             self.mushroomEffect = Custom.LerpAndTick(self.mushroomEffect, 3f, 0.15f, 0.025f);
                             Traverse.Create(self.adrenalineEffect).Field("intensity").SetValue(3 * (Traverse.Create(self.adrenalineEffect).Field("intensity").GetValue<float>()));
@@ -206,7 +206,7 @@ namespace Pkuyo.Wanderer.Feature
                     //进入特效后半程
                     else if (reset && self.mushroomEffect > 0)
                     {
-                        if (!WandererCharacterMod.WandererOptions.DisableDash.Value)
+                        if (!WandererMod.WandererOptions.DisableDash.Value)
                             self.mushroomEffect = Custom.LerpAndTick(self.mushroomEffect, 0f, 0.15f, 0.025f);
 
                         if (self.mushroomEffect <= 0.0)
@@ -327,7 +327,7 @@ namespace Pkuyo.Wanderer.Feature
             {
                 if (IsLounge && IntroCount == -1)
                     rCam.mushroomMode = 3;
-                else if(IsLounge && IntroCount >=0 && WandererCharacterMod.WandererOptions.DisableDash.Value)
+                else if(IsLounge && IntroCount >=0 && WandererMod.WandererOptions.DisableDash.Value)
                     rCam.mushroomMode = Mathf.Lerp(3, 0, Mathf.InverseLerp(0, 15, IntroCount));
                 else if (!IsLounge && IntroCount >= 0)
                     rCam.mushroomMode = Mathf.Lerp(0, 3, Mathf.InverseLerp(0, 15, IntroCount));

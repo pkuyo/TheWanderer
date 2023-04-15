@@ -45,14 +45,14 @@ namespace Pkuyo.Wanderer.Objects
         private bool AbstractPhysicalObject_UsesAPersistantTracker(On.AbstractPhysicalObject.orig_UsesAPersistantTracker orig, AbstractPhysicalObject abs)
         {
             var re = orig(abs);
-            if (abs.type == WandererModEnum.Objects.CoolObject)
+            if (abs.type == WandererEnum.Objects.CoolObject)
                 return true;
             return re;
         }
 
         private void Player_ReleaseGrasp(On.Player.orig_ReleaseGrasp orig, Player self, int grasp)
         {
-            if (WandererCharacterMod.WandererOptions.PreventToolFalling.Value && self.grasps[grasp] != null && self.grasps[grasp].grabbed != null && self.grasps[grasp].grabbed is CoolObject && self.bodyMode == WandererModEnum.PlayerBodyModeIndex.ClimbBackWall)
+            if (WandererMod.WandererOptions.PreventToolFalling.Value && self.grasps[grasp] != null && self.grasps[grasp].grabbed != null && self.grasps[grasp].grabbed is CoolObject && self.bodyMode == WandererEnum.PlayerBodyModeIndex.ClimbBackWall)
                 return;
             orig(self,grasp);
         }

@@ -33,7 +33,7 @@ namespace Pkuyo.Wanderer
     class WandererLoungeTurtorial : CustomTurtorial
     {
         public WandererLoungeTurtorial(Room room)
-            : base(room, new Message[] { Message.NewMessage("Press [/"+WandererCharacterMod.WandererOptions.LoungeKeys[0].Value.ToString() +"/] to enter the sprint state, but it will reduce satiety.",0, 500)})
+            : base(room, new Message[] { Message.NewMessage("Press [/"+WandererMod.WandererOptions.LoungeKeys[0].Value.ToString() +"/] to enter the sprint state, but it will reduce satiety.",0, 500)})
 
         {
         }

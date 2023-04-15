@@ -42,8 +42,9 @@
     <Reference Include="BepInEx.Harmony">
       <HintPath>..\..\..\SteamLibrary\steamapps\common\Rain World\BepInEx\core\BepInEx.Harmony.dll</HintPath>
     </Reference>
-    <Reference Include="Fisobs">
-      <HintPath>..\Fisobs.dll</HintPath>
+    <Reference Include="Fisobs, Version=3.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\SteamLibrary\steamapps\workshop\content\312520\2920541687\plugins\Fisobs.dll</HintPath>
     </Reference>
     <Reference Include="HarmonyXInterop">
       <HintPath>..\..\..\SteamLibrary\steamapps\common\Rain World\BepInEx\core\HarmonyXInterop.dll</HintPath>
@@ -109,6 +110,8 @@
     <Compile Include="Creatures\BabyLizardAI.cs" />
     <Compile Include="Creatures\Parasite.cs" />
     <Compile Include="Creatures\ParasiteAI.cs" />
+    <Compile Include="Creatures\ParasiteGraphics.cs" />
+    <Compile Include="Creatures\ParasiteHook.cs" />
     <Compile Include="Creatures\ToxicSpider.cs" />
     <Compile Include="Hook\AchievementHook.cs" />
     <Compile Include="Hook\Feature\LizardRelationFeature.cs" />
@@ -139,9 +142,9 @@
     <Compile Include="LizardMessage\LizardDialogBox.cs" />
     <Compile Include="LizardMessage\RandomMessagePicker.cs" />
     <Compile Include="Options\WandererOptions.cs" />
-    <Compile Include="WandererCharacterMod.cs" />
+    <Compile Include="WandererMod.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="WandererModEnum.cs" />
+    <Compile Include="WandererEnum.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

@@ -1,6 +1,11 @@
 ﻿using BepInEx;
+using BepInEx.Logging;
 using Fisobs.Core;
-using IL.JollyCoop;
+using Fisobs.Creatures;
+
+using JetBrains.Annotations;
+using MonoMod.Cil;
+using MoreSlugcats;
 using Newtonsoft.Json.Serialization;
 using Nutils.Hook;
 using Pkuyo.Wanderer.Creatures;
@@ -13,6 +18,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Security.Permissions;
 using UnityEngine;
+using static MonoMod.InlineRT.MonoModRule;
 
 #pragma warning disable CS0618
 [assembly: SecurityPermission(SecurityAction.RequestMinimum, SkipVerification = true)]
@@ -20,14 +26,15 @@ using UnityEngine;
 namespace Pkuyo.Wanderer
 {
     [BepInPlugin("pkuyo.thevanguard", "The Vanguard", "1.0.0")]
-    public class WandererCharacterMod : BaseUnityPlugin
+    public class WandererMod : BaseUnityPlugin
     {
         static public readonly string ModID = "pkuyo.thevanguard";
         static public readonly string WandererName = "wanderer";
-        public WandererCharacterMod()
+        public WandererMod()
         {
             _hooks = new List<HookBase>();
             WandererOptions = new WandererOptions(Logger);
+            Log = Logger;
         }
 
         public void OnEnable()
@@ -50,17 +57,24 @@ namespace Pkuyo.Wanderer
             }
             else
             {
-                WandererModEnum.RegisterValues();
+                WandererEnum.RegisterValues();
+                Content.Register(new CoolObjectFisob());
+                Content.Register(new ToxicSpiderCritob());
+
+                Content.Register(new ParasiteCritob(WandererEnum.Creatures.FemaleParasite));
+                Content.Register(new ParasiteCritob(WandererEnum.Creatures.MaleParasite));
+                Content.Register(new ParasiteCritob(WandererEnum.Creatures.ChildParasite));
 
                 _hooks.Add(WandererAssetManager.Instance(Logger));
 
                 _hooks.Add(SessionHook.Instance(Logger));
                 _hooks.Add(SSOracleHook.Instance(Logger));
                 _hooks.Add(AchievementHook.Instance(Logger));
-                _hooks.Add(ParasiteHook.Instance(Logger));
+               
 
                 _hooks.Add(CoolObjectHook.Instance(Logger));
                 _hooks.Add(ToxicSpiderHook.Instance(Logger));
+                _hooks.Add(ParasiteHook.Instance(Logger));
 
                 _hooks.Add(ClimbWallFeature.Instance(Logger));
                 _hooks.Add(ListenLizardFeature.Instance(Logger));
@@ -69,18 +83,43 @@ namespace Pkuyo.Wanderer
                 _hooks.Add(LizardRelationFeature.Instance(Logger));
                 _hooks.Add(WandererGraphicsFeature.Instance(Logger));
 
-                Content.Register(new ToxicSpiderCritob());
-                Content.Register(new CoolObjectFisob());
-
                 On.RainWorld.OnModsInit += RainWorld_OnModsInit;
                 On.RainWorld.OnModsDisabled += RainWorld_OnModsDisabled;
-                On.RainWorld.PostModsInit += ModCompatibilityFix.RainWorld_PostModsInit;
+                On.CreatureTemplate.ctor_Type_CreatureTemplate_List1_List1_Relationship += CreatureTemplate_ctor_Type_CreatureTemplate_List1_List1_Relationship;
+
+                IL.StaticWorld.InitStaticWorld += StaticWorld_InitStaticWorld;
             }
         }
+
+        private void StaticWorld_InitStaticWorld(ILContext il)
+        {
+            ILCursor c = new ILCursor(il);
+            c.GotoNext(MoveType.After, i => i.MatchStloc(19));
+            c.EmitDelegate<Action>(() =>
+            {
+                foreach (var template in StaticWorld.creatureTemplates)
+                {
+                    if (template == null)
+                    {
+                        StaticWorld.InitCustomTemplates();
+                        return;
+                    }
+                }
+            });
+        }
+
+        private void CreatureTemplate_ctor_Type_CreatureTemplate_List1_List1_Relationship(On.CreatureTemplate.orig_ctor_Type_CreatureTemplate_List1_List1_Relationship orig, CreatureTemplate self, CreatureTemplate.Type type, CreatureTemplate ancestor, List<TileTypeResistance> tileResistances, List<TileConnectionResistance> connectionResistances, CreatureTemplate.Relationship defaultRelationship)
+        {
+           orig(self,type,ancestor,tileResistances,connectionResistances,defaultRelationship);
+            Log.LogInfo(type + " Template Init");
+        }
+
+
 
         private void RainWorld_PostModsInit_ClearHook(On.RainWorld.orig_PostModsInit orig, RainWorld self)
         {
             orig(self);
+            
             On.ModManager.RefreshModsLists -= ModManager_RefreshModsLists_RemoveMyMod;
         }
 
@@ -99,6 +138,7 @@ namespace Pkuyo.Wanderer
 
         private void RainWorld_OnModsInit(On.RainWorld.orig_OnModsInit orig, RainWorld self)
         {
+
             try
             {
                 orig(self);
@@ -116,9 +156,9 @@ namespace Pkuyo.Wanderer
 
                     CampaignHook.AddSpawnPos(WandererName, 8, 4, -1, "SB_INTROROOM1");
 
-                    SceneHook.AddIntroSlideShow(WandererName, "RW_Intro_Theme", WandererModEnum.Scene.WandererIntro, DreamScene.BuildSlideShow);
-                    SceneHook.AddScene(WandererModEnum.Scene.Intro_W1, DreamScene.BuildWandererScene1);
-                    SceneHook.AddScene(WandererModEnum.Scene.Intro_W2, DreamScene.BuildWandererScene2);
+                    SceneHook.AddIntroSlideShow(WandererName, "RW_Intro_Theme", WandererEnum.Scene.WandererIntro, DreamScene.BuildSlideShow);
+                    SceneHook.AddScene(WandererEnum.Scene.Intro_W1, DreamScene.BuildWandererScene1);
+                    SceneHook.AddScene(WandererEnum.Scene.Intro_W2, DreamScene.BuildWandererScene2);
 
                     foreach (var feature in _hooks)
                         feature.OnModsInit(self);
@@ -134,7 +174,6 @@ namespace Pkuyo.Wanderer
 
         }
 
-
         private void RainWorld_OnModsDisabled(On.RainWorld.orig_OnModsDisabled orig, RainWorld self, ModManager.Mod[] newlyDisabledMods)
         {
 
@@ -142,7 +181,7 @@ namespace Pkuyo.Wanderer
             {
                 if (mod.id == ModID)
                 {
-                    WandererModEnum.UnRegisterValues();
+                    WandererEnum.UnRegisterValues();
                     return;
                 }
             }
@@ -153,5 +192,9 @@ namespace Pkuyo.Wanderer
         private bool isLoad=false;
         private bool hasNutils = false;
         static public WandererOptions WandererOptions;
+
+        static public ManualLogSource Log;
     }
+
+
 }

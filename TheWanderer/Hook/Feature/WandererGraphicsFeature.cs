@@ -51,7 +51,7 @@ namespace Pkuyo.Wanderer.Feature
         {
             orig(self, ow);
 
-            if ((self.owner as Player).slugcatStats.name.value != WandererCharacterMod.WandererName)
+            if ((self.owner as Player).slugcatStats.name.value != WandererMod.WandererName)
                 return;
 
             WandererGraphics graphics;

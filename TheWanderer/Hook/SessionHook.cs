@@ -55,8 +55,8 @@ namespace Pkuyo.Wanderer
             {
                 c.EmitDelegate<Func<RainCycle, RainCycle>>(self =>
                 {
-                    if(self.world.game.session.characterStats.name.value == WandererCharacterMod.WandererName)
-                        self.cycleLength = Mathf.RoundToInt(self.cycleLength * WandererCharacterMod.WandererOptions.RainCycleLengthScale.Value);
+                    if(self.world.game.session.characterStats.name.value == WandererMod.WandererName)
+                        self.cycleLength = Mathf.RoundToInt(self.cycleLength * WandererMod.WandererOptions.RainCycleLengthScale.Value);
                     return self;
                 });
             }
@@ -66,7 +66,7 @@ namespace Pkuyo.Wanderer
         private void SaveState_ctor(On.SaveState.orig_ctor orig, SaveState self, SlugcatStats.Name saveStateNumber, PlayerProgression progression)
         {
             orig(self, saveStateNumber, progression);
-            if (saveStateNumber.value == WandererCharacterMod.WandererName)
+            if (saveStateNumber.value == WandererMod.WandererName)
             {
                 self.miscWorldSaveData.SLOracleState.neuronsLeft=7;
                 self.miscWorldSaveData.moonGivenRobe = true;
@@ -87,7 +87,7 @@ namespace Pkuyo.Wanderer
             orig(self, cam);
 
             //判断是否为the wanderer战役
-            if (self.owner is Player && (self.owner as Player).abstractCreature.world.game.session.characterStats.name.value == WandererCharacterMod.WandererName)
+            if (self.owner is Player && (self.owner as Player).abstractCreature.world.game.session.characterStats.name.value == WandererMod.WandererName)
             {
                 if (wandererHud != null)
                     wandererHud.Destroy();

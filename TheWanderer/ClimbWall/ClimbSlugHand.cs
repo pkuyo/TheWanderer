@@ -70,7 +70,7 @@ namespace Pkuyo.Wanderer
             {
                 float maxSpeed;
                 ClimbWallFeature.ClimbWallSpeed.TryGet(player, out maxSpeed);
-                if (player.bodyMode == WandererModEnum.PlayerBodyModeIndex.ClimbBackWall)
+                if (player.bodyMode == WandererEnum.PlayerBodyModeIndex.ClimbBackWall)
                 {
                     ClimbSlugHand data;
                     if (!_HandData.TryGetValue(self, out data))

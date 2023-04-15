@@ -1,6 +1,7 @@
 ﻿using BepInEx.Logging;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
+using Pkuyo.Wanderer.Objects;
 using RWCustom;
 using SlugBase.Features;
 using System;
@@ -63,7 +64,7 @@ namespace Pkuyo.Wanderer.Feature
                 c.GotoPrev(MoveType.After, i => i.OpCode == OpCodes.Ldarg_0);
                 c.EmitDelegate<Func<Player, bool>>((player) =>
                  {
-                     if (player.bodyMode == WandererModEnum.PlayerBodyModeIndex.ClimbBackWall && (player.input[0].x != 0 || player.input[0].y != 0))
+                     if (player.bodyMode == WandererEnum.PlayerBodyModeIndex.ClimbBackWall && (player.input[0].x != 0 || player.input[0].y != 0))
                      {
                          return true;
                      }
@@ -273,9 +274,9 @@ namespace Pkuyo.Wanderer.Feature
                 //设置状态
                 if (player.bodyMode == Player.BodyModeIndex.Default
                     || player.bodyMode == Player.BodyModeIndex.WallClimb || player.bodyMode == Player.BodyModeIndex.ZeroG
-                    || player.bodyMode == Player.BodyModeIndex.ClimbingOnBeam || player.bodyMode == WandererModEnum.PlayerBodyModeIndex.ClimbBackWall)
+                    || player.bodyMode == Player.BodyModeIndex.ClimbingOnBeam || player.bodyMode == WandererEnum.PlayerBodyModeIndex.ClimbBackWall)
                 {
-                    player.bodyMode = WandererModEnum.PlayerBodyModeIndex.ClimbBackWall;
+                    player.bodyMode = WandererEnum.PlayerBodyModeIndex.ClimbBackWall;
                     //防止卡杆子
                     player.forceFeetToHorizontalBeamTile = 0;
                     if (player.animation == Player.AnimationIndex.HangFromBeam)
@@ -297,7 +298,7 @@ namespace Pkuyo.Wanderer.Feature
                 return;
 
             //先于updateMSC调用
-            if (player.bodyMode == WandererModEnum.PlayerBodyModeIndex.ClimbBackWall)
+            if (player.bodyMode == WandererEnum.PlayerBodyModeIndex.ClimbBackWall)
                 player.customPlayerGravity = 0;
             else
                 player.customPlayerGravity = 0.9f;

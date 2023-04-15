@@ -9,7 +9,7 @@ namespace Pkuyo.Wanderer.Objects
 {
     class AbstractPoisonNeedle : AbstractPhysicalObject
     {
-        public AbstractPoisonNeedle(World world, PhysicalObject realizedObject, WorldCoordinate pos, EntityID ID) : base(world, WandererModEnum.Objects.PoisonNeedle, realizedObject, pos, ID)
+        public AbstractPoisonNeedle(World world, PhysicalObject realizedObject, WorldCoordinate pos, EntityID ID) : base(world, WandererEnum.Objects.PoisonNeedle, realizedObject, pos, ID)
         {
         }
 
