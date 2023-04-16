@@ -1,7 +1,6 @@
 ﻿using RWCustom;
 using System;
 using System.Collections.Generic;
-using System.Security.Cryptography;
 using UnityEngine;
 
 namespace Pkuyo.Wanderer.Post
@@ -45,7 +44,8 @@ namespace Pkuyo.Wanderer.Post
         private readonly float spit = 0.05f;
         private readonly float scale = 0.025f;
         private readonly int downSampleFactor = 1;
-        private readonly float vignetteSoftness = 0.4f;
+
+        Vector2? center;
 
 
         public int LoungeCounter
@@ -66,26 +66,11 @@ namespace Pkuyo.Wanderer.Post
             }
         }
 
-        public int VignetteCounter
-        {
-            get => vignetteCounter;
-            set 
-            {
-                //为了--
-                if(vignetteCounter < value+2 && loungeMat)
-                {
-                    vignetteCounter = value;
-                    loungeMat.SetFloat("_VRadius", Mathf.Lerp(0.2f,1.2f,Mathf.Pow(Mathf.InverseLerp(40,0,vignetteCounter),0.7f)));
-                }
-            }
-        }
 
         int loungeCounter = 0;
-        int vignetteCounter = 0;
+        
 
         float loungeTimer = 0;
-
-        public Color[] vignetteCenters = new Color[2] { new Color(0.5f, 0.5f, 0.5f, 0.5f), new Color(0.5f, 0.5f, 0.5f, 0.5f) };
 
         Material loungeMat;
             
@@ -98,7 +83,7 @@ namespace Pkuyo.Wanderer.Post
             try
             {
                 loungeMat = new Material(WandererAssetManager.Instance().PostShaders["LoungePost"]);
-                loungeMat.SetFloat("_VSoft", vignetteSoftness);
+                
                 loungeMat.SetFloat("_VRadius", 1.2f);
             }
             catch (Exception e)
@@ -114,9 +99,6 @@ namespace Pkuyo.Wanderer.Post
             timeStacker += Time.deltaTime;
             if (timeStacker > 1 / 40f)
             {
-                if (VignetteCounter != 0)
-                    VignetteCounter--;
-
                 if (LoungeCounter != 0)
                     LoungeCounter--;
                 timeStacker -= 1/40f;
@@ -130,10 +112,21 @@ namespace Pkuyo.Wanderer.Post
 
 
                 List<Vector4> centers = new List<Vector4>();
-                foreach (var i in WandererAssetManager.Instance().postData)
-                    if (i.IsVaild)
-                        centers.Add(new Vector4(i.center.x,i.center.y));
-                loungeMat.SetVectorArray("_BlurCenter", centers);
+                for (int i = 0; i < WandererAssetManager.Instance().PlayerPos.Count; i++)
+                {
+                    if(i==0)
+                    {
+                        if (!center.HasValue) center = WandererAssetManager.Instance().PlayerPos[0];
+                        else
+                            center = Vector2.Lerp(center.Value, WandererAssetManager.Instance().PlayerPos[0], 0.01f);
+                        centers.Add(new Vector4(center.Value.x, center.Value.y));
+                    }
+                    else
+                        centers.Add(new Vector4(WandererAssetManager.Instance().PlayerPos[i].x, WandererAssetManager.Instance().PlayerPos[i].y));
+                }
+                if(centers.Count!=0)
+                    loungeMat.SetVectorArray("_BlurCenter", centers);
+
                 loungeMat.SetFloat("_BlurCenterLength", centers.Count);
 
                 Graphics.Blit(rt1, rt2, loungeMat, 0);
@@ -142,18 +135,6 @@ namespace Pkuyo.Wanderer.Post
 
                 RenderTexture.ReleaseTemporary(rt1);
                 RenderTexture.ReleaseTemporary(rt2);
-            }
-            else if(IsSupported && VignetteCounter != 0 && loungeMat)
-            {
-                List<Vector4> centers = new List<Vector4>();
-                foreach (var i in WandererAssetManager.Instance().postData)
-                    if (i.IsVaild)
-                        centers.Add(new Vector4(i.center.x, i.center.y));
-                loungeMat.SetVectorArray("_BlurCenter", centers);
-                loungeMat.SetFloat("_BlurCenterLength", centers.Count); 
-         
-         
-                Graphics.Blit(source, destination, loungeMat, 2);
             }
             else
                 Graphics.Blit(source, destination);

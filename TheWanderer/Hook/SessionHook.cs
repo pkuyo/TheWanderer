@@ -5,6 +5,7 @@ using MonoMod.Cil;
 using MoreSlugcats;
 using RWCustom;
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Pkuyo.Wanderer
@@ -26,6 +27,7 @@ namespace Pkuyo.Wanderer
         public override void OnModsInit(RainWorld rainWorld)
         {
             On.HUD.HUD.InitSinglePlayerHud += HUD_InitSinglePlayerHud;
+            On.HUD.HUD.InitMultiplayerHud += HUD_InitMultiplayerHud;
             On.HUD.HUD.Update += HUD_Update;
             On.CreatureCommunities.InfluenceLikeOfPlayer += CreatureCommunities_InfluenceLikeOfPlayer;
             On.SaveState.ctor += SaveState_ctor;
@@ -33,6 +35,59 @@ namespace Pkuyo.Wanderer
 
             IL.RainCycle.ctor += RainCycle_ctor;
             _log.LogDebug("WanderMessionFeature Init");
+        }
+
+        private void HUD_InitSinglePlayerHud(On.HUD.HUD.orig_InitSinglePlayerHud orig, HUD.HUD self, RoomCamera cam)
+        {
+            orig(self, cam);
+            if (VignetteHud != null && !VignetteHud.slatedForDeletion)
+            {
+                VignetteHud.ClearSprites();
+                VignetteHud.slatedForDeletion = true;
+                VignetteHud = null;
+            }
+            VignetteHud = new BlindHud(self);
+
+            //判断是否为the wanderer战役
+            if (self.owner is Player && (self.owner as Player).abstractCreature.world.game.session.characterStats.name.value == WandererMod.WandererName)
+            {
+                if (wandererHud != null)
+                    wandererHud.Destroy();
+
+                wandererHud = new WandererSessionHud(self);
+            }
+        }
+
+        private void HUD_InitMultiplayerHud(On.HUD.HUD.orig_InitMultiplayerHud orig, HUD.HUD self, ArenaGameSession session)
+        {
+            orig(self, session);
+            if (VignetteHud != null && !VignetteHud.slatedForDeletion)
+            {
+                VignetteHud.ClearSprites();
+                VignetteHud.slatedForDeletion = true;
+                VignetteHud = null;
+            }
+            VignetteHud = new BlindHud(self);
+        }
+
+
+        private void HUD_Update(On.HUD.HUD.orig_Update orig, HUD.HUD self)
+        {
+            orig(self);
+            if (wandererHud != null)
+                wandererHud.Update();
+        }
+
+
+        private void CreatureCommunities_InfluenceLikeOfPlayer(On.CreatureCommunities.orig_InfluenceLikeOfPlayer orig, CreatureCommunities self, CreatureCommunities.CommunityID commID, int region, int playerNumber, float influence, float interRegionBleed, float interCommunityBleed)
+        {
+            orig(self, commID, region, playerNumber, influence, interRegionBleed, interCommunityBleed);
+
+            //更新HUD
+            if (wandererHud != null && commID == CreatureCommunities.CommunityID.Lizards)
+            {
+                wandererHud.SetLikeOfPlayer(self.playerOpinions[CreatureCommunities.CommunityID.Lizards.Index - 1, 0, playerNumber]);
+            }
         }
 
         private void RegionGate_customKarmaGateRequirements(On.RegionGate.orig_customKarmaGateRequirements orig, RegionGate self)
@@ -48,14 +103,14 @@ namespace Pkuyo.Wanderer
         private void RainCycle_ctor(ILContext il)
         {
             ILCursor c = new ILCursor(il);
-            if(c.TryGotoNext(MoveType.After,i => i.OpCode == OpCodes.Conv_I4,
+            if (c.TryGotoNext(MoveType.After, i => i.OpCode == OpCodes.Conv_I4,
                 i => i.MatchStfld<RainCycle>("cycleLength"),
                 i => i.OpCode == OpCodes.Ldarg_0,
                 i => i.OpCode == OpCodes.Ldarg_0))
             {
                 c.EmitDelegate<Func<RainCycle, RainCycle>>(self =>
                 {
-                    if(self.world.game.session.characterStats.name.value == WandererMod.WandererName)
+                    if (self.world.game.session.characterStats.name.value == WandererMod.WandererName)
                         self.cycleLength = Mathf.RoundToInt(self.cycleLength * WandererMod.WandererOptions.RainCycleLengthScale.Value);
                     return self;
                 });
@@ -68,58 +123,93 @@ namespace Pkuyo.Wanderer
             orig(self, saveStateNumber, progression);
             if (saveStateNumber.value == WandererMod.WandererName)
             {
-                self.miscWorldSaveData.SLOracleState.neuronsLeft=7;
+                self.miscWorldSaveData.SLOracleState.neuronsLeft = 7;
                 self.miscWorldSaveData.moonGivenRobe = true;
-            }
-        }
-
-        private void HUD_Update(On.HUD.HUD.orig_Update orig, HUD.HUD self)
-        {
-            orig(self);
-            if (wandererHud != null)
-                wandererHud.Update();
-        }
-
-
-
-        private void HUD_InitSinglePlayerHud(On.HUD.HUD.orig_InitSinglePlayerHud orig, HUD.HUD self, RoomCamera cam)
-        {
-            orig(self, cam);
-
-            //判断是否为the wanderer战役
-            if (self.owner is Player && (self.owner as Player).abstractCreature.world.game.session.characterStats.name.value == WandererMod.WandererName)
-            {
-                if (wandererHud != null)
-                    wandererHud.Destroy();
-
-                wandererHud = new WandererMessionHud(self);
-            }
-        }
-
-        private void CreatureCommunities_InfluenceLikeOfPlayer(On.CreatureCommunities.orig_InfluenceLikeOfPlayer orig, CreatureCommunities self, CreatureCommunities.CommunityID commID, int region, int playerNumber, float influence, float interRegionBleed, float interCommunityBleed)
-        {
-            orig(self, commID, region, playerNumber, influence, interRegionBleed, interCommunityBleed);
-
-            //更新HUD
-            if (wandererHud != null && commID == CreatureCommunities.CommunityID.Lizards)
-            {
-                wandererHud.SetLikeOfPlayer(self.playerOpinions[CreatureCommunities.CommunityID.Lizards.Index - 1, 0, playerNumber]);
             }
         }
 
         static private SessionHook _Instance;
 
-        WandererMessionHud wandererHud;
+        WandererSessionHud wandererHud;
+
+        public BlindHud VignetteHud;
+
     }
 
-    class WandererMessionHud
+    class BlindHud : HudPart
     {
-        public WandererMessionHud(HUD.HUD owner)
+        public int VignetteCounter
+        {
+            get => vignetteCounter;
+            set
+            {
+                //为了--
+                if (vignetteCounter < value + 2)
+                {
+                    vignetteCounter = value;
+                }
+            }
+        }
+        int vignetteCounter = 0;
+        public BlindHud(HUD.HUD owner) : base(owner)
+        {
+            InitiateSprites();
+            owner.AddPart(this);
+
+        }
+
+        public void InitiateSprites()
+        {
+            mask = new CustomFSprite("Futile_White");
+            mask.shader = Custom.rainWorld.Shaders["VignetteMask"];
+            mask.MoveVertice(0, new Vector2(0, Custom.rainWorld.screenSize.y));
+            mask.MoveVertice(1, new Vector2(Custom.rainWorld.screenSize.x, Custom.rainWorld.screenSize.y));
+            mask.MoveVertice(2, new Vector2(Custom.rainWorld.screenSize.x, 0));
+            mask.MoveVertice(3, new Vector2(0, 0));
+            hud.fContainers[1].AddChild(mask);
+        }
+
+        public override void Draw(float timeStacker)
+        {
+            base.Draw(timeStacker);
+            List<Vector4> centers = new List<Vector4>();
+            foreach (var i in WandererAssetManager.Instance().PlayerPos)
+                    centers.Add(new Vector4(i.x, i.y));
+            if (mask._renderLayer != null && mask._renderLayer._material != null)
+            {
+                if (centers.Count != 0)
+                    mask._renderLayer._material.SetVectorArray("_Center", centers);
+
+                mask._renderLayer._material.SetFloat("_CenterLength", centers.Count);
+                mask._renderLayer._material.SetFloat("_VSoft", vignetteSoftness);
+                mask._renderLayer._material.SetFloat("_VRadius", Mathf.Lerp(0.2f, 1.414f, Mathf.Pow(Mathf.InverseLerp(70, 0, vignetteCounter), 0.7f)));
+            }
+        }
+
+        public override void ClearSprites()
+        {
+            hud.fContainers[1].RemoveChild(mask);
+            base.ClearSprites(); 
+        }
+
+        public override void Update()
+        {
+            if (vignetteCounter > 0)
+                vignetteCounter--;
+        }
+        public CustomFSprite mask;
+
+        private readonly float vignetteSoftness = 0.4f;
+    }
+
+    class WandererSessionHud
+    {
+        public WandererSessionHud(HUD.HUD owner)
         {
             this.owner = owner;
 
             var creature = (owner.owner as Player).abstractCreature;
-            var hudpart = new MissionHud(owner, creature.world.game.session.creatureCommunities.playerOpinions[CreatureCommunities.CommunityID.Lizards.Index - 1, 0, 0], null);
+            var hudpart = new LizardRelationHud(owner, creature.world.game.session.creatureCommunities.playerOpinions[CreatureCommunities.CommunityID.Lizards.Index - 1, 0, 0], null);
             _hud = hudpart;
             owner.AddPart(hudpart);
         }
@@ -194,7 +284,10 @@ namespace Pkuyo.Wanderer
         public void Destroy()
         {
             if (_hud != null)
+            {
+                _hud.ClearSprites();
                 _hud.slatedForDeletion = true;
+            }
             owner = null;
             _hud = null;
         }
@@ -203,13 +296,13 @@ namespace Pkuyo.Wanderer
         bool ScareTurtorial = false;
         bool LoungeTurtorial = false;
         bool DemoEnding = false;
-        MissionHud _hud;
+        LizardRelationHud _hud;
         HUD.HUD owner;
     }
 
-    class MissionHud : HudPart
+    class LizardRelationHud : HudPart
     {
-        public MissionHud(HUD.HUD hud, float aacc, ManualLogSource log) : base(hud)
+        public LizardRelationHud(HUD.HUD hud, float aacc, ManualLogSource log) : base(hud)
         {
             acc[1] = aacc;
             InitiateSprites();
@@ -249,7 +342,7 @@ namespace Pkuyo.Wanderer
             sprites[2].alpha = 0.2f;
             sprites[3].alpha = 0.5f;
             for (int i = 0; i < 4; i++)
-                this.hud.fContainers[1].AddChild(sprites[i]);
+                hud.fContainers[1].AddChild(sprites[i]);
         }
         public override void Draw(float timeStacker)
         {

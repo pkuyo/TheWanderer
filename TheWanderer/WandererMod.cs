@@ -71,7 +71,6 @@ namespace Pkuyo.Wanderer
                 _hooks.Add(SSOracleHook.Instance(Logger));
                 _hooks.Add(AchievementHook.Instance(Logger));
                
-
                 _hooks.Add(CoolObjectHook.Instance(Logger));
                 _hooks.Add(ToxicSpiderHook.Instance(Logger));
                 _hooks.Add(ParasiteHook.Instance(Logger));
@@ -85,13 +84,12 @@ namespace Pkuyo.Wanderer
 
                 On.RainWorld.OnModsInit += RainWorld_OnModsInit;
                 On.RainWorld.OnModsDisabled += RainWorld_OnModsDisabled;
-                On.CreatureTemplate.ctor_Type_CreatureTemplate_List1_List1_Relationship += CreatureTemplate_ctor_Type_CreatureTemplate_List1_List1_Relationship;
 
-                IL.StaticWorld.InitStaticWorld += StaticWorld_InitStaticWorld;
+                IL.StaticWorld.InitStaticWorld += StaticWorldFix;
             }
         }
 
-        private void StaticWorld_InitStaticWorld(ILContext il)
+        private void StaticWorldFix(ILContext il)
         {
             ILCursor c = new ILCursor(il);
             c.GotoNext(MoveType.After, i => i.MatchStloc(19));
@@ -108,18 +106,11 @@ namespace Pkuyo.Wanderer
             });
         }
 
-        private void CreatureTemplate_ctor_Type_CreatureTemplate_List1_List1_Relationship(On.CreatureTemplate.orig_ctor_Type_CreatureTemplate_List1_List1_Relationship orig, CreatureTemplate self, CreatureTemplate.Type type, CreatureTemplate ancestor, List<TileTypeResistance> tileResistances, List<TileConnectionResistance> connectionResistances, CreatureTemplate.Relationship defaultRelationship)
-        {
-           orig(self,type,ancestor,tileResistances,connectionResistances,defaultRelationship);
-            Log.LogInfo(type + " Template Init");
-        }
-
 
 
         private void RainWorld_PostModsInit_ClearHook(On.RainWorld.orig_PostModsInit orig, RainWorld self)
         {
             orig(self);
-            
             On.ModManager.RefreshModsLists -= ModManager_RefreshModsLists_RemoveMyMod;
         }
 

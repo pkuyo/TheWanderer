@@ -42,6 +42,11 @@ namespace Pkuyo.Wanderer.Cosmetic
         {
             return true;
         }
+
+        public virtual void Reset()
+        {
+
+        }
         protected Color GetBodyColor(PlayerGraphics self)
         {
             Color color = PlayerGraphics.SlugcatColor(self.CharacterForColor);

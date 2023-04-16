@@ -1,5 +1,6 @@
 ﻿using BepInEx.Logging;
 using Pkuyo.Wanderer.Post;
+using RWCustom;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
@@ -13,8 +14,7 @@ namespace Pkuyo.Wanderer
         WandererAssetManager(ManualLogSource log) : base(log)
         {
             PostShaders = new Dictionary<string, Shader>();
-            postDic = new ConditionalWeakTable<PlayerGraphics, PostData>();
-            postData = new List<PostData>();
+            PlayerPos = new List<Vector2>();
         }
 
         static public WandererAssetManager Instance(ManualLogSource log = null)
@@ -30,6 +30,7 @@ namespace Pkuyo.Wanderer
             var bundle = AssetBundle.LoadFromFile(AssetManager.ResolveFilePath("AssetBundles/shaders/wanderershaders"));
             rainWorld.Shaders.Add("TwoColorShader", FShader.CreateShader("TwoColorShader", bundle.LoadAsset<Shader>("TwoColorShader")));
             rainWorld.Shaders.Add("ToolHoloGird", FShader.CreateShader("ToolHoloGird", bundle.LoadAsset<Shader>("ToolHoloGird")));
+            rainWorld.Shaders.Add("VignetteMask", FShader.CreateShader("VignetteMask", bundle.LoadAsset<Shader>("VignetteMask")));
 
             PostShaders.Add("LoungePost", bundle.LoadAsset<Shader>("LoungePost"));
 
@@ -40,48 +41,32 @@ namespace Pkuyo.Wanderer
             Camera cam = GameObject.FindObjectOfType<Camera>();
             PostEffect = cam.gameObject.AddComponent<PostEffect>();
 
-            On.PlayerGraphics.ctor += PlayerGraphics_ctor;
-            On.Player.NewRoom += Player_NewRoom;
-            On.PlayerGraphics.DrawSprites += PlayerGraphics_DrawSprites;
+
+            On.RainWorldGame.Update += RainWorldGame_Update;
 
 
 
 
         }
 
-        private void PlayerGraphics_DrawSprites(On.PlayerGraphics.orig_DrawSprites orig, PlayerGraphics self, RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
+        private void RainWorldGame_Update(On.RainWorldGame.orig_Update orig, RainWorldGame self)
         {
-            orig(self, sLeaser, rCam, timeStacker, camPos);
-            if (postDic.TryGetValue(self, out var data))
-                data.DrawSprite(sLeaser);
-        }
-
-        private void Player_NewRoom(On.Player.orig_NewRoom orig, Player self, Room newRoom)
-        {
-
-            orig(self, newRoom);
-            if (self.graphicsModule != null && postDic.TryGetValue(self.graphicsModule as PlayerGraphics, out var data))
-                data.NewRoom();
-        }
-
-
-        private void PlayerGraphics_ctor(On.PlayerGraphics.orig_ctor orig, PlayerGraphics self, PhysicalObject ow)
-        {
-            postData.RemoveAll(i => !i.IsVaild);
-            orig(self,ow);
-            if (!postDic.TryGetValue(self, out _))
+            orig(self);
+            PlayerPos.Clear();
+            foreach (var ab in self.AlivePlayers)
             {
-                var data = new PostData(self);
-                postDic.Add(self, data);
-                postData.Add(data);
+                if (ab.realizedCreature != null)
+                    PlayerPos.Add((ab.realizedCreature.mainBodyChunk.pos - self.cameras[0].pos)/Custom.rainWorld.screenSize);
             }
         }
 
+
+
+
+
         public Dictionary<string, Shader> PostShaders;
 
-        ConditionalWeakTable<PlayerGraphics, PostData> postDic;
-
-        public List<PostData> postData;
+        public List<Vector2> PlayerPos;
 
         public PostEffect PostEffect;
 

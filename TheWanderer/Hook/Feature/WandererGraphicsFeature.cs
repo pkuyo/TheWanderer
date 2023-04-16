@@ -30,18 +30,23 @@ namespace Pkuyo.Wanderer.Feature
             On.PlayerGraphics.ApplyPalette += PlayerGraphics_ApplyPalette;
             On.PlayerGraphics.Update += PlayerGraphics_Update;
             On.PlayerGraphics.AddToContainer += PlayerGraphics_AddToContainer;
-            
+            On.PlayerGraphics.Reset += PlayerGraphics_Reset;
             _log.LogDebug("WandererGraphics Init");
 
         }
 
+        private void PlayerGraphics_Reset(On.PlayerGraphics.orig_Reset orig, PlayerGraphics self)
+        {
+            orig(self);
+            if (WandererGraphics.TryGetValue(self, out var graphics))
+                graphics.Reset();
+        }
 
         private void PlayerGraphics_AddToContainer(On.PlayerGraphics.orig_AddToContainer orig, PlayerGraphics self, RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, FContainer newContatiner)
         {
             orig(self, sLeaser, rCam, newContatiner);
 
-            WandererGraphics graphics;
-            if (WandererGraphics.TryGetValue(self, out graphics))
+            if (WandererGraphics.TryGetValue(self, out var graphics))
                 graphics.AddToContainer(sLeaser, rCam, newContatiner);
 
         }
@@ -54,8 +59,7 @@ namespace Pkuyo.Wanderer.Feature
             if ((self.owner as Player).slugcatStats.name.value != WandererMod.WandererName)
                 return;
 
-            WandererGraphics graphics;
-            if (!WandererGraphics.TryGetValue(self, out graphics))
+            if (!WandererGraphics.TryGetValue(self, out _))
                 WandererGraphics.Add(self, new WandererGraphics(self, _log));
 
         }
@@ -64,8 +68,7 @@ namespace Pkuyo.Wanderer.Feature
         {
             orig(self, sLeaser, rCam, timeStacker, camPos);
 
-            WandererGraphics graphics;
-            if (WandererGraphics.TryGetValue(self, out graphics))
+            if (WandererGraphics.TryGetValue(self, out var graphics))
                 graphics.DrawSprites(sLeaser, rCam, timeStacker, camPos);
         }
 
@@ -73,8 +76,7 @@ namespace Pkuyo.Wanderer.Feature
         {
             orig(self, sLeaser, rCam);
 
-            WandererGraphics graphics;
-            if (WandererGraphics.TryGetValue(self, out graphics))
+            if (WandererGraphics.TryGetValue(self, out var graphics))
                 graphics.InitiateSprites(sLeaser, rCam);
 
         }
@@ -83,8 +85,7 @@ namespace Pkuyo.Wanderer.Feature
         {
             orig(self, sLeaser, rCam, palette);
 
-            WandererGraphics graphics;
-            if (WandererGraphics.TryGetValue(self, out graphics))
+            if (WandererGraphics.TryGetValue(self, out var graphics))
                 graphics.ApplyPalette(sLeaser, rCam, palette);
 
         }
@@ -93,8 +94,7 @@ namespace Pkuyo.Wanderer.Feature
         {
             orig(self);
 
-            WandererGraphics graphics;
-            if (WandererGraphics.TryGetValue(self, out graphics))
+            if (WandererGraphics.TryGetValue(self, out var graphics))
                 graphics.Update();
         }
 
@@ -145,6 +145,12 @@ namespace Pkuyo.Wanderer.Feature
             }
             else
                 Cosmetics.Add(cosmetic);
+        }
+
+        public void Reset()
+        {
+            foreach (var cosmetic in Cosmetics)
+                cosmetic.Reset();
         }
 
         public void DrawSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)

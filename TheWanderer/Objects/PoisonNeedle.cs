@@ -105,8 +105,8 @@ namespace Pkuyo.Wanderer.Objects
                     }
                     else
                     {
-                        if (WandererAssetManager.Instance().PostEffect.VignetteCounter <= 120)
-                            WandererAssetManager.Instance().PostEffect.VignetteCounter += 2;
+                        if (SessionHook.Instance().VignetteHud.VignetteCounter <= 120)
+                            SessionHook.Instance().VignetteHud.VignetteCounter += 2;
                         (stuckInChunk.owner as Player).Blind(40);
                         (stuckInChunk.owner as Player).slowMovementStun = Math.Max((stuckInChunk.owner as Player).slowMovementStun, (int)(Random.value * 20f));
                     }

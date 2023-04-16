@@ -26,6 +26,17 @@ namespace Pkuyo.Wanderer.Cosmetic
 
         }
 
+
+        public override void Reset()
+        {
+            PlayerGraphics iGraphics = null;
+            if (!iGraphicsRef.TryGetTarget(out iGraphics))
+                return;
+            for (int j = 0; j < this.Hairs.Length; j++)
+            {
+                this.Hairs[j].Reset(iGraphics.owner.bodyChunks[1].pos);
+            }
+        }
         public override void DrawSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
         {
             PlayerGraphics iGraphics = null;
@@ -75,8 +86,6 @@ namespace Pkuyo.Wanderer.Cosmetic
                         d3 = 0f;
                     }
                     
-                    if (i!=0 && !Custom.DistLess((sLeaser.sprites[startSprite + k] as TriangleMesh).vertices[i*4], (sLeaser.sprites[startSprite + k] as TriangleMesh).vertices[i*4-4],35))
-                        OutLength = true;
                     //设置坐标
                     (sLeaser.sprites[startSprite + k] as TriangleMesh).MoveVertice(i * 4, vector4 - widthDir * d2 * HairWidth + normalized * d3 - camPos);
                     (sLeaser.sprites[startSprite + k] as TriangleMesh).MoveVertice(i * 4 + 1, vector4 + widthDir * d2 * HairWidth + normalized * d3 - camPos);
@@ -92,11 +101,6 @@ namespace Pkuyo.Wanderer.Cosmetic
                     d2 = Hairs[k * 4 + i].StretchedRad;
                     vector4 = vector5;
                 }
-
-                if (OutLength && sLeaser.sprites[startSprite + k].isVisible)
-                    sLeaser.sprites[startSprite + k].isVisible = false;
-                else if (!OutLength && !sLeaser.sprites[startSprite + k].isVisible)
-                    sLeaser.sprites[startSprite + k].isVisible = true;
             }
             base.DrawSprites(sLeaser, rCam, timeStacker, camPos);
 

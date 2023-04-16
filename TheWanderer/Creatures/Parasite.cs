@@ -284,6 +284,7 @@ namespace Pkuyo.Wanderer.Creatures
                     {
                         infectingCounter = 0;
                         Debug.Log("Female Parasite grab");
+                        (otherObject as Creature).LoseAllGrasps();
                         room.PlaySound(SoundID.Drop_Bug_Grab_Creature, mainBodyChunk);
                     }
                 }
@@ -301,11 +302,7 @@ namespace Pkuyo.Wanderer.Creatures
                             Debug.Log("Male Parasite grab");
                             room.PlaySound(SoundID.Drop_Bug_Grab_Creature, mainBodyChunk);
                         }
-                        //else
-                        //Slash
                     }
-                    //else
-                    //Slash
                     attemptBite = 0f;
                     
                 }

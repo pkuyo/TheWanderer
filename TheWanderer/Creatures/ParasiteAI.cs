@@ -27,7 +27,6 @@ namespace Pkuyo.Wanderer.Creatures
             AddModule(new NoiseTracker(this, tracker));
             AddModule(new UtilityComparer(this));
             AddModule(new RelationshipTracker(this, tracker));
-            //relationshipTracker.visualize = true;
             FloatTweener.FloatTween smoother = new FloatTweener.FloatTweenUpAndDown(new FloatTweener.FloatTweenBasic(FloatTweener.TweenType.Lerp, 0.5f), new FloatTweener.FloatTweenBasic(FloatTweener.TweenType.Tick, 0.005f));
             utilityComparer.AddComparedModule(threatTracker, smoother, 1f, 1.1f);
             smoother = new FloatTweener.FloatTweenUpAndDown(new FloatTweener.FloatTweenBasic(FloatTweener.TweenType.Lerp, 0.2f), new FloatTweener.FloatTweenBasic(FloatTweener.TweenType.Tick, 0.01f));
@@ -280,13 +279,16 @@ namespace Pkuyo.Wanderer.Creatures
                     }
                 }
 
-
-
                 if (!dRelation.state.alive)
                     return new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Ignores, 0.5f);
 
-                if ((dRelation.state as ParasiteTrackState).parasited)
-                    return new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Uncomfortable, 0.5f);
+                if ((dRelation.state as ParasiteTrackState).parasited && parasite.isFemale)
+                {
+                    if (dRelation.trackerRep.representedCreature.creatureTemplate.CreatureRelationship(parasite.Template).type == CreatureTemplate.Relationship.Type.Eats)
+                        return new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Afraid, 0.3f);
+                    else
+                        return new CreatureTemplate.Relationship(CreatureTemplate.Relationship.Type.Uncomfortable, 0.5f);
+                }
 
                 CreatureTemplate.Relationship relationship = StaticRelationship(dRelation.trackerRep.representedCreature);
                 if (relationship.type == CreatureTemplate.Relationship.Type.Afraid)
@@ -326,9 +328,6 @@ namespace Pkuyo.Wanderer.Creatures
         int idlePosCounter;
 
         WorldCoordinate tempIdlePos;
-
-        WorldCoordinate idlePos;
-
 
         WorldCoordinate? idleTowardsPosition;
 

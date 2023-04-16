@@ -226,45 +226,9 @@ namespace Pkuyo.Wanderer.Creatures
 
         private void Creature_Die(On.Creature.orig_Die orig, Creature self)
         {
-            Debug.Log("creature Die!");
             if (parasiteData.TryGetValue(self, out var data) && data.isParasite)
             {
-                Debug.Log("Try Create Parasite");
-                var hasAdult = Random.value < 0.3f;
-                if (hasAdult)
-                {
-                    AbstractCreature abstractCreature = new AbstractCreature(self.abstractCreature.world, StaticWorld.GetCreatureTemplate(WandererEnum.Creatures.FemaleParasite), null, self.abstractCreature.pos, self.abstractCreature.world.game.GetNewID());
-                    abstractCreature.state = new HealthState(abstractCreature);
-                    abstractCreature.RealizeInRoom();
-
-                    if (abstractCreature.realizedCreature != null)
-                    {
-                        foreach (var bodychunk in abstractCreature.realizedCreature.bodyChunks)
-                        {
-                            bodychunk.vel += Custom.RNV() * Random.Range(5f, 20f);
-                            bodychunk.pos = self.mainBodyChunk.pos;
-                        }
-     
-
-                    }
-                }
-                int count = Random.Range(1, 3) - (hasAdult ? 1 : 0);
-                for (int i = 0; i < count; i++)
-                {
-                    AbstractCreature abstractCreature = new AbstractCreature(self.abstractCreature.world, StaticWorld.GetCreatureTemplate(WandererEnum.Creatures.ChildParasite), null, self.abstractCreature.pos, self.abstractCreature.world.game.GetNewID());
-                    abstractCreature.state = new HealthState(abstractCreature);     
-                    abstractCreature.RealizeInRoom();
-                    
-                    if (abstractCreature.realizedCreature != null)
-                    {
-                        foreach (var bodychunk in abstractCreature.realizedCreature.bodyChunks)
-                        {
-                            bodychunk.vel += Custom.RNV() * Random.Range(5f, 20f);
-                            bodychunk.pos = self.mainBodyChunk.pos;
-                        }
-                       
-                    }
-                }
+                self.room.AddObject(new ParasiteBirth(self));
             }
             orig(self);
         }
@@ -281,7 +245,133 @@ namespace Pkuyo.Wanderer.Creatures
         }
         public ConditionalWeakTable<Creature, ParasiteData> parasiteData;
     }
+    
+    class ParasiteBirth : UpdatableAndDeletable
+    {
+        public ParasiteBirth(Creature origin)
+        {
+            Debug.Log("Add ParasiteBirth");
+            if (origin == null)
+            {
+                hasExplosion = true;
+                Destroy();
+            }
+            this.origin = origin;
 
+            rads = new float[origin.bodyChunks.Length];
+            pos = new Vector2[origin.bodyChunks.Length];
+            for (int i = 0; i < origin.bodyChunks.Length; i++)
+            {
+                rads[i] = origin.bodyChunks[i].rad;
+                pos[i] = origin.bodyChunks[i].pos;
+            }
+
+
+
+        }
+        public override void Update(bool eu)
+        {
+            base.Update(eu);
+            if (slatedForDeletetion || room == null)
+                return;
+
+            if (room.PlayersInRoom.Count == 0)
+            {
+                Explosion();
+                Destroy();
+                return;
+            }
+            if(counter > maxCount && !hasExplosion)
+            {
+                Explosion();
+            }
+            else if(!hasExplosion)
+            {
+                for (int i = 0; i < origin.bodyChunks.Length; i++)
+                {
+                    origin.bodyChunks[i].rad = rads[i] * Custom.LerpMap(counter, 0, maxCount, 1, 2f);
+                    origin.bodyChunks[i].vel += Custom.RNV()* Custom.LerpMap(counter, 0, maxCount, 1, 6f);
+                    origin.bodyChunks[i].pos = pos[i];
+                }
+                counter++;
+            }
+            else
+            {
+                for (int i = 0; i < origin.bodyChunks.Length; i++)
+                    origin.bodyChunks[i].rad = Mathf.Lerp(origin.bodyChunks[i].rad, rads[i], 0.02f);
+                
+                if (origin.bodyChunks[0].rad / rads[0]< 1.1f)
+                    Destroy();
+            }
+            
+        }
+        public override void Destroy()
+        {
+            if (!hasExplosion)
+                Explosion();
+
+            for (int i = 0; i < origin.bodyChunks.Length; i++)
+                origin.bodyChunks[i].rad = rads[i];
+
+            origin = null;
+            base.Destroy();
+        }
+
+        public void Explosion()
+        {
+            hasExplosion = true;
+            for (int i = 0; i < origin.bodyChunks.Length; i++)
+            {
+                origin.bodyChunks[i].pos = pos[i];
+                origin.bodyChunks[i].vel = Vector2.zero;
+            }
+            Debug.Log("Parasite explode from " + origin.abstractCreature.ID);
+            var hasAdult = Random.value < 0.3f;
+            if (hasAdult)
+            {
+                AbstractCreature abstractCreature = new AbstractCreature(origin.abstractCreature.world, StaticWorld.GetCreatureTemplate(WandererEnum.Creatures.FemaleParasite), null, origin.abstractCreature.pos, origin.abstractCreature.world.game.GetNewID());
+                abstractCreature.state = new HealthState(abstractCreature);
+                abstractCreature.RealizeInRoom();
+
+                if (abstractCreature.realizedCreature != null)
+                {
+                    foreach (var bodychunk in abstractCreature.realizedCreature.bodyChunks)
+                    {
+                        bodychunk.vel += Custom.RNV() * Random.Range(5f, 20f);
+                        bodychunk.pos = origin.mainBodyChunk.pos;
+                    }
+
+
+                }
+            }
+            int count = Random.Range(1, 3) - (hasAdult ? 1 : 0);
+            for (int i = 0; i < count; i++)
+            {
+                AbstractCreature abstractCreature = new AbstractCreature(origin.abstractCreature.world, StaticWorld.GetCreatureTemplate(WandererEnum.Creatures.ChildParasite), null, origin.abstractCreature.pos, origin.abstractCreature.world.game.GetNewID());
+                abstractCreature.state = new HealthState(abstractCreature);
+                abstractCreature.RealizeInRoom();
+
+                if (abstractCreature.realizedCreature != null)
+                {
+                    foreach (var bodychunk in abstractCreature.realizedCreature.bodyChunks)
+                    {
+                        bodychunk.vel += Custom.RNV() * Random.Range(5f, 20f);
+                        bodychunk.pos = origin.mainBodyChunk.pos;
+                    }
+
+                }
+            }
+        }
+        int counter = 0;
+        bool hasExplosion = false;
+       
+
+        readonly int maxCount = 200;
+
+        float[] rads;
+        Vector2[] pos;
+        Creature origin;
+    }
     //TODO : 多人
     class ParasiteGameSession : GameSession
     {
