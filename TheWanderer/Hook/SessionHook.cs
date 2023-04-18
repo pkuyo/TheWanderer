@@ -33,9 +33,11 @@ namespace Pkuyo.Wanderer
             On.SaveState.ctor += SaveState_ctor;
             On.RegionGate.customKarmaGateRequirements += RegionGate_customKarmaGateRequirements;
 
-            IL.RainCycle.ctor += RainCycle_ctor;
+            IL.RainCycle.ctor += RainCycle_ctorIL;
             _log.LogDebug("WanderMessionFeature Init");
         }
+
+   
 
         private void HUD_InitSinglePlayerHud(On.HUD.HUD.orig_InitSinglePlayerHud orig, HUD.HUD self, RoomCamera cam)
         {
@@ -100,7 +102,7 @@ namespace Pkuyo.Wanderer
             }
         }
 
-        private void RainCycle_ctor(ILContext il)
+        private void RainCycle_ctorIL(ILContext il)
         {
             ILCursor c = new ILCursor(il);
             if (c.TryGotoNext(MoveType.After, i => i.OpCode == OpCodes.Conv_I4,
@@ -352,9 +354,13 @@ namespace Pkuyo.Wanderer
 
             //是否是避难所内，是则强制显示
             bool isShelter = false;
-            if ((this.hud.owner as Player).room != null)
-                isShelter = (this.hud.owner as Player).room.abstractRoom.shelter;
-            if (isShelter)
+            if(!(hud.owner is Player))
+            {
+                return;
+            }
+            if ((hud.owner as Player).room != null)
+                isShelter = (hud.owner as Player).room.abstractRoom.shelter;
+            if (isShelter || (hud.owner as Player).showKarmaFoodRainTime >0)
                 fade = 3.0f;
 
             //声望变动时显示
@@ -363,9 +369,9 @@ namespace Pkuyo.Wanderer
                 fade += 1 / 30f;
                 ReputationChanged -= 1 / 30f;
             }
-            else if (this.hud.owner.RevealMap && fade < 6.0f)
+            else if (hud.owner.RevealMap && fade < 6.0f)
                 fade += 1 / 30f;
-            else if (!this.hud.owner.RevealMap && ReputationChanged <= 0 && fade > 0.0f && !isShelter)
+            else if (!hud.owner.RevealMap && ReputationChanged <= 0 && fade > 0.0f && !isShelter)
                 fade -= 1 / 30f;
 
 

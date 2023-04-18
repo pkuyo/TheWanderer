@@ -22,6 +22,7 @@ namespace Pkuyo.Wanderer.Creatures
     {
         ToxicSpiderHook(ManualLogSource log) : base(log)
         {
+            
         }
 
         static public ToxicSpiderHook Instance(ManualLogSource log = null)
@@ -51,7 +52,6 @@ namespace Pkuyo.Wanderer.Creatures
         private void BigSpider_ctor(On.BigSpider.orig_ctor orig, BigSpider self, AbstractCreature abstractCreature, World world)
         {
             orig(self, abstractCreature, world);
-
             if (abstractCreature.creatureTemplate.type == WandererEnum.Creatures.ToxicSpider)
             {
 
@@ -224,7 +224,6 @@ namespace Pkuyo.Wanderer.Creatures
     {
         public ToxicSpiderCritob() : base(WandererEnum.Creatures.ToxicSpider)
         {
-            WandererMod.Log.LogDebug("[ToxicSpiderCritob] CTOR");
             Icon = new SimpleIcon("Kill_BigSpider", new Color(0.1f, 0.1f, 1f));
             CreatureName = "Toxic Spider";
             LoadedPerformanceCost = 50f;
@@ -251,7 +250,6 @@ namespace Pkuyo.Wanderer.Creatures
 
         public override CreatureTemplate CreateTemplate()
         {
-            WandererMod.Log.LogDebug("[ToxicSpiderCritob] Create Template ");
             CreatureTemplate t = new CreatureFormula(this)
             {
                 DefaultRelationship = new(CreatureTemplate.Relationship.Type.Ignores, 0.0f),

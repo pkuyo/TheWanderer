@@ -1,6 +1,6 @@
 ﻿using BepInEx.Logging;
 using HarmonyLib;
-using Nutils.Hook;
+using Nutils.hook;
 using Pkuyo.Wanderer.Options;
 using RWCustom;
 using SlugBase.Features;

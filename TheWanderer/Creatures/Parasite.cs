@@ -23,19 +23,19 @@ namespace Pkuyo.Wanderer.Creatures
     {
         public Parasite(AbstractCreature abstractCreature, World world) : base(abstractCreature, world)
         {
-            float rad = 5;
-            float mass = 0.5f;
+            float rad = 6;
+            float mass = 1f;
             float connectLength = 15;
             if (abstractCreature.creatureTemplate.type == WandererEnum.Creatures.FemaleParasite)
             {
-                kindSpeed = 0.7f;
-                rad = 6;
+                kindSpeed = 1f;
+                rad = 5;
                 mass = 0.7f;
                 isFemale = true;
             }
             else if (abstractCreature.creatureTemplate.type == WandererEnum.Creatures.MaleParasite)
             {
-                kindSpeed = 1.0f;
+                kindSpeed = 1.4f;
                 isMale = true;
             }
             else if (abstractCreature.creatureTemplate.type == WandererEnum.Creatures.ChildParasite)
@@ -44,11 +44,13 @@ namespace Pkuyo.Wanderer.Creatures
                 rad = 3;
                 mass = 0.25f;
                 connectLength = 10;
-                kindSpeed = 0.6f;
+                kindSpeed = 0.7f;
             }
-            bodyChunks = new BodyChunk[2];
-            bodyChunks[0] = new BodyChunk(this, 0, Vector2.zero, rad, mass);
-            bodyChunks[1] = new BodyChunk(this, 0, Vector2.zero, rad, mass);
+            bodyChunks = new BodyChunk[3];
+            bodyChunks[0] = new BodyChunk(this, 0, Vector2.zero, rad, mass * 0.4f);
+            bodyChunks[1] = new BodyChunk(this, 0, Vector2.zero, rad, mass * 0.4f);
+            bodyChunks[2] = new BodyChunk(this, 0, Vector2.zero, rad, mass * 0.2f);
+
             airFriction = 0.999f;
             bounce = 0.1f;
             surfaceFriction = 0.4f;
@@ -56,20 +58,28 @@ namespace Pkuyo.Wanderer.Creatures
             gravity = 0.9f;
             waterFriction = 0.96f;
             buoyancy = 0.95f;
-            bodyChunkConnections = new BodyChunkConnection[1];
-            bodyChunkConnections[0] = new BodyChunkConnection(bodyChunks[0], bodyChunks[1], connectLength, BodyChunkConnection.Type.Normal, 1f, 0.5f);
 
-          
+            bodyChunkConnections = new BodyChunkConnection[3];
+            bodyChunkConnections[0] = new BodyChunkConnection(bodyChunks[0], bodyChunks[1], connectLength, BodyChunkConnection.Type.Normal, 1f, 0.5f);
+            bodyChunkConnections[1] = new BodyChunkConnection(bodyChunks[1], bodyChunks[2], connectLength*1.2f, BodyChunkConnection.Type.Normal, 1f, -1f);
+            bodyChunkConnections[2] = new BodyChunkConnection(bodyChunks[0], bodyChunks[2], connectLength*0.8f, BodyChunkConnection.Type.Push, 1f, -1f);
+
         }
 
 
         public override void Update(bool eu)
         {
-            if (room == null)
-            {
-                return;
-            }
 
+            if (room == null)
+                return;
+
+            foreach (var chunk in bodyChunks)
+                if (chunk == null)
+                    return;
+
+            foreach (var chunk in bodyChunkConnections)
+                if (chunk == null)
+                    return;
             if (room.game.devToolsActive && Input.GetKey("b") && room.game.cameras[0].room == room)
             {
                 bodyChunks[0].vel += Custom.DirVec(bodyChunks[0].pos, new Vector2(Futile.mousePosition.x, Futile.mousePosition.y) + room.game.cameras[0].pos) * 14f;
@@ -88,19 +98,23 @@ namespace Pkuyo.Wanderer.Creatures
                     bodyChunks[1].vel += Custom.RNV() * Random.value * 3f;
             }
             base.Update(eu);
-            mainBodyChunk.vel += Custom.DirVec(bodyChunks[1].pos, mainBodyChunk.pos) * 0.5f;
+            //mainBodyChunk.vel += Custom.DirVec(bodyChunks[1].pos, mainBodyChunk.pos) * 0.5f;
             sitting = false;
-
+      
             if (Consious)
             {
-                if (room.aimap.TileAccessibleToCreature(bodyChunks[0].pos, Template) || room.aimap.TileAccessibleToCreature(bodyChunks[1].pos, Template))
-                    footingCounter++;
 
-                var cost = room.aimap.TileCostForCreature(abstractCreature.pos, Template);
-                if(cost.legality<=PathCost.Legality.Unwanted)
-                    diffSpeed = Custom.LerpAndTick(diffSpeed, 1f / Mathf.Pow(cost.resistance, 0.5f), 0.01f, 0.1f);
+                if (room.aimap != null)
+                {
+                    var cost = room.aimap.TileCostForCreature(abstractCreature.pos, Template);
+                    if (cost.legality <= PathCost.Legality.Unwanted)
+                        diffSpeed = Custom.LerpAndTick(diffSpeed, 1f / Mathf.Pow(cost.resistance, 0.5f), 0.01f, 0.1f);
+                    if (room.aimap.TileAccessibleToCreature(bodyChunks[0].pos, Template) || room.aimap.TileAccessibleToCreature(bodyChunks[1].pos, Template))
+                        footingCounter++;
+                }
 
                 Act();
+
             }
             else
             {
@@ -109,29 +123,33 @@ namespace Pkuyo.Wanderer.Creatures
 
             if (Footing)
             {
-                for (int k = 0; k < 2; k++)
+                for (int k = 0; k < 3; k++)
                 {
+                    bodyChunks[k].vel.y += gravity;
                     bodyChunks[k].vel *= 0.8f;
-                    BodyChunk bodyChunk = bodyChunks[k];
-                    bodyChunk.vel.y = bodyChunk.vel.y +gravity;
                 }
-                if (MoveBackwards)
+                if (!sitting)
                 {
-                    BodyChunk bodyChunk2 = bodyChunks[1];
-                    bodyChunk2.vel.y = bodyChunk2.vel.y + gravity;
-                }
-                else
-                {
-                    BodyChunk bodyChunk3 = bodyChunks[1];
-                    bodyChunk3.vel.y = bodyChunk3.vel.y + gravity * Mathf.Lerp(0.5f, 1f, AI.stuckTracker.Utility());
+                    if (MoveBackwards)
+                    {
+                        BodyChunk bodyChunk2 = bodyChunks[2];
+                        bodyChunk2.vel.y = bodyChunk2.vel.y + gravity;
+                    }
+                    else
+                    {
+                        BodyChunk bodyChunk3 = bodyChunks[2];
+                        bodyChunk3.vel.y = bodyChunk3.vel.y + gravity * Mathf.Lerp(0.5f, 1f, AI.stuckTracker.Utility());
+                    }
                 }
             }
+
             travelDir *= (sitting ? 0.5f : 0.9995f);
             if (grasps[0] != null)
             {
                 CarryObject(eu);
                 return;
             }
+
         }
         public void InitiateJump(BodyChunk target)
         {
@@ -197,7 +215,7 @@ namespace Pkuyo.Wanderer.Creatures
                 (AI.DynamicRelationship((grasps[0].grabbed as Creature).abstractCreature).type != CreatureTemplate.Relationship.Type.Eats) &&
                 AI.DynamicRelationship((grasps[0].grabbed as Creature).abstractCreature).type != CreatureTemplate.Relationship.Type.Attacks))
             {
-                Debug.Log("Parasite lose grasp, not except creature");
+                WandererMod.Log("Parasite lose grasp, not except creature");
                 LoseAllGrasps();
                 return;
             }
@@ -283,7 +301,7 @@ namespace Pkuyo.Wanderer.Creatures
                     if (Grab(otherObject, 0, otherChunk, Grasp.Shareability.CanNotShare, 0.5f, false, true))
                     {
                         infectingCounter = 0;
-                        Debug.Log("Female Parasite grab");
+                        WandererMod.Log("Female Parasite grab");
                         (otherObject as Creature).LoseAllGrasps();
                         room.PlaySound(SoundID.Drop_Bug_Grab_Creature, mainBodyChunk);
                     }
@@ -298,9 +316,22 @@ namespace Pkuyo.Wanderer.Creatures
                         if (Grab(otherObject, 0, otherChunk, Grasp.Shareability.CanNotShare, 0.5f, false, true))
                         {
                             eattingCounter = 0;
-                            (otherObject as Creature).Violence(mainBodyChunk, new Vector2?(Custom.DirVec(mainBodyChunk.pos, otherObject.bodyChunks[otherChunk].pos) * 4f), otherObject.bodyChunks[otherChunk], null, DamageType.Bite, Mathf.Lerp(0.5f, 1.5f, attemptBite), 0f);
-                            Debug.Log("Male Parasite grab");
                             room.PlaySound(SoundID.Drop_Bug_Grab_Creature, mainBodyChunk);
+
+                            //如果在梦里则添加寄生效果 并加上即死
+                            if ((otherObject is Player && abstractPhysicalObject.world.game.session is ParasiteGameSession))
+                            {
+                                if (ParasiteHook.Instance().parasiteData.TryGetValue((otherObject as Player).abstractCreature, out var data))
+                                    data.isParasite = true;
+                                if (otherObject is Player)
+                                    ParasiteHook.AddParasiteFood(otherObject as Player);
+  
+                                (otherObject as Creature).Die();
+                                return;
+                            }
+
+                            (otherObject as Creature).Violence(mainBodyChunk, new Vector2?(Custom.DirVec(mainBodyChunk.pos, otherObject.bodyChunks[otherChunk].pos) * 4f), otherObject.bodyChunks[otherChunk], null, DamageType.Bite, Mathf.Lerp(0.75f, 1.5f, attemptBite), 0f);
+                            WandererMod.Log("Male Parasite grab");
                         }
                     }
                     attemptBite = 0f;
@@ -325,11 +356,16 @@ namespace Pkuyo.Wanderer.Creatures
                     {
                         Creature creature = grasps[0].grabbed as Creature;
 
-                        if (ParasiteHook.Instance().parasiteData.TryGetValue(creature, out var data))
+                        if (ParasiteHook.Instance().parasiteData.TryGetValue(creature.abstractCreature, out var data))
+                        {
+                            WandererMod.Log("Parasite param set " + (grasps[0].grabbed as Creature).Template.type);
                             data.isParasite = true;
-                        
+                        }
+                        if (creature is Player)
+                            ParasiteHook.AddParasiteFood(creature as Player);
+
                         room.PlaySound(SoundID.Drop_Bug_Grab_Creature, mainBodyChunk);
-                        Debug.Log("Parasite infected " + (grasps[0].grabbed as Creature).Template.type);
+                        WandererMod.Log("Parasite infected " + (grasps[0].grabbed as Creature).Template.type);
                     }
                     LoseAllGrasps();
                 }
@@ -378,10 +414,20 @@ namespace Pkuyo.Wanderer.Creatures
                     {
                         eattingCounter=0;
                         room.PlaySound(SoundID.Drop_Bug_Grab_Creature, mainBodyChunk);
-                        Debug.Log("Parasite eaten " + (grasps[0].grabbed as Creature).Template.type);
+
+                        if(!(grasps[0].grabbed as Creature).dead)
+                            (grasps[0].grabbed as Creature).Die();
+
+                        WandererMod.Log("Parasite eaten " + (grasps[0].grabbed as Creature).Template.type);
                         LoseAllGrasps();
                     }
-                    
+                    if (eattingCounter == 20 && room.game.session is ParasiteGameSession)
+                    {
+                        if (!(grasps[0].grabbed as Creature).dead)
+                            (grasps[0].grabbed as Creature).Die();
+                        WandererMod.Log("Parasite lose grasp, waiting brith");
+                        LoseAllGrasps();
+                    }
                 }
             }
 
@@ -408,7 +454,8 @@ namespace Pkuyo.Wanderer.Creatures
                 {
                     bodyChunks[0].vel += Custom.DirVec(bodyChunks[0].pos, jumpAtChunk.pos) * 1.0f;
                     bodyChunks[1].vel -= Custom.DirVec(bodyChunks[0].pos, jumpAtChunk.pos) * 0.4f;
-  
+                    bodyChunks[2].vel = Custom.DirVec(bodyChunks[0].pos, jumpAtChunk.pos) * 0.4f;
+
                 }
 
                 if (Footing)
@@ -558,10 +605,10 @@ namespace Pkuyo.Wanderer.Creatures
                     }
                 }
                 Vector2 toPos = room.MiddleOfTile(movementConnection.DestTile);
-                travelDir = Vector2.Lerp(travelDir, Custom.DirVec(bodyChunks[(!MoveBackwards) ? 0 : 1].pos, toPos), 0.4f);
+                travelDir = Vector2.Lerp(travelDir, Custom.DirVec(bodyChunks[(!MoveBackwards) ? 0 : 2].pos, toPos), 0.4f);
                 if (lastFollowedConnection != null && lastFollowedConnection.type == MovementConnection.MovementType.ReachUp)
                 {
-                    bodyChunks[(!MoveBackwards) ? 0 : 1].vel += Custom.DirVec(bodyChunks[(!MoveBackwards) ? 0 : 1].pos, toPos) * 4f * CurrentSpeed;
+                    bodyChunks[(!MoveBackwards) ? 0 : 2].vel += Custom.DirVec(bodyChunks[(!MoveBackwards) ? 0 : 2].pos, toPos) * 4f * CurrentSpeed;
                 }
 
                 //转方向
@@ -569,13 +616,17 @@ namespace Pkuyo.Wanderer.Creatures
                     ((followingConnection.startCoord.x != followingConnection.destinationCoord.x && lastFollowedConnection.startCoord.x == lastFollowedConnection.destinationCoord.x) ||
                      (followingConnection.startCoord.y != followingConnection.destinationCoord.y && lastFollowedConnection.startCoord.y == lastFollowedConnection.destinationCoord.y)))
                 {
-                    bodyChunks[(!MoveBackwards) ? 0 : 1].vel *= 0.7f;
-                    bodyChunks[(!MoveBackwards) ? 1 : 0].vel *= 0.5f;
+                    bodyChunks[(!MoveBackwards) ? 0 : 2].vel *= 0.7f;
+                    bodyChunks[(!MoveBackwards) ? 2 : 0].vel *= 0.5f;
                 }
                 MoveTowards(toPos);
 
             }
             lastFollowedConnection = followingConnection;
+            if (followingConnection.type == MovementConnection.MovementType.DropToFloor)
+            {
+                footingCounter = 0;
+            }
         }
 
         private void MoveTowards(Vector2 moveTo)
@@ -596,14 +647,18 @@ namespace Pkuyo.Wanderer.Creatures
             float d = 1 * Mathf.Lerp(1f, 1.5f, stuckShake) * CurrentSpeed;
             if (MoveBackwards)
             {
-                bodyChunks[1].vel += vector * 7.5f * d;
+                bodyChunks[2].vel += vector * 7.5f * d;
+                bodyChunks[1].vel += vector * 0.2f * d;
                 mainBodyChunk.vel -= vector * 0.45f * d;
-                GoThroughFloors = (moveTo.y < bodyChunks[1].pos.y - 5f);
-                return;
+                GoThroughFloors = (moveTo.y < bodyChunks[2].pos.y - 5f);
             }
-            mainBodyChunk.vel += vector * 4.5f * d;
-            bodyChunks[1].vel -= vector * 0.2f * d;
-            GoThroughFloors = (moveTo.y < mainBodyChunk.pos.y - 5f);
+            else
+            {
+                mainBodyChunk.vel += vector * 4.5f * d;
+                bodyChunks[1].vel -= vector * 0.45f * d;
+                bodyChunks[2].vel -= vector * 0.2f * d;
+                GoThroughFloors = (moveTo.y < mainBodyChunk.pos.y - 5f);
+            }
         }
 
         public override void Stun(int st)
@@ -628,7 +683,6 @@ namespace Pkuyo.Wanderer.Creatures
         IntVector2 specialMoveDestination;
         public Vector2 travelDir;
         MovementConnection lastFollowedConnection;
-
         int footingCounter = 0;
 
         float stuckShake;
@@ -830,6 +884,8 @@ namespace Pkuyo.Wanderer.Creatures
             relationships.EatenBy(MoreSlugcatsEnums.CreatureTemplateType.SlugNPC, 0.3f);
 
             relationships.EatenBy(CreatureTemplate.Type.LizardTemplate, 0.2f);
+
+            
 
             relationships.Fears(CreatureTemplate.Type.RedLizard, 0.8f);
             relationships.EatenBy(CreatureTemplate.Type.RedLizard, 0.3f);

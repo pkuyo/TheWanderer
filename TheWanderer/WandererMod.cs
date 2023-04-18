@@ -7,7 +7,7 @@ using JetBrains.Annotations;
 using MonoMod.Cil;
 using MoreSlugcats;
 using Newtonsoft.Json.Serialization;
-using Nutils.Hook;
+using Nutils.hook;
 using Pkuyo.Wanderer.Creatures;
 using Pkuyo.Wanderer.Feature;
 using Pkuyo.Wanderer.Objects;
@@ -34,9 +34,13 @@ namespace Pkuyo.Wanderer
         {
             _hooks = new List<HookBase>();
             WandererOptions = new WandererOptions(Logger);
-            Log = Logger;
+            log = Logger;
         }
 
+        public static void Log(string msg)
+        {
+            Debug.Log("[The Vanguard] "+ msg);
+        }
         public void OnEnable()
         {
             var modList = FindObjectsOfType<BaseUnityPlugin>();
@@ -48,7 +52,6 @@ namespace Pkuyo.Wanderer
                     break; 
                 }
             }
-
             if (!hasNutils)
             {
                 Logger.LogError("Missing Nutils Mod. Auto Disable The Vanguard Mod.");
@@ -58,12 +61,20 @@ namespace Pkuyo.Wanderer
             else
             {
                 WandererEnum.RegisterValues();
-                Content.Register(new CoolObjectFisob());
-                Content.Register(new ToxicSpiderCritob());
 
+                Content.Register(new CoolObjectFisob());
+
+                Content.Register(new ToxicSpiderCritob());
                 Content.Register(new ParasiteCritob(WandererEnum.Creatures.FemaleParasite));
                 Content.Register(new ParasiteCritob(WandererEnum.Creatures.MaleParasite));
                 Content.Register(new ParasiteCritob(WandererEnum.Creatures.ChildParasite));
+
+                CampaignHook.AddSpawnPos(WandererName, 8, 4, -1, "SB_INTROROOM1");
+                SceneHook.AddIntroSlideShow(WandererName, "RW_Intro_Theme", WandererEnum.Scene.WandererIntro, DreamScene.BuildSlideShow);
+                SceneHook.AddScene(WandererEnum.Scene.Intro_W1, DreamScene.BuildWandererScene1);
+                SceneHook.AddScene(WandererEnum.Scene.Intro_W2, DreamScene.BuildWandererScene2);
+                DreamSessionHook.RegisterDream(new ParasiteDreamNutils());
+
 
                 _hooks.Add(WandererAssetManager.Instance(Logger));
 
@@ -145,11 +156,7 @@ namespace Pkuyo.Wanderer
                 {
                     MachineConnector.SetRegisteredOI(ModID, WandererOptions);
 
-                    CampaignHook.AddSpawnPos(WandererName, 8, 4, -1, "SB_INTROROOM1");
 
-                    SceneHook.AddIntroSlideShow(WandererName, "RW_Intro_Theme", WandererEnum.Scene.WandererIntro, DreamScene.BuildSlideShow);
-                    SceneHook.AddScene(WandererEnum.Scene.Intro_W1, DreamScene.BuildWandererScene1);
-                    SceneHook.AddScene(WandererEnum.Scene.Intro_W2, DreamScene.BuildWandererScene2);
 
                     foreach (var feature in _hooks)
                         feature.OnModsInit(self);
@@ -167,7 +174,7 @@ namespace Pkuyo.Wanderer
 
         private void RainWorld_OnModsDisabled(On.RainWorld.orig_OnModsDisabled orig, RainWorld self, ModManager.Mod[] newlyDisabledMods)
         {
-
+            orig(self, newlyDisabledMods);
             foreach (var mod in newlyDisabledMods)
             {
                 if (mod.id == ModID)
@@ -184,7 +191,7 @@ namespace Pkuyo.Wanderer
         private bool hasNutils = false;
         static public WandererOptions WandererOptions;
 
-        static public ManualLogSource Log;
+        static public ManualLogSource log;
     }
 
 

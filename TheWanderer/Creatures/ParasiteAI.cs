@@ -263,7 +263,7 @@ namespace Pkuyo.Wanderer.Creatures
             {
                 if (dRelation.trackerRep.representedCreature.realizedCreature != null)
                 {
-                    if (ParasiteHook.Instance().parasiteData.TryGetValue(dRelation.trackerRep.representedCreature.realizedCreature, out var data))
+                    if (ParasiteHook.Instance().parasiteData.TryGetValue(dRelation.trackerRep.representedCreature, out var data))
                         (dRelation.state as ParasiteTrackState).parasited = data.isParasite;
 
                     if ((dRelation.trackerRep.representedCreature.creatureTemplate.type == CreatureTemplate.Type.Slugcat || dRelation.trackerRep.representedCreature.creatureTemplate.type == CreatureTemplate.Type.Scavenger))

@@ -1,7 +1,9 @@
 ﻿using BepInEx.Logging;
+using JetBrains.Annotations;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using MonoMod.RuntimeDetour;
+using Nutils.hook;
 using RWCustom;
 using System;
 using System.Reflection;
@@ -15,8 +17,6 @@ namespace Pkuyo.Wanderer.Creatures
     class ParasiteHook : HookBase
     {
 
-        public delegate SlugcatStats orig_slugcatStats(Player self);
-
         static public ParasiteHook Instance(ManualLogSource log = null)
         {
             if (_instance == null)
@@ -28,206 +28,52 @@ namespace Pkuyo.Wanderer.Creatures
 
         ParasiteHook(ManualLogSource log) : base(log)
         {
-            parasiteData = new ConditionalWeakTable<Creature, ParasiteData> ();
+            parasiteData = new ConditionalWeakTable<AbstractCreature, ParasiteData> ();
         }
 
-        public static SlugcatStats Player_slugcatStats_get(orig_slugcatStats orig, Player self)
-        {
-            if (self.abstractCreature.world.game.session is ParasiteGameSession)
-                return self.abstractCreature.world.game.session.characterStats;
-            return orig(self);
-        }
 
         public override void OnModsInit(RainWorld rainWorld)
         {
 
             On.DreamsState.StaticEndOfCycleProgress += DreamsState_StaticEndOfCycleProgress;
-
-
-            On.RainWorldGame.ExitGame += RainWorldGame_ExitGame;
-            On.RainWorldGame.Win += RainWorldGame_Win;
-            On.RainWorldGame.Update += RainWorldGame_Update;
-
-            On.ProcessManager.PreSwitchMainProcess += ProcessManager_PreSwitchMainProcess;
-
-            On.OverWorld.LoadFirstWorld += OverWorld_LoadFirstWorld;
-
-            IL.RainWorldGame.ctor += RainWorldGame_ctor;
-            IL.World.ctor += World_ctor;
-
-            On.Creature.ctor += Creature_ctor;
+            On.AbstractCreature.ctor += AbstractCreature_ctor;
             On.Creature.Die += Creature_Die;
+            
 
-            Hook overseerColourHook = new Hook(
-                typeof(Player).GetProperty("slugcatStats", BindingFlags.Instance | BindingFlags.Public).GetGetMethod(),
-                typeof(ParasiteHook).GetMethod("Player_slugcatStats_get", BindingFlags.Static | BindingFlags.Public)
-            );
 
 
         }
 
-
-        private void RainWorldGame_Update(On.RainWorldGame.orig_Update orig, RainWorldGame self)
-        {
-            if (self.session is ParasiteGameSession)
-                (self.session as ParasiteGameSession).Update();
-            orig(self);
-        }
-
-        private void OverWorld_LoadFirstWorld(On.OverWorld.orig_LoadFirstWorld orig, OverWorld self)
-        {
-            if (self.game.session is ParasiteGameSession)
-            {
-                var text = "accelerator";
-                self.LoadWorld(text, self.PlayerCharacterNumber, true);
-                return;
-            }
-            orig(self);
-        }
-
-        private void World_ctor(ILContext il)
-        {
-            ILCursor c = new ILCursor(il);
-            if (c.TryGotoNext(MoveType.After, i => i.MatchCallvirt<RainWorldGame>("get_GetArenaGameSession")))
-            {
-                c.GotoPrev(MoveType.After, i => i.MatchLdarg(1));
-
-                var notArena = c.DefineLabel();
-                var arena = c.DefineLabel();
-                c.EmitDelegate<Func<RainWorldGame, bool>>((game) =>
-                {
-                    return game.IsArenaSession;
-                });
-                c.Emit(OpCodes.Brfalse_S, notArena);
-
-                c.Emit(OpCodes.Ldarg_1);
-                c.GotoNext(MoveType.After, i => i.MatchStfld<World>("rainCycle"));
-                c.Emit(OpCodes.Br_S, arena);
-                c.MarkLabel(notArena);
-
-                c.EmitDelegate<Action<World, World>>((self, world) =>
-                {
-                    //我无聊 好吧是为了清除返回值
-                    self.rainCycle = new RainCycle(world, 100);
-                });
-                c.MarkLabel(arena);
-            }
-        }
-
-        private void RainWorldGame_ExitGame(On.RainWorldGame.orig_ExitGame orig, RainWorldGame self, bool asDeath, bool asQuit)
-        {
-            if (self.session is ParasiteGameSession)
-            {
-                ExitParasiteDream(self, asDeath || asQuit);
-            }
-            orig(self, asDeath, asQuit);
-        }
-
-
-        public void ExitParasiteDream(RainWorldGame self, bool death)
-        {
-            parasiteDream = false;
-            var game = self.manager.oldProcess as RainWorldGame;
-            if (game == null)
-                throw new Exception("[ParasiteGameSession] OldPrcess is not a RainWorldGame Class!");
-
-            //progression会在切换process时清空(PostSwitchMainProcess)，需重新赋值
-
-            game.rainWorld.progression.currentSaveState = game.GetStorySession.saveState;
-
-            if (!death)
-                game.GetStorySession.saveState.SessionEnded(game, death, ma);
-
-
-            if (self.manager.musicPlayer != null)
-                self.manager.musicPlayer.FadeOutAllSongs(20f);
-
-            self.manager.menuSetup.startGameCondition = ProcessManager.MenuSetup.StoryGameInitCondition.Load;
-
-            if (death)
-                self.manager.RequestMainProcessSwitch(ProcessManager.ProcessID.DeathScreen, 3f);
-            else
-                self.manager.RequestMainProcessSwitch(ProcessManager.ProcessID.SleepScreen, 3f);
-
-            return;
-        }
-
-        private void ProcessManager_PreSwitchMainProcess(On.ProcessManager.orig_PreSwitchMainProcess orig, ProcessManager self, ProcessManager.ProcessID ID)
-        {
-
-            if (self.oldProcess is RainWorldGame && self.currentMainLoop is RainWorldGame && (self.currentMainLoop as RainWorldGame).session is ParasiteGameSession)
-            {
-                //切换回story进行数据传输
-                var game = self.oldProcess;
-                self.oldProcess = self.currentMainLoop;
-                self.currentMainLoop = game;
-
-                //手动删除梦境
-                self.oldProcess.ShutDownProcess();
-                self.oldProcess.processActive = false;
-
-                //清除恼人的coop控件
-                if (!game.processActive && ModManager.JollyCoop)
-                {
-                    foreach (var camera in (game as RainWorldGame).cameras)
-                    {
-                        if (camera.hud != null && camera.hud.jollyMeter != null)
-                        {
-                            camera.hud.parts.Remove(camera.hud.jollyMeter);
-                            camera.hud.jollyMeter = null;
-                        }
-                    }
-                }
-            }
-            orig(self, ID);
-        }
-
-        private void RainWorldGame_ctor(ILContext il)
-        {
-            ILCursor c = new ILCursor(il);
-            if (c.TryGotoNext(MoveType.Before, i => i.MatchNewobj<OverWorld>(),
-                                              i => i.MatchStfld<RainWorldGame>("overWorld")))
-            {
-                c.Emit(OpCodes.Ldarg_0);
-                c.EmitDelegate<Action<RainWorldGame>>((self) =>
-                {
-                    if (parasiteDream && self.manager.oldProcess is RainWorldGame)
-                    {
-                        self.session = new ParasiteGameSession(self, (self.manager.oldProcess as RainWorldGame).session.characterStats.name);
-                    }
-                });
-            }
-        }
-
-        private void RainWorldGame_Win(On.RainWorldGame.orig_Win orig, RainWorldGame self, bool malnourished)
-        {
-            //TODO : 获取
-            if (IsParasite && !(self.session is ParasiteGameSession))
-            {
-                parasiteDream = true;
-                self.manager.menuSetup.startGameCondition = ProcessManager.MenuSetup.StoryGameInitCondition.New;
-                ma = malnourished;
-                self.manager.RequestMainProcessSwitch(ProcessManager.ProcessID.Game);
-            }
-            orig(self, malnourished);
-        }
 
         private void DreamsState_StaticEndOfCycleProgress(On.DreamsState.orig_StaticEndOfCycleProgress orig, SaveState saveState, string currentRegion, string denPosition, ref int cyclesSinceLastDream, ref int cyclesSinceLastFamilyDream, ref int cyclesSinceLastGuideDream, ref int inGWOrSHCounter, ref DreamsState.DreamID upcomingDream, ref DreamsState.DreamID eventDream, ref bool everSleptInSB, ref bool everSleptInSB_S01, ref bool guideHasShownHimselfToPlayer, ref int guideThread, ref bool guideHasShownMoonThisRound, ref int familyThread)
         {
             orig(saveState, currentRegion, denPosition, ref cyclesSinceLastDream, ref cyclesSinceLastFamilyDream, ref cyclesSinceLastGuideDream, ref inGWOrSHCounter, ref upcomingDream, ref eventDream, ref everSleptInSB, ref everSleptInSB_S01, ref guideHasShownHimselfToPlayer, ref guideThread, ref guideHasShownMoonThisRound, ref familyThread);
         }
 
-        private void Creature_ctor(On.Creature.orig_ctor orig, Creature self, AbstractCreature abstractCreature, World world)
+
+        private void AbstractCreature_ctor(On.AbstractCreature.orig_ctor orig, AbstractCreature self, World world, CreatureTemplate creatureTemplate, Creature realizedCreature, WorldCoordinate pos, EntityID ID)
         {
-            orig(self, abstractCreature, world);
+            orig(self,world,creatureTemplate, realizedCreature, pos, ID);
+            if (self.creatureTemplate.type == CreatureTemplate.Type.Fly ||
+                self.creatureTemplate.type == WandererEnum.Creatures.ChildParasite ||
+                self.creatureTemplate.type == WandererEnum.Creatures.FemaleParasite ||
+                self.creatureTemplate.type == WandererEnum.Creatures.MaleParasite)
+                return;
+
             if (!parasiteData.TryGetValue(self, out _))
+            {
                 parasiteData.Add(self, new ParasiteData());
+                WandererMod.Log("Add parasite data for" + self.type + " " + self.ID);
+            }
         }
+
+ 
 
         private void Creature_Die(On.Creature.orig_Die orig, Creature self)
         {
-            if (parasiteData.TryGetValue(self, out var data) && data.isParasite)
+            if (parasiteData.TryGetValue(self.abstractCreature, out var data) && data.isParasite && !data.hasBirth)
             {
+                data.hasBirth = true;
                 self.room.AddObject(new ParasiteBirth(self));
             }
             orig(self);
@@ -242,15 +88,32 @@ namespace Pkuyo.Wanderer.Creatures
         public class ParasiteData
         {
             public bool isParasite = false;
+            public bool hasBirth = false;
         }
-        public ConditionalWeakTable<Creature, ParasiteData> parasiteData;
+        public ConditionalWeakTable<AbstractCreature, ParasiteData> parasiteData;
+
+        public static void AddParasiteFood(Player owner)
+        {
+            if (!owner.room.game.IsStorySession)
+                return;
+            WandererMod.Log("Increase food limit to hibernate");
+            owner.room.game.session.characterStats.foodToHibernate = Mathf.Min(owner.room.game.session.characterStats.maxFood, owner.room.game.session.characterStats.foodToHibernate + 1);
+            if (owner.room.game.cameras[0].hud.foodMeter != null)
+            {
+                owner.showKarmaFoodRainTime = 80;
+                owner.room.game.cameras[0].hud.foodMeter.MoveSurvivalLimit(owner.room.game.session.characterStats.foodToHibernate, true);
+                owner.room.game.cameras[0].hud.foodMeter.survivalLimit = owner.room.game.session.characterStats.foodToHibernate;
+            }
+        }
+            
+
     }
     
     class ParasiteBirth : UpdatableAndDeletable
     {
         public ParasiteBirth(Creature origin)
         {
-            Debug.Log("Add ParasiteBirth");
+            WandererMod.Log("Add ParasiteBirth");
             if (origin == null)
             {
                 hasExplosion = true;
@@ -264,16 +127,82 @@ namespace Pkuyo.Wanderer.Creatures
             {
                 rads[i] = origin.bodyChunks[i].rad;
                 pos[i] = origin.bodyChunks[i].pos;
+
             }
 
 
 
         }
+
+        public void UpdateColor()
+        {
+            if (slatedForDeletetion)
+                return;
+            if (sLeaser == null && origin.graphicsModule != null)
+            {
+                foreach (var sl in room.game.cameras[0].spriteLeasers)
+                {
+                    if (sl.drawableObject == origin.graphicsModule)
+                    {
+                        sLeaser = sl;
+                        if (origin is Lizard)
+                        {
+                            color = new Color[1];
+                            color[0] = ((origin as Lizard).graphicsModule as LizardGraphics).palette.blackColor;
+                            break;
+                        }
+                        else
+                        {
+                            color = new Color[sLeaser.sprites.Length];
+                            for (int i = 0; i < color.Length; i++)
+                                color[i] = sLeaser.sprites[i].color;
+                            break;
+                        }
+                    }
+                }
+            }
+            
+            if (sLeaser!=null)
+            {
+                if (!hasExplosion)
+                {
+                    if (origin is Lizard && (origin as Lizard).graphicsModule != null)
+                    {
+                        var pa = ((origin as Lizard).graphicsModule as LizardGraphics).palette;
+                        pa.blackColor = Color.Lerp(color[0], Color.white, Mathf.InverseLerp(0, maxCount, counter));
+                        ((origin as Lizard).graphicsModule as LizardGraphics).ApplyPalette(sLeaser, room.game.cameras[0], pa);
+                    }
+                    else
+                    {
+                        for (int i = 0; i < sLeaser.sprites.Length; i++)
+                            sLeaser.sprites[i].color = Color.Lerp(color[i], Color.white, Mathf.InverseLerp(0, maxCount, counter));
+                    }
+                }
+                else
+                {
+                    if (origin is Lizard && (origin as Lizard).graphicsModule != null)
+                    {
+                        var pa = ((origin as Lizard).graphicsModule as LizardGraphics).palette;
+                        pa.blackColor = Color.Lerp(pa.blackColor, color[0], 0.02f);
+                        ((origin as Lizard).graphicsModule as LizardGraphics).ApplyPalette(sLeaser, room.game.cameras[0], pa);
+                    }
+                    else
+                    {
+                        for (int i = 0; i < sLeaser.sprites.Length; i++)
+                            sLeaser.sprites[i].color = Color.Lerp(sLeaser.sprites[i].color, color[i], 0.02f);
+                    }
+                }
+            }
+           
+        }
+
         public override void Update(bool eu)
         {
             base.Update(eu);
             if (slatedForDeletetion || room == null)
                 return;
+
+            UpdateColor();
 
             if (room.PlayersInRoom.Count == 0)
             {
@@ -281,25 +210,29 @@ namespace Pkuyo.Wanderer.Creatures
                 Destroy();
                 return;
             }
-            if(counter > maxCount && !hasExplosion)
+            if (counter > maxCount && !hasExplosion)
             {
                 Explosion();
             }
-            else if(!hasExplosion)
+            else if (!hasExplosion)
             {
                 for (int i = 0; i < origin.bodyChunks.Length; i++)
                 {
-                    origin.bodyChunks[i].rad = rads[i] * Custom.LerpMap(counter, 0, maxCount, 1, 2f);
-                    origin.bodyChunks[i].vel += Custom.RNV()* Custom.LerpMap(counter, 0, maxCount, 1, 6f);
-                    origin.bodyChunks[i].pos = pos[i];
+                    Vector2 rnv;
+                    rnv = new Vector2((Random.value - 0.5f), (Random.value - 0.5f) / 2).normalized;
+                    if (!(origin is Player))
+                        origin.bodyChunks[i].rad = rads[i] * Custom.LerpMap(counter, 0, maxCount, 1, 2f);
+                    origin.bodyChunks[i].vel += rnv * Custom.LerpMap(counter, 0, maxCount, 1, 6f) * Mathf.Clamp(origin.bodyChunks[i].mass, 0.4f, 1.5f);
+                    origin.bodyChunks[i].pos.x = pos[i].x;
                 }
+
+   
                 counter++;
             }
             else
             {
                 for (int i = 0; i < origin.bodyChunks.Length; i++)
                     origin.bodyChunks[i].rad = Mathf.Lerp(origin.bodyChunks[i].rad, rads[i], 0.02f);
-                
                 if (origin.bodyChunks[0].rad / rads[0]< 1.1f)
                     Destroy();
             }
@@ -308,8 +241,22 @@ namespace Pkuyo.Wanderer.Creatures
         public override void Destroy()
         {
             if (!hasExplosion)
-                Explosion();
+                Explosion();    
 
+            if(sLeaser != null)
+            {
+                if (origin is Lizard && (origin as Lizard).graphicsModule != null)
+                {
+                    var pa = ((origin as Lizard).graphicsModule as LizardGraphics).palette;
+                    pa.blackColor =  color[0];
+                    ((origin as Lizard).graphicsModule as LizardGraphics).ApplyPalette(sLeaser, room.game.cameras[0], pa);
+                }
+                else
+                {
+                    for (int i = 0; i < sLeaser.sprites.Length; i++)
+                        sLeaser.sprites[i].color = color[i];
+                }
+            }
             for (int i = 0; i < origin.bodyChunks.Length; i++)
                 origin.bodyChunks[i].rad = rads[i];
 
@@ -322,10 +269,10 @@ namespace Pkuyo.Wanderer.Creatures
             hasExplosion = true;
             for (int i = 0; i < origin.bodyChunks.Length; i++)
             {
-                origin.bodyChunks[i].pos = pos[i];
+                origin.bodyChunks[i].pos.x = pos[i].x;
                 origin.bodyChunks[i].vel = Vector2.zero;
             }
-            Debug.Log("Parasite explode from " + origin.abstractCreature.ID);
+            WandererMod.Log("Parasite explode from " + origin.abstractCreature.ID);
             var hasAdult = Random.value < 0.3f;
             if (hasAdult)
             {
@@ -338,7 +285,7 @@ namespace Pkuyo.Wanderer.Creatures
                     foreach (var bodychunk in abstractCreature.realizedCreature.bodyChunks)
                     {
                         bodychunk.vel += Custom.RNV() * Random.Range(5f, 20f);
-                        bodychunk.pos = origin.mainBodyChunk.pos;
+                        bodychunk.pos = origin.mainBodyChunk.pos + bodychunk.vel;
                     }
 
 
@@ -356,7 +303,7 @@ namespace Pkuyo.Wanderer.Creatures
                     foreach (var bodychunk in abstractCreature.realizedCreature.bodyChunks)
                     {
                         bodychunk.vel += Custom.RNV() * Random.Range(5f, 20f);
-                        bodychunk.pos = origin.mainBodyChunk.pos;
+                        bodychunk.pos = origin.mainBodyChunk.pos + bodychunk.vel;
                     }
 
                 }
@@ -368,93 +315,84 @@ namespace Pkuyo.Wanderer.Creatures
 
         readonly int maxCount = 200;
 
+        RoomCamera.SpriteLeaser sLeaser;
         float[] rads;
         Vector2[] pos;
         Creature origin;
+        Color[] color;
+
     }
     //TODO : 多人
-    class ParasiteGameSession : GameSession
+
+    class ParasiteDreamNutils : DreamNutils
     {
-        public ParasiteGameSession(RainWorldGame game, SlugcatStats.Name name) : base(game)
+        public override bool HasDreamThisCycle(RainWorldGame game, bool malnourished)
         {
-            characterStats = new SlugcatStats(name, false);
-
-        }
-        public Room room
-        {
-            get
+            foreach(var a in game.Players)
             {
-                return game.cameras[0].room;
+                if (ParasiteHook.Instance().parasiteData.TryGetValue(a, out var data) && data.isParasite)
+                    return true;
             }
+            return false;
+        }
+        public override DreamGameSession GetSession(RainWorldGame game, SlugcatStats.Name name)
+        {
+            return new ParasiteGameSession(game, name, this);
+        }
+        public override string FirstRoom => "parasitecaveC";
+        public override bool HiddenRoomInArena => true;
+        public override bool IsSingleWorld => true;
+    }
+
+    class ParasiteGameSession : DreamGameSession
+    {
+        public ParasiteGameSession(RainWorldGame game, SlugcatStats.Name name,DreamNutils ow) : base(game, name,ow)
+        {
         }
 
-        public void Update()
+
+        public override void Update()
         {
+            base.Update();
             if (EndSession) return;
-            if (!isInit && room != null && room.shortCutsReady)
+
+            if (afterDieCounter != -1)
             {
-                Init();
-            }
-            foreach (var player in Players)
-            {
-                if (player.realizedCreature != null && player.realizedCreature.dead)
+                if ((--afterDieCounter) == 0)
                 {
                     game.ExitGame(true, false);
                     EndSession = true;
+                }
+                return;
+            }
+            foreach (var player in Players)
+            {
+                if (!player.state.alive)
+                {
+                    WandererMod.Log("exit parasite session : player dead");
+                    afterDieCounter = 200;
                     return;
                 }
             }
-            if (isInit && targetCreature != null && targetCreature.dead)
+            if (!targetCreature.state.alive)
             {
+                WandererMod.Log("exit parasite session : parasite dead");
                 game.ExitGame(false, false);
                 EndSession = true;
                 return;
             }
         }
 
-        public void Init()
+        public override void PostFirstRoomRealized()
         {
-            SpawnPlayers();
-            SpawnCreatures();
-
-            isInit = true;
+            SpawnPlayerInShortCut(0, 0);
+            targetCreature = SpawnCreatureInShortCut(WandererEnum.Creatures.MaleParasite, 0, 1);
         }
 
-        public void SpawnCreatures()
-        {
-            int exits = game.world.GetAbstractRoom(0).exits;
 
-            int node = Random.Range(1, exits);
-            AbstractCreature abstractCreature = new AbstractCreature(game.world, StaticWorld.GetCreatureTemplate(WandererEnum.Creatures.ToxicSpider), null, new WorldCoordinate(0, -1, -1, -1), game.GetNewID());
-            abstractCreature.state = new HealthState(abstractCreature);
+        AbstractCreature targetCreature;
 
-            abstractCreature.Realize();
-            ShortcutHandler.ShortCutVessel shortCutVessel = new ShortcutHandler.ShortCutVessel(new IntVector2(-1, -1), abstractCreature.realizedCreature, game.world.GetAbstractRoom(0), 0);
-            shortCutVessel.entranceNode = node;
-            shortCutVessel.room = game.world.GetAbstractRoom(0);
-            abstractCreature.pos.room = game.world.offScreenDen.index;
-            game.shortcuts.betweenRoomsWaitingLobby.Add(shortCutVessel);
-            targetCreature = abstractCreature.realizedCreature;
-        }
-
-        public void SpawnPlayers()
-        {
-            AbstractCreature abstractCreature = new AbstractCreature(game.world, StaticWorld.GetCreatureTemplate("Slugcat"), null, new WorldCoordinate(0, -1, -1, -1), new EntityID(-1, 0));
-            game.cameras[0].followAbstractCreature = abstractCreature;
-            abstractCreature.state = new PlayerState(abstractCreature, 0, characterStats.name, false);
-
-            abstractCreature.Realize();
-            ShortcutHandler.ShortCutVessel shortCutVessel = new ShortcutHandler.ShortCutVessel(new IntVector2(-1, -1), abstractCreature.realizedCreature,game.world.GetAbstractRoom(0), 0);
-            shortCutVessel.entranceNode = 0;
-            shortCutVessel.room = game.world.GetAbstractRoom(0);
-            abstractCreature.pos.room = game.world.offScreenDen.index;
-            game.shortcuts.betweenRoomsWaitingLobby.Add(shortCutVessel);
-            AddPlayer(abstractCreature);
-        }
-
-        Creature targetCreature;
-        bool isInit = false;
-        bool EndSession = false;
+        int afterDieCounter = -1;
 
     }
 }
