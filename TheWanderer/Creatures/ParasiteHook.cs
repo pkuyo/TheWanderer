@@ -38,10 +38,6 @@ namespace Pkuyo.Wanderer.Creatures
             On.DreamsState.StaticEndOfCycleProgress += DreamsState_StaticEndOfCycleProgress;
             On.AbstractCreature.ctor += AbstractCreature_ctor;
             On.Creature.Die += Creature_Die;
-            
-
-
-
         }
 
 
@@ -339,7 +335,7 @@ namespace Pkuyo.Wanderer.Creatures
         {
             return new ParasiteGameSession(game, name, this);
         }
-        public override string FirstRoom => "parasitecaveC";
+        public override string FirstRoom => "parasitecaveE";
         public override bool HiddenRoomInArena => true;
         public override bool IsSingleWorld => true;
     }

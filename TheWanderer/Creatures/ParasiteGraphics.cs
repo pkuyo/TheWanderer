@@ -1,9 +1,6 @@
 ﻿using RWCustom;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -18,46 +15,93 @@ namespace Pkuyo.Wanderer.Creatures
             Random.State state = Random.state;
             Random.InitState(parasite.abstractCreature.ID.RandomSeed);
             ////////////////////////
+            ///
+            legLength = parasite.bodyChunkConnections[0].distance;
+
+            if (parasite.isChild)
+            {
+                pincherLength = 3f;
+            }
+            else if(parasite.isFemale)
+            {
+                pincherLength = 6f;
+                needleLength = 10;
+            }
+            else
+            {
+                pincherLength = 20f;
+            }
             
             drawPositions = new Vector2[parasite.bodyChunks.Length, 2];
-            //pinchers = new GenericBodyPart[2];
-            //for(int  i = 0; i<2;i++)
-            //    pinchers[i] = new GenericBodyPart(this, 1f, 0.5f, 1f, owner.bodyChunks[2]);
+            pinchers = new GenericBodyPart[2];
+            for (int i = 0; i < 2; i++)
+                pinchers[i] = new GenericBodyPart(this, 1f, 0.5f, 1f, owner.bodyChunks[0]);
 
-            //limbs = new Limb[3, 2];
-            //for(int i =0;i<3;i++)
-            //    for(int j =0;j<2;i++)
-            //        limbs[i,j] = new Limb(this, owner.bodyChunks[0], i * 4 + j, 0.1f, 0.7f, 0.99f, 22f, 0.95f);
+            if (parasite.isFemale)
+            {
+                needles = new GenericBodyPart[2];
+                for (int i = 0; i < 2; i++)
+                    needles[i] = new GenericBodyPart(this, 1f, 0.5f, 1f, owner.bodyChunks[2]);
+            }
+            legs = new Limb[3, 2];
+            knees = new GenericBodyPart[3, 2];
+            for (int i = 0; i < legs.GetLength(0); i++)
+                for (int j = 0; j < legs.GetLength(1); j++)
+                {
+                    knees[i, j] = new GenericBodyPart(this, 1f, 0.5f, 0.99f, parasite.mainBodyChunk);
+                    legs[i, j] = new Limb(this, owner.bodyChunks[0], i * 4 + j, 0.2f, 0.7f, 0.99f, 22f, 0.95f);
+                }
 
             int index = 0;
-            //bodyParts = new BodyPart[15];
-            //bodyParts[index++] = pinchers[0];
-            //bodyParts[index++] = pinchers[1];
-            //for (int i = 0; i < 3; i++)
-            //    for (int j = 0; j < 2; i++)
-            //        bodyParts[index++] = limbs[i, j];
-
-            limbsTravelDirs = new Vector2[3, 2];
+            bodyParts = new BodyPart[parasite.isFemale ? 10 : 8];
+            bodyParts[index++] = pinchers[0];
+            bodyParts[index++] = pinchers[1];
+            for (int i = 0; i < 3; i++)
+                for (int j = 0; j < 2; j++)
+                    bodyParts[index++] = legs[i, j];
+            if (parasite.isFemale)
+            {
+                bodyParts[index++] = needles[0];
+                bodyParts[index++] = needles[1];
+            }
+            legsTravelDirs = new Vector2[3, 2];
             ////////////////////////
             Random.state = state;
             if(debugVisual)
                 debugLabel = new FLabel(Custom.GetFont(), "");
         }
 
+   
         public override void InitiateSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam)
         {
-            //sLeaser.sprites = new FSprite[TotalSprites];
-            //sLeaser.sprites[HeadSprite] = new FSprite("Circle20", true);
-            //sLeaser.sprites[HeadSprite].scaleX = 0.7f;
-            //sLeaser.sprites[HeadSprite].scaleY = 0.8f;
-            ////TODO :花纹装饰
+            sLeaser.sprites = new FSprite[2+6 + (parasite.isFemale ? 2 : 0)];
+            for (int i = 0; i < 2; i++)
+            {
+                sLeaser.sprites[i] = new FSprite("Futile_White");
+                sLeaser.sprites[i].color = Color.Lerp(Color.white,Color.blue,0.5f);
+                sLeaser.sprites[i].anchorX = 1;
+                sLeaser.sprites[i].anchorY = 1;
+            }
+  
 
-            //for(int i=0;i<pinchers.Length;i++)
-            //    sLeaser.sprites[PincherSprite(i)] = TriangleMesh.MakeLongMesh(8, false, false);
-            //for (int j = 0; j < limbs.GetLength(0); j++)
-            //    for (int k = 0; k < limbs.GetLength(1); k++)
-            //        sLeaser.sprites[LegSprite(j, k)] = TriangleMesh.MakeLongMesh(12, false, false);
-                
+            for (int i = 0; i < 6; i++)
+            {
+                sLeaser.sprites[i + 2] = new FSprite("Futile_White");
+                sLeaser.sprites[i + 2].color = Color.Lerp(Color.white, Color.green,0.5f);
+                sLeaser.sprites[i + 2].anchorX = 1;
+                sLeaser.sprites[i + 2].anchorY = 1;
+            }
+
+            if (parasite.isFemale)
+            {
+                for (int i = 0; i < 2; i++)
+                {
+                    sLeaser.sprites[i + 8] = new FSprite("Futile_White");
+                    sLeaser.sprites[i + 8].color = Color.Lerp(Color.white, Color.cyan, 0.5f);
+                    sLeaser.sprites[i + 8].anchorX = 1;
+                    sLeaser.sprites[i + 8].anchorY = 1;
+                }
+            }
             //DEBUG 
             if (debugVisual)
             {
@@ -74,6 +118,7 @@ namespace Pkuyo.Wanderer.Creatures
                 };
                 var sprite = new TriangleMesh("Futile_White", tris, true, false);
                 sLeaser.sprites[sLeaser.sprites.Length - 1] = sprite;
+                sprite.MoveToBack();
                 if (parasite.isFemale)
                     debugColor = Color.yellow;
                 else if (parasite.isMale)
@@ -90,86 +135,54 @@ namespace Pkuyo.Wanderer.Creatures
             base.InitiateSprites(sLeaser, rCam);
         }
 
-        public override void Update()
-        {
-            base.Update();
-            for (int i = 0; i < drawPositions.GetLength(0); i++)
-            {
-                drawPositions[i, 1] = drawPositions[i, 0];
-                drawPositions[i, 0] = parasite.bodyChunks[i].pos;
-            }
-        }
+
         public override void DrawSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
         {
+            for (int i = 0; i < 2; i++)
+            {
+                sLeaser.sprites[i].width = pinchers[i].rad * 3;
+                sLeaser.sprites[i].x = Mathf.Lerp(pinchers[i].lastPos.x, pinchers[i].pos.x, timeStacker) - camPos.x;
+                sLeaser.sprites[i].y = Mathf.Lerp(pinchers[i].lastPos.y, pinchers[i].pos.y, timeStacker) - camPos.y;
+                sLeaser.sprites[i].height = Mathf.Lerp(Custom.Dist(pinchers[i].lastPos, pinchers[i].connection.lastPos), Custom.Dist(pinchers[i].pos, pinchers[i].connection.pos), timeStacker);
+                sLeaser.sprites[i].rotation = Custom.VecToDeg(Custom.DirVec(Vector2.Lerp(pinchers[i].connection.lastPos, pinchers[i].connection.pos, timeStacker), Vector2.Lerp(pinchers[i].lastPos, pinchers[i].pos, timeStacker)));
+            }
 
-            //Vector2 vector = Vector2.Lerp(drawPositions[0, 1], drawPositions[0, 0], timeStacker);
-            //Vector2 vector2 = Vector2.Lerp(drawPositions[1, 1], drawPositions[1, 0], timeStacker) + Custom.RNV() * Random.value * 10f * d;
-            //Vector2 vector3 = Vector2.Lerp(drawPositions[2, 1], drawPositions[2, 0], timeStacker);
-            //Vector2 vector4 = Custom.DirVec(vector2, vector);
-            //Vector2 a = Custom.PerpendicularVector(vector4);
-            //Vector2 normalized = rCam.room.lightAngle.normalized;
-            //normalized.y *= -1f;
-            //sLeaser.sprites[HeadSprite].x = vector.x - camPos.x;
-            //sLeaser.sprites[HeadSprite].y = vector.y - camPos.y;
-            //sLeaser.sprites[HeadSprite].rotation = Custom.VecToDeg(vector4);
-            //Vector2 vector6 = vector + vector4;
-            //float num = Mathf.Lerp(this.lastFlip, this.flip, timeStacker);
-            //float num2 = 0f;
-            //float num3 = 0f;
-            //Vector2 a2 = vector;
-            //for (int j = 0; j < limbs.GetLength(0); j++)
-            //{
-            //    for (int k = 0; k < limbs.GetLength(1); k++)
-            //    {
-            //        float t2 = Mathf.InverseLerp(0f, (limbs.GetLength(1) - 1), k);
-            //        Vector2 vector11 = Vector2.Lerp(vector, vector2, 0.3f);
-            //        vector11 += a * ((j == 0) ? 1f : -1f) * 3f * (1f - Mathf.Abs(num));
-            //        vector11 += vector4 * Mathf.Lerp(5f, -11f, t2);
-            //        Vector2 vector12 = Vector2.Lerp(limbs[j, k].lastPos, limbs[j, k].pos, timeStacker);
-            //        Vector2 vector13 = Vector2.Lerp(knees[j, k].lastPos, knees[j, k].pos, timeStacker);
-            //        Vector2 vector14 = Vector2.Lerp(vector11, vector13, 0.5f);
-            //        Vector2 vector15 = Vector2.Lerp(vector13, vector12, 0.5f);
-            //        float d2 = 5f;
-            //        Vector2 vector16 = Vector2.Lerp(vector14, vector15, 0.5f);
-            //        vector14 = vector16 + Custom.DirVec(vector16, vector14) * d2 / 2f;
-            //        vector15 = vector16 + Custom.DirVec(vector16, vector15) * d2 / 2f;
-            //        vector6 = vector11;
-            //        num2 = 2f;
-            //        for (int l = 0; l < 12; l++)
-            //        {
-            //            float num7 = Mathf.InverseLerp(0f, 11f, (float)l);
-            //            Vector2 vector17;
-            //            if (num7 < 0.5f)
-            //            {
-            //                vector17 = Custom.Bezier(vector11, vector11 + Custom.DirVec(vector11, vector12) * 10f, (vector15 + vector14) / 2f, vector14 + Custom.DirVec(vector15, vector14) * 7f, Mathf.InverseLerp(0f, 0.5f, num7));
-            //            }
-            //            else
-            //            {
-            //                vector17 = Custom.Bezier((vector15 + vector14) / 2f, vector15 + Custom.DirVec(vector14, vector15) * 7f, vector12, vector12 + Custom.DirVec(vector12, vector11) * 14f, Mathf.InverseLerp(0.5f, 1f, num7));
-            //            }
-            //            float num8 = (Mathf.Lerp(4f, 0.5f, Mathf.Pow(num7, 0.25f)) + Mathf.Sin(Mathf.Pow(num7, 2.5f) * 3.1415927f) * 1.5f) * limbsThickness;
-            //            Vector2 a4 = Custom.PerpendicularVector(vector17, vector6);
-            //            (sLeaser.sprites[LegSprite(j, k)] as TriangleMesh).MoveVertice(l * 4, (vector6 + vector17) / 2f - a4 * (num8 + num2) * 0.5f - camPos);
-            //            (sLeaser.sprites[LegSprite(j, k)] as TriangleMesh).MoveVertice(l * 4 + 1, (vector6 + vector17) / 2f + a4 * (num8 + num2) * 0.5f - camPos);
-            //            (sLeaser.sprites[LegSprite(j, k)] as TriangleMesh).MoveVertice(l * 4 + 2, vector17 - a4 * num8 - camPos);
-            //            (sLeaser.sprites[LegSprite(j, k)] as TriangleMesh).MoveVertice(l * 4 + 3, vector17 + a4 * num8 - camPos);
-            //            vector6 = vector17;
-            //            num2 = num8;
-            //        }
-            //    }
-            //}
+            if(parasite.isFemale)
+            {
+                for (int i = 0; i < 2; i++)
+                {
+                    sLeaser.sprites[2 + 6 + i].width = needles[i].rad * 3;
+                    sLeaser.sprites[2 + 6 + i].x = Mathf.Lerp(needles[i].lastPos.x, needles[i].pos.x, timeStacker) - camPos.x;
+                    sLeaser.sprites[2 + 6 + i].y = Mathf.Lerp(needles[i].lastPos.y, needles[i].pos.y, timeStacker) - camPos.y;
+                    sLeaser.sprites[2 + 6 + i].height = Mathf.Lerp(Custom.Dist(needles[i].lastPos, needles[i].connection.lastPos), Custom.Dist(needles[i].pos, needles[i].connection.pos), timeStacker);
+                    sLeaser.sprites[2 + 6 + i].rotation = Custom.VecToDeg(Custom.DirVec(Vector2.Lerp(needles[i].connection.lastPos, needles[i].connection.pos, timeStacker), Vector2.Lerp(needles[i].lastPos, needles[i].pos, timeStacker)));
+                }
 
+            }
 
+            for (int i = 0; i < 3; i++)
+            {
+                for (int j = 0; j < 2; j++)
+                {
+                    float t = Mathf.InverseLerp(0f, legs.GetLength(0) - 1, i);
+                    Vector2 mainPos = parasite.mainBodyChunk.pos - Custom.DirVec(parasite.bodyChunks[1].pos, parasite.bodyChunks[0].pos) * parasite.bodyChunkConnections[0].distance * t;
+                    Vector2 mainLastPos = parasite.mainBodyChunk.lastPos - Custom.DirVec(parasite.bodyChunks[1].lastPos, parasite.bodyChunks[0].lastPos) * parasite.bodyChunkConnections[0].distance * t;
+                    sLeaser.sprites[i + j * 3 + 2].width = legs[i,j].rad *3;
+                    sLeaser.sprites[i + j * 3 + 2].x = Mathf.Lerp(legs[i, j].lastPos.x, legs[i, j].pos.x, timeStacker) - camPos.x;
+                    sLeaser.sprites[i + j * 3 + 2].y = Mathf.Lerp(legs[i, j].lastPos.y, legs[i, j].pos.y, timeStacker) - camPos.y;
+                    sLeaser.sprites[i + j * 3 + 2].height = Mathf.Lerp(Custom.Dist(legs[i, j].lastPos, mainLastPos), Custom.Dist(legs[i, j].pos, mainPos),timeStacker);
+                    sLeaser.sprites[i + j * 3 + 2].rotation = Custom.VecToDeg(Custom.DirVec(Vector2.Lerp(mainLastPos, mainPos, timeStacker), Vector2.Lerp(legs[i, j].lastPos, legs[i, j].pos, timeStacker)));
+                }
+            }
             //DEBUG 
             if (debugVisual)
             {
                 var tris = sLeaser.sprites[sLeaser.sprites.Length-1] as TriangleMesh;
                 for (int i = 0; i < owner.bodyChunks.Length; i++)
                 {
-                    tris.MoveVertice(0 + i * 2, Vector2.Lerp(owner.bodyChunks[i].lastPos, owner.bodyChunks[i].pos, timeStacker) + Vector2.Perpendicular(owner.bodyChunks[i].Rotation) * owner.bodyChunks[i].rad *((i==2) ? -1 : 1)* (1) - camPos);
-                    tris.MoveVertice(1 + i * 2, Vector2.Lerp(owner.bodyChunks[i].lastPos, owner.bodyChunks[i].pos, timeStacker) + Vector2.Perpendicular(owner.bodyChunks[i].Rotation) * owner.bodyChunks[i].rad * ((i == 2) ? -1 : 1)*(-1) - camPos);
+                    tris.MoveVertice(0 + i * 2, Vector2.Lerp(owner.bodyChunks[i].lastPos, owner.bodyChunks[i].pos, timeStacker) + Vector2.Perpendicular(owner.bodyChunks[i].Rotation) * owner.bodyChunks[i].rad *((i==2) ? -1 : 1)* (1/2f) - camPos);
+                    tris.MoveVertice(1 + i * 2, Vector2.Lerp(owner.bodyChunks[i].lastPos, owner.bodyChunks[i].pos, timeStacker) + Vector2.Perpendicular(owner.bodyChunks[i].Rotation) * owner.bodyChunks[i].rad * ((i == 2) ? -1 : 1)*(-1/2f) - camPos);
                 }
-               // tris.MoveVertice(6, Vector2.Lerp(owner.bodyChunks[2].lastPos, owner.bodyChunks[2].pos, timeStacker) + Vector2.Perpendicular(owner.bodyChunks[2].Rotation) * owner.bodyChunks[2].rad * (-1) - camPos);
                 debugLabel.text = parasite.AI.behavior.ToString() + " " + parasite.travelDir;
                 debugLabel.x = tris.vertices[0].x;
                 debugLabel.y = tris.vertices[0].y + 20;
@@ -181,17 +194,209 @@ namespace Pkuyo.Wanderer.Creatures
             base.AddToContainer(sLeaser, rCam, newContatiner);
             if (debugVisual)
             {
+                foreach(var s in sLeaser.sprites)
+                {
+                    s.RemoveFromContainer();
+                    rCam.ReturnFContainer("HUD").AddChild(s);
+                }
+                sLeaser.sprites[sLeaser.sprites.Length-1].MoveToBack();
                 rCam.ReturnFContainer("HUD").RemoveChild(debugLabel);
                 rCam.ReturnFContainer("HUD").AddChild(debugLabel);
             }
+        }
+
+        public override void Update()
+        {
+            base.Update();
+            for (int i = 0; i < drawPositions.GetLength(0); i++)
+            {
+                drawPositions[i, 1] = drawPositions[i, 0];
+                drawPositions[i, 0] = parasite.bodyChunks[i].pos;
+            }
+            //TODO : 危机情况
+            lastFlip = flip;
+
+            lastVibrate = vibrate;
+            vibrate = Custom.LerpAndTick(vibrate, (parasite.charging > 0f || parasite.attemptBite > 0f) ? 1f : 0f, 0.2f, 0.05f);
+
+
+
+            Vector2 bodyDir = Custom.DirVec(parasite.bodyChunks[1].pos, parasite.bodyChunks[0].pos);
+            BodyChunk bodyChunk = (parasite.grasps[0] != null) ? parasite.grasps[0].grabbedChunk : null;
+            float bodyDeg = Custom.AimFromOneVectorToAnother(parasite.bodyChunks[1].pos, parasite.bodyChunks[0].pos);
+
+            for (int m = 0; m < pinchers.Length; m++)
+            {
+                pinchers[m].Update();
+                Vector2 PincherDir = (bodyDir + Custom.PerpendicularVector(parasite.bodyChunks[0].pos, parasite.bodyChunks[1].pos) * ((m == 0) ? -1f : 1f) * (1f - Mathf.Abs(flip)) * Mathf.Lerp(0.2f, 3f, vibrate)).normalized;
+                pinchers[m].ConnectToPoint(parasite.mainBodyChunk.pos + PincherDir * Mathf.Lerp(pincherLength, pincherLength*1.25f, parasite.attemptBite), Mathf.Lerp(pincherLength, pincherLength * 1.25f, parasite.attemptBite), false, 0, parasite.mainBodyChunk.vel, 0.1f, 0);
+                pinchers[m].vel += PincherDir * (1f + 19f * parasite.attemptBite);
+
+                if (parasite.isFemale)
+                {
+                    needles[m].Update();
+                    var infectingTime = Mathf.Min(Mathf.Pow(parasite.infectingCounter / 20f, 2),1.0f);
+                    var curLength = Mathf.Lerp(needleLength * 0.5f, needleLength * 2f, infectingTime);
+                    Vector2 needlesDir = (Custom.DirVec(parasite.bodyChunks[1].pos, parasite.bodyChunks[2].pos) + Custom.PerpendicularVector(parasite.bodyChunks[2].pos, parasite.bodyChunks[1].pos) * ((m == 0) ? -1f : 1f) * (1f - Mathf.Abs(flip)) * Mathf.Lerp(0.2f, 3f, vibrate)).normalized;
+
+                    if (parasite.grasps[0] != null && parasite.injectedChunk != null && parasite.grasps[0].grabbedChunk != null)
+                    {
+                        //获取最终点 但是长度限制为30
+                        var toInfectedPos = (parasite.injectedChunk.pos + parasite.grasps[0].grabbedChunk.pos) / 2;
+                        toInfectedPos = parasite.bodyChunks[2].pos + Custom.DirVec(parasite.bodyChunks[2].pos,toInfectedPos) * Mathf.Min(Custom.Dist(toInfectedPos, parasite.bodyChunks[2].pos), 30);
+                        needles[m].ConnectToPoint(Vector2.Lerp(parasite.bodyChunks[2].pos + needlesDir * curLength,toInfectedPos, infectingTime),curLength, false, 0.03f, parasite.bodyChunks[2].vel, 0.2f, 0);
+
+                        //位置未到 战斗仍将继续
+                        if (!Custom.DistLess(needles[m].pos, (parasite.injectedChunk.pos + parasite.grasps[0].grabbedChunk.pos) / 2, 15))
+                            parasite.infectingCounter = Mathf.Min(parasite.infectingCounter, 38);
+                    }
+                    else
+                        needles[m].ConnectToPoint(parasite.bodyChunks[2].pos + needlesDir * curLength, curLength, false, 0, parasite.bodyChunks[2].vel, 0.1f, 0);
+                }
+
+                if (bodyChunk != null)
+                {
+                    pinchers[m].pos = Vector2.Lerp(pinchers[m].pos, bodyChunk.pos, 0.5f);
+                    pinchers[m].vel *= 0.7f;
+                }
+                //蓄力
+                if (vibrate > 0f)
+                {
+                    pinchers[m].vel += Custom.RNV() * vibrate * Random.value * 2f;
+                    pinchers[m].pos += Custom.RNV() * vibrate * Random.value * 2f;
+                }
+            }
+
+            //根据腿判断方向？
+            float num3 = 0f;
+            for (int i = 0; i < legs.GetLength(0); i++)
+                for (int j = 0; j < legs.GetLength(1); j++)
+                    num3 += Custom.DistanceToLine(legs[i, j].pos, parasite.bodyChunks[1].pos, parasite.bodyChunks[0].pos);
+            flip = Custom.LerpAndTick(flip, Mathf.Clamp(num3 / 40f, -1f, 1f), 0.07f, 0.1f);
+
+            float legFloorAjust = 0;
+            if (parasite.Consious)
+            {
+                //头顶有东西
+                if (parasite.room.GetTile(parasite.mainBodyChunk.pos + Custom.PerpendicularVector(parasite.mainBodyChunk.pos, parasite.bodyChunks[1].pos) * 20f).Solid)
+                    legFloorAjust += 1f;
+
+                //下面有东西
+                if (parasite.room.GetTile(parasite.mainBodyChunk.pos - Custom.PerpendicularVector(parasite.mainBodyChunk.pos, parasite.bodyChunks[1].pos) * 20f).Solid)
+                    legFloorAjust -= 1f;
+            }
+            if (legFloorAjust != 0f)
+                flip = Custom.LerpAndTick(flip, legFloorAjust, 0.07f, 0.05f);
+
+            int totIndex = 0;//?
+            for (int j = 0; j < legs.GetLength(1); j++)
+            {
+                for (int i = 0; i < legs.GetLength(0); i++)
+                {
+                    //第几条腿
+                    float t = Mathf.InverseLerp(0f, legs.GetLength(0) - 1, i);
+                    Vector2 mainPos = parasite.mainBodyChunk.pos - bodyDir * parasite.bodyChunkConnections[0].distance * t;
+                    //腿的步进值
+                    float indexStep = 0.5f + 0.5f * Mathf.Sin((parasite.runCycle + totIndex * 0.25f) * 3.1415927f);//?
+                    legsTravelDirs[i, j] = Vector2.Lerp(legsTravelDirs[i, j], parasite.travelDir, Mathf.Pow(Random.value, 1f - 0.9f * indexStep));
+
+                    if (parasite.charging > 0f)
+                        legsTravelDirs[i, j] *= 0f;
+
+                    legs[i, j].Update();
+                    //if (this.legs[num9, num8].mode == Limb.Mode.HuntRelativePosition || this.legsDangleCounter > 0)
+                    //{
+                    //    this.legs[num9, num8].mode = Limb.Mode.Dangle;
+                    //}
+
+                    //slerp是a -> b的旋转插值
+                    Vector2 toLegDir = Custom.DegToVec(bodyDeg + Mathf.Lerp(40f, 160f, t) * ((legFloorAjust != 0f) ? (-legFloorAjust) : ((i == 0) ? 1f : -1f)));
+                    var slerp = Vector3.Slerp(legsTravelDirs[i, j], toLegDir, 0.1f) * legLength * 0.85f * Mathf.Pow(indexStep, 0.5f);
+
+                    Vector2 connectPoint = mainPos + new Vector2(slerp.x, slerp.y);
+                    legs[i, j].ConnectToPoint(connectPoint, legLength, false, 0f, parasite.mainBodyChunk.vel, 0.1f, 0f);
+                    legs[i, j].ConnectToPoint(mainPos, legLength, false, 0f, parasite.mainBodyChunk.vel, 0.1f, 0f);
+                    knees[i, j].Update();
+
+                    //向连接点移动
+                    knees[i, j].vel += Custom.DirVec(connectPoint, knees[i, j].pos) * (legLength * 0.55f - Vector2.Distance(knees[i, j].pos, connectPoint)) * 0.6f;
+                    knees[i, j].pos += Custom.DirVec(connectPoint, knees[i, j].pos) * (legLength * 0.55f - Vector2.Distance(knees[i, j].pos, connectPoint)) * 0.6f;
+
+                    //向腿移动
+                    knees[i, j].vel += Custom.DirVec(legs[i, j].pos, knees[i, j].pos) * (legLength * 0.55f - Vector2.Distance(knees[i, j].pos, legs[i, j].pos)) * 0.6f;
+                    knees[i, j].pos += Custom.DirVec(legs[i, j].pos, knees[i, j].pos) * (legLength * 0.55f - Vector2.Distance(knees[i, j].pos, legs[i, j].pos)) * 0.6f;
+
+                    //push out
+                    if (Custom.DistLess(knees[i, j].pos, mainPos, 15f))
+                    {
+                        knees[i, j].vel += Custom.DirVec(mainPos, knees[i, j].pos) * (15f - Vector2.Distance(knees[i, j].pos, mainPos));
+                        knees[i, j].pos += Custom.DirVec(mainPos, knees[i, j].pos) * (15f - Vector2.Distance(knees[i, j].pos, mainPos));
+                    }
+
+                    //速度回调，纵向下调，增加蓄力颤抖
+                    knees[i, j].vel = Vector2.Lerp(knees[i, j].vel, parasite.mainBodyChunk.vel, 0.8f);
+                    knees[i, j].vel += Custom.PerpendicularVector(parasite.bodyChunks[1].pos, mainPos) * Mathf.Lerp((i == 0) ? -1f : 1f, Mathf.Sign(flip), Mathf.Abs(flip)) * 9f;
+                    knees[i, j].vel += Custom.RNV() * 4f * vibrate * Random.value;
+
+                    if (parasite.Consious)
+                    {
+                        drawPositions[0, 0] += Custom.DirVec(legs[i, j].pos, drawPositions[0, 0]) * 4f * indexStep;
+                        drawPositions[1, 0] += Custom.DirVec(legs[i, j].pos, drawPositions[1, 0]) * 3f * indexStep;
+                        drawPositions[2, 0] += Custom.DirVec(knees[i, j].pos, drawPositions[2, 0]) * 1f * (1f - indexStep);
+                    }
+                    if (!Custom.DistLess(knees[i, j].pos, connectPoint, 200f))
+                    {
+                        knees[i, j].pos = connectPoint + Custom.RNV() * Random.value;
+                    }
+                    //if (legsDangleCounter > 0 || num10 < 0.1f)
+                    //{
+                    //    Vector2 a2 = connectPoint + vector4 * legLength * 0.5f;
+                    //    if (!parasite.Consious)
+                    //    {
+                    //        a2 = vector5 + legsTravelDirs[i, j] * legLength * 0.5f;
+                    //    }
+                    //    legs[i, j].vel = Vector2.Lerp(legs[i, j].vel, a2 - legs[i, j].pos, parasite.swimming ? 0.5f : 0.05f);
+                    //    Limb limb = legs[i, j];
+                    //    limb.vel.y = limb.vel.y - 0.4f;
+                    //}
+                    //else
+                    {
+                        Vector2 gripPoint = connectPoint + toLegDir * legLength;
+                        for (int k = 0; k < legs.GetLength(0); k++)
+                        {
+                            for (int l = 0; l < legs.GetLength(1); l++)
+                            {
+                                if (k != i && l != j && Custom.DistLess(gripPoint, legs[k, l].absoluteHuntPos, legLength * 0.1f))
+                                {
+                                    gripPoint = legs[k, l].absoluteHuntPos + Custom.DirVec(legs[k, l].absoluteHuntPos, gripPoint) * legLength * 0.1f;
+                                }
+                            }
+                        }
+                        float num13 = 1.2f;
+
+                        //如果没找到落点则获取落点
+                        if (!legs[i, j].reachedSnapPosition)
+                        {
+                            legs[i, j].FindGrip(parasite.room, connectPoint, connectPoint, legLength * num13, gripPoint, -2, -2, true);
+                        }
+                        else if (!Custom.DistLess(connectPoint, legs[i, j].absoluteHuntPos, legLength * num13 * Mathf.Pow(1f - indexStep, 0.2f)))
+                        {
+                            legs[i, j].mode = Limb.Mode.Dangle;
+                        }
+
+                    }
+                    totIndex++;
+                }
+            }
+
+            
+
         }
 
         int TotalSprites
         {
             get => 1 + 3 * 2 + 1 * 2;
         }
-
-
         int HeadSprite { get => 0; }
 
         int LegSprite(int a,int b)
@@ -206,12 +411,27 @@ namespace Pkuyo.Wanderer.Creatures
         FLabel debugLabel;
         Color debugColor;
         Parasite parasite;
+        
+        //影响钳子高度
+        float flip = 1;
+        float lastFlip;
+        float legLength = 15f;
 
-        float flip;
+        float vibrate;
+        float lastVibrate;
+
+
+        float pincherLength = 0;
+        float needleLength = 0;
 
         GenericBodyPart[] pinchers;
-        Limb[,] limbs;
-        Vector2[,] limbsTravelDirs;
+
+        GenericBodyPart[] needles;
+
+        Limb[,] legs;
+        GenericBodyPart[,] knees;
+
+        Vector2[,] legsTravelDirs;
 
         Vector2[,] drawPositions;
     }

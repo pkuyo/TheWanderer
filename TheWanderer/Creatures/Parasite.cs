@@ -25,17 +25,18 @@ namespace Pkuyo.Wanderer.Creatures
         {
             float rad = 6;
             float mass = 1f;
-            float connectLength = 15;
+            connectLength = 15;
             if (abstractCreature.creatureTemplate.type == WandererEnum.Creatures.FemaleParasite)
             {
-                kindSpeed = 1f;
+                kindSpeed = 1.1f;
                 rad = 5;
                 mass = 0.7f;
                 isFemale = true;
             }
             else if (abstractCreature.creatureTemplate.type == WandererEnum.Creatures.MaleParasite)
             {
-                kindSpeed = 1.4f;
+                kindSpeed = 1.5f;
+                mass = 0.7f;
                 isMale = true;
             }
             else if (abstractCreature.creatureTemplate.type == WandererEnum.Creatures.ChildParasite)
@@ -44,12 +45,16 @@ namespace Pkuyo.Wanderer.Creatures
                 rad = 3;
                 mass = 0.25f;
                 connectLength = 10;
-                kindSpeed = 0.7f;
+                kindSpeed = 0.8f;
             }
             bodyChunks = new BodyChunk[3];
             bodyChunks[0] = new BodyChunk(this, 0, Vector2.zero, rad, mass * 0.4f);
             bodyChunks[1] = new BodyChunk(this, 0, Vector2.zero, rad, mass * 0.4f);
-            bodyChunks[2] = new BodyChunk(this, 0, Vector2.zero, rad, mass * 0.2f);
+
+            if(!isFemale)
+                bodyChunks[2] = new BodyChunk(this, 0, Vector2.zero, rad, mass * 0.2f);
+            else
+                bodyChunks[2] = new BodyChunk(this, 0, Vector2.zero, rad*2, mass * 0.4f);
 
             airFriction = 0.999f;
             bounce = 0.1f;
@@ -65,6 +70,247 @@ namespace Pkuyo.Wanderer.Creatures
             bodyChunkConnections[2] = new BodyChunkConnection(bodyChunks[0], bodyChunks[2], connectLength*0.8f, BodyChunkConnection.Type.Push, 1f, -1f);
 
         }
+        private void Act()
+        {
+            AI.Update();
+
+            attemptBite = Mathf.Max(0f, attemptBite - 0.025f);
+
+            if (AI.behavior == ParasiteAI.Behavior.Infect)
+            {
+                infectingCounter++;
+                rawInfectingCounter++;
+                var infectingTime = Mathf.Pow(Mathf.Min(infectingCounter / 20f, 1.0f), 2);
+                var bodyDir = Custom.DirVec(bodyChunks[0].pos, bodyChunks[1].pos);
+
+                Vector2 toPos = Quaternion.AngleAxis(120 + Mathf.Max(rawInfectingCounter - 40, 0), Vector3.forward) * bodyDir * bodyChunkConnections[1].distance;
+                toPos = toPos.y >= 0 ? toPos : Quaternion.AngleAxis(-120 - Mathf.Max(rawInfectingCounter - 40, 0), Vector3.forward) * bodyDir * bodyChunkConnections[1].distance;
+                toPos += bodyChunks[1].pos;
+
+                if (!infectToPos.HasValue)
+                {
+                    infectFromPos = bodyChunks[2].pos;
+                    infectToPos = toPos;
+                    float dis = float.MaxValue;
+                    foreach (var chunk in grasps[0].grabbed.bodyChunks)
+                    {
+                        if (dis > Custom.Dist(chunk.pos, bodyChunks[2].pos))
+                        {
+                            dis = Custom.Dist(chunk.pos, bodyChunks[2].pos);
+                            injectedChunk = chunk;
+                        }
+                    }
+                }
+                else
+                    infectToPos = Vector2.Lerp(infectToPos.Value, toPos, 0.015f);
+                bodyChunks[2].pos = Vector2.Lerp(infectFromPos, infectToPos.Value, infectingTime);
+                if (infectingCounter == 40)
+                {
+                    infectingCounter = 0;
+                    rawInfectingCounter = 0;
+
+                    if (grasps[0] != null && grasps[0].grabbed is Creature)
+                    {
+                        Creature creature = grasps[0].grabbed as Creature;
+
+                        if (ParasiteHook.Instance().parasiteData.TryGetValue(creature.abstractCreature, out var data))
+                        {
+                            WandererMod.Log("Parasite param set " + (grasps[0].grabbed as Creature).Template.type);
+                            data.isParasite = true;
+                        }
+                        if (creature is Player)
+                            ParasiteHook.AddParasiteFood(creature as Player);
+
+                        room.PlaySound(SoundID.Drop_Bug_Grab_Creature, mainBodyChunk);
+                        WandererMod.Log("Parasite infected " + (grasps[0].grabbed as Creature).Template.type);
+                    }
+                    LoseAllGrasps();
+                }
+                else if (rawInfectingCounter == 160)
+                {
+                    infectingCounter = 0;
+                    rawInfectingCounter = 0;
+                    WandererMod.Log("Parasite failed to infect " + (grasps[0].grabbed as Creature).Template.type);
+                    LoseAllGrasps();
+                }
+            }
+            else
+            {
+                rawInfectingCounter = 0;
+                injectedChunk = null;
+                infectingCounter = 0;
+                infectToPos = null;
+            }
+
+            if (AI.behavior == ParasiteAI.Behavior.Eat)
+            {
+                eattingCounter++;
+                if (grasps[0] != null && grasps[0].grabbed is Creature)
+                {
+                    Creature creature = grasps[0].grabbed as Creature;
+
+                    if (!creature.dead && eattingCounter % 20 == 0)
+                        creature.Violence(mainBodyChunk, new Vector2?(Custom.DirVec(mainBodyChunk.pos, grasps[0].grabbedChunk.pos) * 4f), grasps[0].grabbedChunk, null, DamageType.Bite, Random.Range(0.5F, 0.85F), 0f);
+
+                    //进行一个抖动的模拟
+                    if (eattingCounter % 10 == 0)
+                    {
+                        Vector2 vector = grasps[0].grabbedChunk.pos * grasps[0].grabbedChunk.mass;
+                        float num = grasps[0].grabbedChunk.mass;
+                        for (int j = 0; j < grasps[0].grabbed.bodyChunkConnections.Length; j++)
+                        {
+                            if (grasps[0].grabbed.bodyChunkConnections[j].chunk1 == grasps[0].grabbedChunk)
+                            {
+                                vector += grasps[0].grabbed.bodyChunkConnections[j].chunk2.pos * grasps[0].grabbed.bodyChunkConnections[j].chunk2.mass;
+                                num += grasps[0].grabbed.bodyChunkConnections[j].chunk2.mass;
+                            }
+                            else if (grasps[0].grabbed.bodyChunkConnections[j].chunk2 == grasps[0].grabbedChunk)
+                            {
+                                vector += grasps[0].grabbed.bodyChunkConnections[j].chunk1.pos * grasps[0].grabbed.bodyChunkConnections[j].chunk1.mass;
+                                num += grasps[0].grabbed.bodyChunkConnections[j].chunk1.mass;
+                            }
+                        }
+                        vector /= num;
+                        mainBodyChunk.pos += Custom.DegToVec(Mathf.Lerp(-90f, 90f, Random.value)) * 4f;
+                        grasps[0].grabbedChunk.vel += Custom.DirVec(vector, mainBodyChunk.pos) * 0.9f / grasps[0].grabbedChunk.mass;
+                    }
+                    if (Random.value > 0.97f)
+                    {
+                        room.PlaySound(SoundID.Slugcat_Eat_Meat_B, mainBodyChunk);
+                        room.PlaySound(SoundID.Drop_Bug_Grab_Creature, mainBodyChunk, false, 1f, 0.76f);
+                    }
+                    if (eattingCounter == 120)
+                    {
+                        eattingCounter = 0;
+                        room.PlaySound(SoundID.Drop_Bug_Grab_Creature, mainBodyChunk);
+
+                        if (!(grasps[0].grabbed as Creature).dead)
+                            (grasps[0].grabbed as Creature).Die();
+
+                        WandererMod.Log("Parasite eaten " + (grasps[0].grabbed as Creature).Template.type);
+                        LoseAllGrasps();
+                    }
+                    if (eattingCounter == 20 && room.game.session is ParasiteGameSession)
+                    {
+                        if (!(grasps[0].grabbed as Creature).dead)
+                            (grasps[0].grabbed as Creature).Die();
+                        WandererMod.Log("Parasite lose grasp, waiting brith");
+                        LoseAllGrasps();
+                    }
+                }
+            }
+
+            if (Submersion > 0.3f)
+            {
+                Die();
+                //TODO : 跟细节的死法
+                return;
+            }
+
+            if (jumping)
+            {
+                bool flag = false;
+                for (int j = 0; j < bodyChunks.Length; j++)
+                    if ((bodyChunks[j].ContactPoint.x != 0 || bodyChunks[j].ContactPoint.y != 0) && room.aimap.TileAccessibleToCreature(bodyChunks[j].pos, Template))
+                        flag = true;
+
+                if (flag)
+                    footingCounter++;
+                else
+                    footingCounter = 0;
+
+                if (jumpAtChunk != null && room.VisualContact(mainBodyChunk.pos, jumpAtChunk.pos))
+                {
+                    bodyChunks[0].vel += Custom.DirVec(bodyChunks[0].pos, jumpAtChunk.pos) * 1.4f;
+                    bodyChunks[1].vel -= Custom.DirVec(bodyChunks[0].pos, jumpAtChunk.pos) * 0.4f;
+                    bodyChunks[2].vel -= Custom.DirVec(bodyChunks[0].pos, jumpAtChunk.pos) * 0.4f;
+
+                }
+
+                if (Footing)
+                {
+                    jumping = false;
+                    jumpAtChunk = null;
+                }
+                return;
+            }
+            if (AI.stuckTracker.Utility() > 0.9f)
+            {
+                stuckShake = Custom.LerpAndTick(stuckShake, 1f, 0.07f, 0.014285714f);
+            }
+            else if (AI.stuckTracker.Utility() < 0.2f)
+            {
+                stuckShake = Custom.LerpAndTick(stuckShake, 0f, 0.07f, 0.05f);
+            }
+            //尝试不被卡住
+            if (stuckShake > 0f)
+            {
+                for (int k = 0; k < bodyChunks.Length; k++)
+                {
+                    bodyChunks[k].vel += Custom.RNV() * Random.value * 5f * stuckShake;
+                    bodyChunks[k].pos += Custom.RNV() * Random.value * 5f * stuckShake;
+                }
+            }
+            //?什么特殊运动
+            if (specialMoveCounter > 0)
+            {
+                specialMoveCounter--;
+                MoveTowards(room.MiddleOfTile(specialMoveDestination));
+                travelDir = Vector2.Lerp(travelDir, Custom.DirVec(mainBodyChunk.pos, room.MiddleOfTile(specialMoveDestination)), 0.4f);
+                if (Custom.DistLess(mainBodyChunk.pos, room.MiddleOfTile(specialMoveDestination), 5f))
+                    specialMoveCounter = 0;
+            }
+            else
+            {
+                if (!room.aimap.TileAccessibleToCreature(mainBodyChunk.pos, Template) && !room.aimap.TileAccessibleToCreature(bodyChunks[1].pos, Template))
+                {
+                    footingCounter = Custom.IntClamp(footingCounter - 3, 0, 35);
+                }
+                if (Footing && charging > 0f)
+                {
+                    sitting = true;
+                    GoThroughFloors = false;
+                    charging += 0.06666667f;
+                    Vector2? vector = null;
+                    if (jumpAtChunk != null)
+                        vector = new Vector2?(Custom.DirVec(mainBodyChunk.pos, jumpAtChunk.pos));
+
+                    if (vector != null)
+                    {
+                        bodyChunks[0].vel += vector.Value * Mathf.Pow(charging, 2f);
+                        bodyChunks[1].vel -= vector.Value * 4f * charging;
+                    }
+                    if (charging >= 1f)
+                        Attack();
+
+                }
+                else if ((room.GetWorldCoordinate(mainBodyChunk.pos) == AI.pathFinder.GetDestination || room.GetWorldCoordinate(bodyChunks[1].pos) == AI.pathFinder.GetDestination)
+                    && AI.threatTracker.Utility() < 0.5f)
+                {
+                    sitting = true;
+                    GoThroughFloors = false;
+                }
+                else
+                {
+                    MovementConnection movementConnection = (AI.pathFinder as StandardPather).FollowPath(room.GetWorldCoordinate(bodyChunks[(!this.MoveBackwards) ? 0 : 1].pos), true);
+
+                    if (movementConnection == null)
+                        movementConnection = (AI.pathFinder as StandardPather).FollowPath(room.GetWorldCoordinate(bodyChunks[(!MoveBackwards) ? 1 : 0].pos), true);
+
+                    if (movementConnection != null)
+                        Run(movementConnection);
+                    else
+                    {
+                        GoThroughFloors = false;
+                    }
+
+                }
+                if (Consious && !Custom.DistLess(mainBodyChunk.pos, mainBodyChunk.lastPos, 2f))
+                    runCycle += 0.125f;
+                //行走声音
+            }
+        }
+
 
 
         public override void Update(bool eu)
@@ -80,11 +326,13 @@ namespace Pkuyo.Wanderer.Creatures
             foreach (var chunk in bodyChunkConnections)
                 if (chunk == null)
                     return;
+
             if (room.game.devToolsActive && Input.GetKey("b") && room.game.cameras[0].room == room)
             {
                 bodyChunks[0].vel += Custom.DirVec(bodyChunks[0].pos, new Vector2(Futile.mousePosition.x, Futile.mousePosition.y) + room.game.cameras[0].pos) * 14f;
                 Stun(12);
             }
+
             if (!dead)
             {
                 if (State.health < 0f && Random.value < -State.health && Random.value < 1f / (Consious ? 80 : 800))
@@ -132,13 +380,11 @@ namespace Pkuyo.Wanderer.Creatures
                 {
                     if (MoveBackwards)
                     {
-                        BodyChunk bodyChunk2 = bodyChunks[2];
-                        bodyChunk2.vel.y = bodyChunk2.vel.y + gravity;
+                        bodyChunks[2].vel.y += gravity;
                     }
                     else
                     {
-                        BodyChunk bodyChunk3 = bodyChunks[2];
-                        bodyChunk3.vel.y = bodyChunk3.vel.y + gravity * Mathf.Lerp(0.5f, 1f, AI.stuckTracker.Utility());
+                        bodyChunks[2].vel.y += gravity * Mathf.Lerp(0.5f, 1f, AI.stuckTracker.Utility());
                     }
                 }
             }
@@ -170,19 +416,18 @@ namespace Pkuyo.Wanderer.Creatures
                 jumpAtChunk = null;
                 return;
             }
-            Vector2? vector = null;
+            Vector2? jumpTagetPos = null;
             if (jumpAtChunk != null)
-                vector = new Vector2?(jumpAtChunk.pos);
+                jumpTagetPos = new Vector2?(jumpAtChunk.pos);
             
-            Vector2 p = new Vector2(vector.Value.x, vector.Value.y);
-            if (!room.GetTile(vector.Value + new Vector2(0f, 20f)).Solid)
+            Vector2 p = new Vector2(jumpTagetPos.Value.x, jumpTagetPos.Value.y);
+            if (!room.GetTile(jumpTagetPos.Value + new Vector2(0f, 20f)).Solid)
             {
-                Vector2? vector2 = vector;
-                Vector2 b = new Vector2(0f, Mathf.InverseLerp(40f, 200f, Vector2.Distance(mainBodyChunk.pos, vector.Value)) * 20f);
-                vector = vector2 + b;
+                Vector2 b = new Vector2(0f, Mathf.InverseLerp(40f, 200f, Vector2.Distance(mainBodyChunk.pos, jumpTagetPos.Value)) * 20f);
+                jumpTagetPos = jumpTagetPos + b;
             }
-            Vector2 vector3 = Custom.DirVec(mainBodyChunk.pos, vector.Value);
-            if (!Custom.DistLess(mainBodyChunk.pos, p, Custom.LerpMap(Vector2.Dot(vector3, Custom.DirVec(bodyChunks[1].pos, bodyChunks[0].pos)), -0.1f, 0.8f, 0f, 300f, 0.4f)))
+            Vector2 jumpTargetDir = Custom.DirVec(mainBodyChunk.pos, jumpTagetPos.Value);
+            if (!Custom.DistLess(mainBodyChunk.pos, p, Custom.LerpMap(Vector2.Dot(jumpTargetDir, Custom.DirVec(bodyChunks[1].pos, bodyChunks[0].pos)), -0.1f, 0.8f, 0f, 300f, 0.4f)))
             {
                 charging = 0f;
                 jumpAtChunk = null;
@@ -190,10 +435,10 @@ namespace Pkuyo.Wanderer.Creatures
             }
             if (!room.GetTile(mainBodyChunk.pos + new Vector2(0f, 20f)).Solid && !room.GetTile(bodyChunks[1].pos + new Vector2(0f, 20f)).Solid)
             {
-                vector3 = Vector3.Slerp(vector3, new Vector2(0f, 1f), Custom.LerpMap(Vector2.Distance(mainBodyChunk.pos, vector.Value), 40f, 200f, 0.05f, 0.2f));
+                jumpTargetDir = Vector3.Slerp(jumpTargetDir, new Vector2(0f, 1f), Custom.LerpMap(Vector2.Distance(mainBodyChunk.pos, jumpTagetPos.Value), 40f, 200f, 0.05f, 0.2f));
             }
             room.PlaySound(SoundID.Drop_Bug_Jump, mainBodyChunk);
-            Jump(vector3);
+            Jump(jumpTargetDir);
         }
 
         private void Jump(Vector2 jumpDir)
@@ -240,21 +485,18 @@ namespace Pkuyo.Wanderer.Creatures
             Vector2 vector = mainBodyChunk.pos + Custom.DirVec(bodyChunks[1].pos, mainBodyChunk.pos) * num;
             Vector2 vector2 = grabbed.bodyChunks[grasps[0].chunkGrabbed].vel - mainBodyChunk.vel;
             grabbed.bodyChunks[grasps[0].chunkGrabbed].vel = mainBodyChunk.vel;
+
+
             if (enteringShortCut == null && (vector2.magnitude * grabbed.bodyChunks[grasps[0].chunkGrabbed].mass > 30f || !Custom.DistLess(vector, grabbed.bodyChunks[grasps[0].chunkGrabbed].pos, 70f + grabbed.bodyChunks[grasps[0].chunkGrabbed].rad)))
-            {
                 LoseAllGrasps();
-            }
             else
-            {
                 grabbed.bodyChunks[grasps[0].chunkGrabbed].MoveFromOutsideMyUpdate(eu, vector);
-            }
+            
             if (grasps[0] != null)
-            {
                 for (int i = 0; i < 2; i++)
-                {
                     grasps[0].grabbed.PushOutOf(bodyChunks[i].pos, bodyChunks[i].rad, grasps[0].chunkGrabbed);
-                }
-            }
+                
+            
         }
 
         public override void SpitOutOfShortCut(IntVector2 pos, Room newRoom, bool spitOutAllSticks)
@@ -281,6 +523,19 @@ namespace Pkuyo.Wanderer.Creatures
             graphicsModule.Reset();
         }
 
+        public bool CheckCanGrab(PhysicalObject physicalObject)
+        {
+            foreach (var grasp in physicalObject.grabbedBy)
+            {
+                if (AI.StaticRelationship(grasp.grabber.abstractCreature).type == CreatureTemplate.Relationship.Type.Afraid)
+                    return false;
+                if (grasp.grabber is Parasite)
+                    if (!ParasiteAI.CheckLeader(abstractCreature, grasp.grabber.abstractCreature))
+                        return false;
+
+            }
+            return true;
+        }
         public override void Collide(PhysicalObject otherObject, int myChunk, int otherChunk)
         {
             base.Collide(otherObject, myChunk, otherChunk);
@@ -288,11 +543,15 @@ namespace Pkuyo.Wanderer.Creatures
             {
                 if ((otherObject as Creature) is Parasite)
                 {
-                    AI.CollideWithKin(otherObject as Parasite);
                     return;
                 }
+
                 AI.tracker.SeeCreature((otherObject as Creature).abstractCreature);
-                if(isFemale && grasps[0] == null && Vector2.Dot(Custom.DirVec(bodyChunks[1].pos, mainBodyChunk.pos), Custom.DirVec(mainBodyChunk.pos, otherObject.bodyChunks[otherChunk].pos)) > 0f &&
+
+                if (!CheckCanGrab(otherObject))
+                    return;
+
+                if(isFemale && grasps[0] == null /*&& Vector2.Dot(Custom.DirVec(bodyChunks[1].pos, mainBodyChunk.pos), Custom.DirVec(mainBodyChunk.pos, otherObject.bodyChunks[otherChunk].pos)) > 0f*/ &&
                     (AI.DynamicRelationship((otherObject as Creature).abstractCreature).type == CreatureTemplate.Relationship.Type.Attacks && AI.behavior == ParasiteAI.Behavior.Hunt))
                 {
                     for (int i = 0; i < 4; i++)
@@ -301,7 +560,7 @@ namespace Pkuyo.Wanderer.Creatures
                     if (Grab(otherObject, 0, otherChunk, Grasp.Shareability.CanNotShare, 0.5f, false, true))
                     {
                         infectingCounter = 0;
-                        WandererMod.Log("Female Parasite grab");
+                        WandererMod.Log("Female Parasite grab " + (otherObject as Creature).abstractCreature.ID);
                         (otherObject as Creature).LoseAllGrasps();
                         room.PlaySound(SoundID.Drop_Bug_Grab_Creature, mainBodyChunk);
                     }
@@ -331,7 +590,7 @@ namespace Pkuyo.Wanderer.Creatures
                             }
 
                             (otherObject as Creature).Violence(mainBodyChunk, new Vector2?(Custom.DirVec(mainBodyChunk.pos, otherObject.bodyChunks[otherChunk].pos) * 4f), otherObject.bodyChunks[otherChunk], null, DamageType.Bite, Mathf.Lerp(0.75f, 1.5f, attemptBite), 0f);
-                            WandererMod.Log("Male Parasite grab");
+                            WandererMod.Log("Male Parasite grab " + (otherObject as Creature).abstractCreature.ID);
                         }
                     }
                     attemptBite = 0f;
@@ -340,207 +599,13 @@ namespace Pkuyo.Wanderer.Creatures
             }
         }
 
-        private void Act()
+        public override Color ShortCutColor()
         {
-            AI.Update();
-
-            attemptBite = Mathf.Max(0f, attemptBite - 0.025f);
-
-            if (AI.behavior == ParasiteAI.Behavior.Infect)
-            {
-                infectingCounter++;
-                if (infectingCounter == 40)
-                {
-                    infectingCounter = 0;
-                    if (grasps[0] != null && grasps[0].grabbed is Creature)
-                    {
-                        Creature creature = grasps[0].grabbed as Creature;
-
-                        if (ParasiteHook.Instance().parasiteData.TryGetValue(creature.abstractCreature, out var data))
-                        {
-                            WandererMod.Log("Parasite param set " + (grasps[0].grabbed as Creature).Template.type);
-                            data.isParasite = true;
-                        }
-                        if (creature is Player)
-                            ParasiteHook.AddParasiteFood(creature as Player);
-
-                        room.PlaySound(SoundID.Drop_Bug_Grab_Creature, mainBodyChunk);
-                        WandererMod.Log("Parasite infected " + (grasps[0].grabbed as Creature).Template.type);
-                    }
-                    LoseAllGrasps();
-                }
-            }
-            else
-                infectingCounter = 0;
-
-            if (AI.behavior == ParasiteAI.Behavior.Eat)
-            {
-                eattingCounter++;
-                if (grasps[0] != null && grasps[0].grabbed is Creature)
-                {
-                    Creature creature = grasps[0].grabbed as Creature;
-
-                    if (!creature.dead && eattingCounter %20 == 0)
-                        creature.Violence(mainBodyChunk, new Vector2?(Custom.DirVec(mainBodyChunk.pos, grasps[0].grabbedChunk.pos) * 4f), grasps[0].grabbedChunk, null, DamageType.Bite, Random.Range(0.5F,0.85F), 0f);
-
-                    //进行一个抖动的模拟
-                    if (eattingCounter % 10 == 0)
-                    {
-                        Vector2 vector = grasps[0].grabbedChunk.pos * grasps[0].grabbedChunk.mass;
-                        float num = grasps[0].grabbedChunk.mass;
-                        for (int j = 0; j < grasps[0].grabbed.bodyChunkConnections.Length; j++)
-                        {
-                            if (grasps[0].grabbed.bodyChunkConnections[j].chunk1 == grasps[0].grabbedChunk)
-                            {
-                                vector += grasps[0].grabbed.bodyChunkConnections[j].chunk2.pos * grasps[0].grabbed.bodyChunkConnections[j].chunk2.mass;
-                                num += grasps[0].grabbed.bodyChunkConnections[j].chunk2.mass;
-                            }
-                            else if (grasps[0].grabbed.bodyChunkConnections[j].chunk2 == grasps[0].grabbedChunk)
-                            {
-                                vector += grasps[0].grabbed.bodyChunkConnections[j].chunk1.pos * grasps[0].grabbed.bodyChunkConnections[j].chunk1.mass;
-                                num += grasps[0].grabbed.bodyChunkConnections[j].chunk1.mass;
-                            }
-                        }
-                        vector /= num;
-                        mainBodyChunk.pos += Custom.DegToVec(Mathf.Lerp(-90f, 90f, Random.value)) * 4f;
-                        grasps[0].grabbedChunk.vel += Custom.DirVec(vector, mainBodyChunk.pos) * 0.9f / grasps[0].grabbedChunk.mass;
-                    }
-                    if (Random.value > 0.97f)
-                    {
-                        room.PlaySound(SoundID.Slugcat_Eat_Meat_B, mainBodyChunk);
-                        room.PlaySound(SoundID.Drop_Bug_Grab_Creature, mainBodyChunk, false, 1f, 0.76f);
-                    }
-                    if (eattingCounter == 120)
-                    {
-                        eattingCounter=0;
-                        room.PlaySound(SoundID.Drop_Bug_Grab_Creature, mainBodyChunk);
-
-                        if(!(grasps[0].grabbed as Creature).dead)
-                            (grasps[0].grabbed as Creature).Die();
-
-                        WandererMod.Log("Parasite eaten " + (grasps[0].grabbed as Creature).Template.type);
-                        LoseAllGrasps();
-                    }
-                    if (eattingCounter == 20 && room.game.session is ParasiteGameSession)
-                    {
-                        if (!(grasps[0].grabbed as Creature).dead)
-                            (grasps[0].grabbed as Creature).Die();
-                        WandererMod.Log("Parasite lose grasp, waiting brith");
-                        LoseAllGrasps();
-                    }
-                }
-            }
-
-            if (Submersion > 0.3f)
-            {
-                Die();
-                //TODO : 跟细节的死法
-                return;
-            }
-
-            if (jumping)
-            {
-                bool flag = false;
-                for (int j = 0; j < bodyChunks.Length; j++)
-                    if ((bodyChunks[j].ContactPoint.x != 0 || bodyChunks[j].ContactPoint.y != 0) && room.aimap.TileAccessibleToCreature(bodyChunks[j].pos, Template))
-                        flag = true;
-
-                if (flag)
-                    footingCounter++;
-                else
-                    footingCounter = 0;
-                
-                if (jumpAtChunk != null && room.VisualContact(mainBodyChunk.pos, jumpAtChunk.pos))
-                {
-                    bodyChunks[0].vel += Custom.DirVec(bodyChunks[0].pos, jumpAtChunk.pos) * 1.0f;
-                    bodyChunks[1].vel -= Custom.DirVec(bodyChunks[0].pos, jumpAtChunk.pos) * 0.4f;
-                    bodyChunks[2].vel = Custom.DirVec(bodyChunks[0].pos, jumpAtChunk.pos) * 0.4f;
-
-                }
-
-                if (Footing)
-                {
-                    jumping = false;
-                    jumpAtChunk = null;
-                }
-                return;
-            }
-            if (AI.stuckTracker.Utility() > 0.9f)
-            {
-                stuckShake = Custom.LerpAndTick(stuckShake, 1f, 0.07f, 0.014285714f);
-            }
-            else if (AI.stuckTracker.Utility() < 0.2f)
-            {
-                stuckShake = Custom.LerpAndTick(stuckShake, 0f, 0.07f, 0.05f);
-            }
-            //尝试不被卡住
-            if (stuckShake > 0f)
-            {
-                for (int k = 0; k <bodyChunks.Length; k++)
-                {
-                    bodyChunks[k].vel += Custom.RNV() * Random.value * 5f * stuckShake;
-                    bodyChunks[k].pos += Custom.RNV() * Random.value * 5f * stuckShake;
-                }
-            }
-            //?什么特殊运动
-            if (specialMoveCounter > 0)
-            {
-                specialMoveCounter--;
-                MoveTowards(room.MiddleOfTile(specialMoveDestination));
-                travelDir = Vector2.Lerp(travelDir, Custom.DirVec(mainBodyChunk.pos, room.MiddleOfTile(specialMoveDestination)), 0.4f);
-                if (Custom.DistLess(mainBodyChunk.pos, room.MiddleOfTile(specialMoveDestination), 5f))
-                    specialMoveCounter = 0;
-            }
-            else
-            {
-                if (!room.aimap.TileAccessibleToCreature(mainBodyChunk.pos, Template) && !room.aimap.TileAccessibleToCreature(bodyChunks[1].pos, Template))
-                {
-                    footingCounter = Custom.IntClamp(footingCounter - 3, 0, 35);
-                }
-                if (Footing && charging > 0f)
-                {
-                    sitting = true;
-                    GoThroughFloors = false;
-                    charging += 0.06666667f;
-                    Vector2? vector = null;
-                    if (jumpAtChunk != null)
-                        vector = new Vector2?(Custom.DirVec(mainBodyChunk.pos, jumpAtChunk.pos));
-                    
-                    if (vector != null)
-                    {
-                        bodyChunks[0].vel += vector.Value * Mathf.Pow(charging, 2f);
-                        bodyChunks[1].vel -= vector.Value * 4f * charging;
-                    }
-                    if (charging >= 1f)
-                        Attack();
-                    
-                }
-                else if ((room.GetWorldCoordinate(mainBodyChunk.pos) == AI.pathFinder.GetDestination || room.GetWorldCoordinate(bodyChunks[1].pos) == AI.pathFinder.GetDestination) 
-                    && AI.threatTracker.Utility() < 0.5f)
-                {
-                    sitting = true;
-                    GoThroughFloors = false;
-                }
-                else
-                {
-                    MovementConnection movementConnection = (AI.pathFinder as StandardPather).FollowPath(room.GetWorldCoordinate(bodyChunks[(!this.MoveBackwards) ? 0 : 1].pos), true);
-                    
-                    if (movementConnection == null)
-                        movementConnection = (AI.pathFinder as StandardPather).FollowPath(room.GetWorldCoordinate(bodyChunks[(!MoveBackwards) ? 1 : 0].pos), true);
-                  
-                    if (movementConnection != null)
-                        Run(movementConnection);
-                    else
-                    {
-                        GoThroughFloors = false;
-                    }
-                    
-                }
-                //行走声音
-            }
+            //TODO : ShortCutColor
+            return base.ShortCutColor();
         }
 
-   
+ 
 
         private void Run(MovementConnection followingConnection)
         {
@@ -689,7 +754,7 @@ namespace Pkuyo.Wanderer.Creatures
 
         float carryObjectMass;
 
-        int infectingCounter = 0;
+
 
         int eattingCounter = 0;
 
@@ -702,7 +767,9 @@ namespace Pkuyo.Wanderer.Creatures
         public bool isMale;
         public bool isFemale;
         public bool isChild;
-       
+
+        public int infectingCounter = 0;
+        int rawInfectingCounter = 0;
 
         public ParasiteAI AI;
 
@@ -713,7 +780,15 @@ namespace Pkuyo.Wanderer.Creatures
         public float diffSpeed = 1f;
 
         public float kindSpeed = 1f;
-        
+
+        public float runCycle = 0;
+
+        float connectLength;
+
+
+        Vector2? infectToPos;
+        Vector2 infectFromPos;
+        public BodyChunk injectedChunk;
 
         public float CurrentSpeed
         {
@@ -732,12 +807,12 @@ namespace Pkuyo.Wanderer.Creatures
             if (type == WandererEnum.Creatures.FemaleParasite)
             {
                 Icon = new SimpleIcon("Kill_DropBug", new Color(1f, 0.9f, 0.9f));
-                RegisterUnlock(KillScore.Configurable(5), WandererEnum.Sandbox.FemaleParasite, MultiplayerUnlocks.SandboxUnlockID.BigSpider, 0);
+                RegisterUnlock(KillScore.Configurable(10), WandererEnum.Sandbox.FemaleParasite, MultiplayerUnlocks.SandboxUnlockID.BigSpider, 0);
             }
             else if (type == WandererEnum.Creatures.MaleParasite)
             {
                 Icon = new SimpleIcon("Kill_DropBug", new Color(0.2f, 0.1f, 0.1f));
-                RegisterUnlock(KillScore.Configurable(5), WandererEnum.Sandbox.MaleParasite, MultiplayerUnlocks.SandboxUnlockID.DropBug, 0);
+                RegisterUnlock(KillScore.Configurable(20), WandererEnum.Sandbox.MaleParasite, MultiplayerUnlocks.SandboxUnlockID.DropBug, 0);
             }
             else
             {
@@ -774,12 +849,12 @@ namespace Pkuyo.Wanderer.Creatures
                 Pathing = PreBakedPathing.Ancestral(CreatureTemplate.Type.BigSpider),
                 TileResistances = new()
                 {
-                    OffScreen = new(2, PathCost.Legality.Allowed),
+                    OffScreen = new(1.2f, PathCost.Legality.Allowed),
                     Floor = new(1, PathCost.Legality.Allowed),
                     Corridor = new(1, PathCost.Legality.Allowed),
-                    Climb = new(2f, PathCost.Legality.Allowed),
-                    Wall = new(6, PathCost.Legality.Allowed),
-                    Ceiling = new(8, PathCost.Legality.Allowed),
+                    Climb = new(1.2f, PathCost.Legality.Allowed),
+                    Wall = new(1.5f, PathCost.Legality.Allowed),
+                    Ceiling = new(1.5f, PathCost.Legality.Allowed),
                 },
                 ConnectionResistances = new()
                 {

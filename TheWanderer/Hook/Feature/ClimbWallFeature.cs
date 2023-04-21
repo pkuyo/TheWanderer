@@ -40,18 +40,16 @@ namespace Pkuyo.Wanderer.Feature
             On.Player.GrabVerticalPole += new On.Player.hook_GrabVerticalPole(Player_GrabVerticalPole);
 
             IL.Player.ThrowObject += Player_ThrowObjectIL;
-
-
-
             _climbSlugHandGraphics.OnModsInit();
 
             _log.LogDebug("ClimbWallFeature Init");
         }
 
+
+
         private void Player_ThrowObjectIL(ILContext il)
         {
             ILCursor c = new ILCursor(il);
-
             if (c.TryGotoNext(MoveType.After,
                 i => i.MatchCallOrCallvirt<Player>("get_ThrowDirection"),
                 i => i.OpCode == OpCodes.Ldc_I4_0,

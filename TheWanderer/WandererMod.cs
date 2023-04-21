@@ -15,10 +15,8 @@ using Pkuyo.Wanderer.Options;
 using RWCustom;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Security.Permissions;
 using UnityEngine;
-using static MonoMod.InlineRT.MonoModRule;
 
 #pragma warning disable CS0618
 [assembly: SecurityPermission(SecurityAction.RequestMinimum, SkipVerification = true)]
@@ -63,7 +61,7 @@ namespace Pkuyo.Wanderer
                 WandererEnum.RegisterValues();
 
                 Content.Register(new CoolObjectFisob());
-
+                
                 Content.Register(new ToxicSpiderCritob());
                 Content.Register(new ParasiteCritob(WandererEnum.Creatures.FemaleParasite));
                 Content.Register(new ParasiteCritob(WandererEnum.Creatures.MaleParasite));
